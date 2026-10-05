@@ -231,7 +231,6 @@
       .to($(".h-dive .scroll-cue", root), { opacity: 0, duration: 0.1 }, 0)
       .fromTo($(".l1", root), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.12 }, 0.32)
       .fromTo($(".l2", root), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.12 }, 0.44)
-      .fromTo($(".l3", root), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.12 }, 0.58)
       .to($$(".h-dive-copy p", root), { opacity: 0, y: -60, stagger: 0.03, duration: 0.12 }, 0.86);
 
     gsap.timeline({ scrollTrigger: { trigger: $(".h-iris", root), pin: true, scrub: 1, end: "+=160%" } })
@@ -243,20 +242,26 @@
     gsap.set($$(".e2, .e3", root), { opacity: 0, scale: 1.08 });
     gsap.set($(".s1", root), { opacity: 1 });
     gsap.timeline({ scrollTrigger: { trigger: $(".h-evolve", root), pin: true, scrub: 1, end: "+=260%" } })
-      .fromTo($(".evo-bar i", root), { width: "0%" }, { width: "100%", ease: "none", duration: 3 }, 0)
+      .fromTo($(".evo-bar i", root), { width: "0%" }, { width: "100%", ease: "none", duration: 4 }, 0)
       .from($(".evo-stage", root), { xPercent: 12, opacity: 0, duration: 0.6 }, 0)
       .to($(".s1", root), { opacity: 0, y: -24, duration: 0.3 }, 1)
       .fromTo($(".s2", root), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3 }, 1.1)
       .to($(".e2", root), { opacity: 1, scale: 1, duration: 0.5 }, 1)
       .to($(".s2", root), { opacity: 0, y: -24, duration: 0.3 }, 2)
       .fromTo($(".s3", root), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3 }, 2.1)
-      .to($(".e3", root), { opacity: 1, scale: 1, duration: 0.5 }, 2);
+      .to($(".e3", root), { opacity: 1, scale: 1, duration: 0.5 }, 2)
+      .to($(".s3", root), { opacity: 0, y: -24, duration: 0.3 }, 3)
+      .fromTo($(".s4", root), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3 }, 3.1)
+      .to($(".evo-stage", root), { yPercent: 22, scale: 0.92, filter: "brightness(0.5)", duration: 0.9, ease: "power2.in" }, 3);
 
     counters(root);
     rise({ selector: ".h-stats .stat", root }, { y: 100 });
-    // 7 cm against 20 m is a real ratio: 0.0035
-    gsap.fromTo($(".scale-bar i", root), { scaleX: 0.0035 }, { scaleX: 1, ease: "power2.inOut",
-      scrollTrigger: { trigger: $(".scale", root), start: "top 75%", end: "top 25%", scrub: 1 } });
+    // 7 cm against a few hundred metres (300 m here): about 0.00023 of the bar
+    const idg = $(".idgaf", root);
+    gsap.set(idg, { opacity: 0 });
+    gsap.fromTo($(".scale-bar i", root), { scaleX: 0.00023 }, { scaleX: 1, ease: "power2.inOut",
+      scrollTrigger: { trigger: $(".scale", root), start: "top 75%", end: "top 25%", scrub: 1,
+        onUpdate: self => gsap.to(idg, { opacity: self.progress > 0.97 ? 1 : 0, duration: 0.3, overwrite: "auto" }) } });
 
     hscroll($(".h-zones", root));
 
@@ -381,17 +386,13 @@
 
     const R = $$(".rounds i", root);
     gsap.set($(".a1", root), { opacity: 1 });
-    gsap.timeline({ scrollTrigger: { trigger: $(".o-ammo", root), pin: true, scrub: 1, end: "+=260%" } })
+    gsap.timeline({ scrollTrigger: { trigger: $(".o-ammo", root), pin: true, scrub: 1, end: "+=200%" } })
       .from(R, { y: -200, opacity: 0, stagger: 0.08, duration: 0.6, ease: "bounce.out" }, 0)
-      .to($(".a1", root), { opacity: 0, y: -20, duration: 0.3 }, 1)
-      .fromTo($(".a2", root), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 1.1)
-      .to([R[5], R[4]], { y: 260, rotate: (i) => i ? -70 : 55, opacity: 0, duration: 0.7, stagger: 0.12, ease: "power2.in" }, 1.2)
-      .to($(".a2", root), { opacity: 0, y: -20, duration: 0.3 }, 2)
-      .fromTo($(".a3", root), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 2.1)
-      .to(R[3], { y: -24, filter: "brightness(1.6) drop-shadow(0 0 14px #c9793f)", duration: 0.4 }, 2.2)
-      .to($(".a3", root), { opacity: 0, y: -20, duration: 0.3 }, 3)
-      .fromTo($(".a4", root), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 3.1)
-      .to(R.slice(0, 4), { scale: 1.15, filter: "brightness(1.4) drop-shadow(0 0 18px #c9793f)", y: 0, duration: 0.4 }, 3.1);
+      .to([R[5], R[4], R[3]], { y: 260, rotate: (i) => [55, -70, 30][i], opacity: 0, duration: 0.7, stagger: 0.12, ease: "power2.in" }, 0.9)
+      .to($(".a1", root), { opacity: 0, y: -20, duration: 0.3 }, 1.8)
+      .fromTo($(".a2", root), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 1.9)
+      .to([R[5], R[4], R[3]], { y: 0, rotate: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "back.out(1.6)" }, 2)
+      .to(R, { filter: "brightness(1.4) drop-shadow(0 0 16px #c9793f)", duration: 0.4 }, 2.6);
 
     hscroll($(".o-gallery", root));
     clipReveal(root, ".feat .shot");

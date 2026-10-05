@@ -7,8 +7,8 @@
 **Still needed:**
 - **Studio:** Z-01.
 - **Hadal:** everything, starting with H-01. That's H-01, H-03 to H-05, H-09 to H-15, and the names of zones 2 to 4.
-- **One House:** O-09 (shootable lock) and O-10 (zombie in the flashlight). Both need to be captured in play.
-- **Text:** your studio line, and a logo if you have one.
+- **One House:** O-10 (zombie in the flashlight), captured in play. O-09 is no longer needed.
+- **Text:** a logo, if you have one.
 - **Optional:** the video loops.
 
 
@@ -48,7 +48,7 @@ Every grey box on the preview site shows a code such as `H-01`. That box is wait
 
 Optional for Hadal:
 - **H-06:** the level-up screen with three mutation offers (UI shot).
-- **H-07 and H-08:** the smallest reef fish next to the player, and the 20 m cave predator.
+- **H-07 and H-08:** the smallest reef fish next to the player, and the biggest predator.
 
 ## One House Away From Home tab
 
@@ -57,7 +57,6 @@ Optional for Hadal:
 | O-02 | **Hero, PSX filter OFF.** A wide, atmospheric interior or courtyard with lamps | The site crushes this live into pixels and dither as you scroll. A sharp, clean render works best. Most important shot. |
 | O-01 | **The exact same shot as O-02, PSX filter ON** | Same position and angle. Optional, but lets me end the effect on the real in-game look. |
 | O-03 to O-08 | **Six different wings, one shot each, PSX filter ON** | Pick the six with the most different architecture, e.g. great hall, chapel, greenhouse, burial galleries, cloister ward, Renaissance wing. Tell me which wing each shot shows. |
-| O-09 | **Aiming at a shootable lock** | |
 | O-10 | **A zombie in a corridor**, flashlight on it | Shown tall (3:4). |
 | O-11 | **The map screen** | UI shot, shown tall (3:4). |
 
@@ -65,7 +64,6 @@ Optional for Hadal:
 
 | What | Why |
 |---|---|
-| **One line about ZEAR Productions** in your own words | Replaces the placeholder "Two games. Both unfinished. Both playable." |
 | **Names of Hadal depth zones 2, 3 and 4** | Captions on the zone gallery. |
 | **Lamp colour of each of the 15 One House buildings** (a hex code, or "warm orange", "cold blue" and so on) | Each building in the list has a glowing dot in its lamp colour. They're stand-ins right now. |
 | **A ZEAR logo** (SVG or transparent PNG), if you have one | Otherwise the plain text wordmark stays. |

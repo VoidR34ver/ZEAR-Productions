@@ -168,9 +168,9 @@ main { min-height: 100vh; }
 
 .h-get { padding: 16vh 16px 12vh; text-align: center; }
 .get-pre { font: 13px var(--mono); color: var(--dim); }
-.get-btn { display: inline-block; margin: 12px 0 18px; padding: 20px 40px; background: var(--aqua); color: var(--sea);
+.get-btn { display: inline-block; margin: 12px 0 18px; padding: 20px 40px; background: var(--acc); color: var(--bg);
   text-decoration: none; font: 400 clamp(32px, 5vw, 60px)/1 var(--serif); transition: background-color .3s, letter-spacing .4s; }
-.get-btn:hover { background: var(--foam); letter-spacing: .02em; }
+.get-btn:hover { background: var(--fg); letter-spacing: .02em; }
 .get-post { color: var(--dim); font-size: 15px; }
 
 /* ======================= OHAfH ======================= */
@@ -264,3 +264,15 @@ kbd { font: 13px var(--mono); border-bottom: 1px solid currentColor; }
 .static .ammo-lines { min-height: 0; }
 .static .hscroll { height: auto; overflow-x: auto; padding: 72px 0; }
 .static .scroll-cue { display: none; }
+
+/* copy pass 2026-10-05 */
+.z-works { margin: 0; padding: 18vh 16px 8vh; font: 400 clamp(56px, 10vw, 150px)/0.9 var(--serif); }
+@media (min-width: 700px) { .z-works { padding: 22vh 40px 10vh; } }
+.z-strip .panel { width: auto; padding-right: 8vw; }
+.idgaf { margin: 10px 0 0; text-align: right; font: 13px var(--mono); color: var(--dim); }
+.o-get { padding-bottom: 4vh; }
+.o-get .get-btn { font-family: var(--fraktur); }
+@media (min-width: 900px) { .o-feats { grid-template-columns: repeat(2, 1fr); max-width: 1000px; } .f3 { margin-top: 18vh; } }
+.feat .shot { max-width: 100%; }
+.evo-copy { position: relative; z-index: 2; }
+.door .shot.ph { background-color: transparent; }
