@@ -397,7 +397,8 @@
     hscroll($(".o-gallery", root));
     clipReveal(root, ".feat .shot");
     rise({ selector: ".feat p", root }, { y: 30 });
-    rise({ selector: ".o-warn, .o-play h2, .o-play-sub, .cmd, .keys", root }, { y: 40 });
+    rise({ selector: ".o-warn, .o-get .get-pre, .o-get .get-post", root }, { y: 30 });
+    gsap.from($(".o-get .get-btn", root), { scale: 0.6, opacity: 0, duration: 1.2, ease: "elastic.out(1, 0.6)", scrollTrigger: { trigger: $(".o-get", root), start: "top 75%", once: true } });
     feedbackIn(root);
 
     return () => window.removeEventListener("resize", onResize);

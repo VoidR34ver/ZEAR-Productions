@@ -276,3 +276,5 @@ kbd { font: 13px var(--mono); border-bottom: 1px solid currentColor; }
 .feat .shot { max-width: 100%; }
 .evo-copy { position: relative; z-index: 2; }
 .door .shot.ph { background-color: transparent; }
+.o-status { max-width: 860px; margin: 0 auto; padding: 4vh 16px 0; }
+.o-status .o-warn { margin-bottom: 0; }
