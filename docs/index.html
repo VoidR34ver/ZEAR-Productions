@@ -6,218 +6,254 @@
 <title>ZEAR Productions</title>
 <meta name="description" content="Playtest builds from ZEAR Productions.">
 <style>
+  @font-face { font-family: "Plex Mono"; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Plex Mono"; src: url(fonts/ibm-plex-mono-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Plex Mono"; src: url(fonts/ibm-plex-mono-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Fraktur"; src: url(fonts/unifrakturmaguntia-latin-400-normal.woff2) format("woff2"); font-display: swap; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-garamond-latin-500-italic.woff2) format("woff2"); font-weight: 500; font-style: italic; font-display: swap; }
+
   :root {
-    --bg: #0b0c0f;
-    --panel: #14161b;
-    --line: #262a33;
-    --text: #e6e6e6;
-    --muted: #9aa0ab;
-    --accent: #d8d8d8;
-    --hadal: #2fb3c9;
-    --ohafh: #c9a04a;
-    --radius: 10px;
+    --ink: #d8d2c4;
+    --dim: #8c8778;
+    --bg: #0e0d0b;
+    --rule: #2b2924;
+    --sea: #7fd6d0;
+    --bone: #c9b58a;
   }
   * { box-sizing: border-box; }
   html { color-scheme: dark; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.7 "Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   }
-  a { color: inherit; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
-  header { padding: 56px 0 32px; border-bottom: 1px solid var(--line); }
-  header h1 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); letter-spacing: .08em; text-transform: uppercase; }
-  header p { margin: 8px 0 0; color: var(--muted); }
-  nav { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: .95rem; }
-  nav a { color: var(--muted); text-decoration: none; }
-  nav a:hover { color: var(--text); }
-  section { padding: 40px 0; }
-  h2 { font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 20px; }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: #fff; }
+  p { margin: 0 0 1em; }
+  .col { max-width: 68ch; margin: 0 auto; padding: 0 16px; }
 
-  .card {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    border-top: 3px solid var(--c); margin-bottom: 28px; overflow: hidden;
-  }
-  .card .body { padding: 20px; }
-  .card h3 { margin: 0; font-size: 1.5rem; color: var(--c); }
-  .tag { display: inline-block; font-size: .78rem; padding: 2px 8px; border-radius: 99px;
-         border: 1px solid var(--c); color: var(--c); margin: 6px 0 12px; }
-  .card p { margin: 0 0 12px; }
-  .card ul { margin: 0 0 12px; padding-left: 20px; color: var(--muted); }
-  .card h4 { margin: 18px 0 8px; font-size: .95rem; }
-  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2px; background: var(--line); }
-  .shot-ph { aspect-ratio: 16/9; display: grid; place-items: center; color: var(--muted); font-size: .85rem;
-             background: var(--bg); }
-  .hadal { --c: var(--hadal); }
-  .hadal .shot-ph { background: linear-gradient(180deg, #0d3a4a, #04111a 70%); }
-  .ohafh { --c: var(--ohafh); }
-  .ohafh .shot-ph {
-    background-color: #120f0b;
-    background-image: radial-gradient(#2a2216 1px, transparent 1px);
-    background-size: 3px 3px; image-rendering: pixelated;
-  }
-  .btn { display: inline-block; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--c, var(--accent));
-         color: var(--c, var(--accent)); text-decoration: none; font-size: .95rem; background: none; cursor: pointer; font: inherit; }
-  .btn:hover { background: color-mix(in srgb, var(--c, var(--accent)) 15%, transparent); }
-  .cmd { display: flex; gap: 8px; align-items: stretch; margin: 6px 0 10px; }
-  .cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; background: var(--bg);
-              border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: .85rem; }
-  .cmd .btn { padding: 6px 10px; font-size: .85rem; }
-  .small { font-size: .85rem; color: var(--muted); }
-  .keys { font-size: .9rem; color: var(--muted); }
+  /* ---------- top ---------- */
+  .top { padding: 64px 0 56px; }
+  .top h1 { font-size: 15px; font-weight: 600; margin: 0 0 28px; }
+  .top h1 span { color: var(--dim); font-weight: 400; }
+  .top p { max-width: 54ch; }
+  .top .index { color: var(--dim); }
 
-  form { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-  label { display: block; font-size: .9rem; margin: 14px 0 6px; color: var(--muted); }
+  /* ---------- hadal ---------- */
+  .hadal {
+    position: relative;
+    background: linear-gradient(180deg, #11535c 0%, #0a2e3a 22%, #061a24 48%, #030a10 75%, #010305 100%);
+    color: #cfe3e2;
+    padding: 96px 0 120px;
+  }
+  .depth {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 120px;
+    font-size: 11px; color: rgba(207, 227, 226, .45); pointer-events: none;
+  }
+  .depth div { position: absolute; left: 16px; border-top: 1px solid rgba(207, 227, 226, .25); padding-top: 2px; width: 84px; }
+  @media (max-width: 900px) { .depth { display: none; } }
+  .hadal h2 {
+    font: italic 500 clamp(64px, 14vw, 132px)/0.9 "Cormorant", Georgia, serif;
+    margin: 0 0 32px; color: var(--sea); letter-spacing: -0.01em;
+  }
+  .hadal .meta, .ohafh .meta { color: rgba(207, 227, 226, .6); margin-bottom: 28px; }
+  .hadal a.get {
+    display: inline-block; margin-top: 12px; padding: 10px 16px;
+    background: var(--sea); color: #021014; text-decoration: none; font-weight: 600;
+  }
+  .hadal a.get:hover { background: #fff; }
+
+  /* ---------- ohafh ---------- */
+  .ohafh {
+    background-color: #0a0807;
+    background-image:
+      linear-gradient(45deg, rgba(201,181,138,.035) 25%, transparent 25%, transparent 75%, rgba(201,181,138,.035) 75%),
+      linear-gradient(45deg, rgba(201,181,138,.035) 25%, transparent 25%, transparent 75%, rgba(201,181,138,.035) 75%);
+    background-size: 4px 4px; background-position: 0 0, 2px 2px;
+    border-top: 1px solid #000;
+    padding: 96px 0 104px;
+    color: #d6ccb6;
+  }
+  .ohafh h2 {
+    font: 400 clamp(44px, 9vw, 84px)/1 "Fraktur", "Old English Text MT", serif;
+    margin: 0 0 18px; color: var(--bone);
+    text-shadow: 3px 3px 0 #3a1612;
+  }
+  .ohafh .meta { color: #8f846c; }
+  .ohafh .warn { border-left: 2px solid #6e2a22; padding-left: 14px; color: #a99d84; }
+  .ohafh h3, .feedback h2 { font-size: 15px; font-weight: 600; margin: 40px 0 12px; }
+  .cmd { margin: 4px 0 18px; }
+  .cmd .label { color: #8f846c; font-size: 13px; }
+  .cmd pre {
+    margin: 4px 0 0; padding: 10px 12px; background: #000; border: 1px solid #2a231b;
+    overflow-x: auto; font: 13px/1.5 "Plex Mono", monospace; color: #e8dcc0;
+  }
+  .cmd button {
+    font: inherit; font-size: 13px; background: none; border: 0; padding: 0; color: var(--bone);
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  kbd { font: inherit; border-bottom: 1px solid #5a503f; padding: 0 2px; }
+  .keys { font-size: 13px; color: #a99d84; }
+
+  /* ---------- feedback ---------- */
+  .feedback { padding: 88px 0 72px; }
+  .feedback h2 { font-size: 22px; margin-top: 0; }
+  form { margin-top: 28px; }
+  .field { margin-bottom: 22px; }
+  .field > label, .field > .lbl { display: block; color: var(--dim); font-size: 13px; margin-bottom: 4px; }
   select, input[type=text], textarea {
-    width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line);
-    border-radius: 6px; padding: 8px 10px; font: inherit;
+    width: 100%; font: inherit; color: var(--ink); background: transparent;
+    border: 0; border-bottom: 1px solid #4a473e; padding: 6px 0; border-radius: 0;
   }
-  textarea { min-height: 140px; resize: vertical; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
-  .stars { display: flex; gap: 4px; flex-direction: row-reverse; justify-content: flex-end; }
-  .stars input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-  .stars label { margin: 0; font-size: 1.8rem; line-height: 1; cursor: pointer; color: var(--line); }
-  .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: var(--accent); }
-  .stars input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+  select { -webkit-appearance: none; appearance: none; cursor: pointer;
+    background: linear-gradient(45deg, transparent 50%, var(--dim) 50%) right 4px center / 6px 6px no-repeat; }
+  select option { background: var(--bg); }
+  textarea { border: 1px solid #4a473e; padding: 10px; min-height: 160px; resize: vertical; }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--ink); }
+  .rate { display: flex; gap: 0; }
+  .rate input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .rate label {
+    width: 44px; height: 40px; display: grid; place-items: center; cursor: pointer;
+    border: 1px solid #4a473e; margin-left: -1px; color: var(--dim);
+  }
+  .rate label:first-of-type { margin-left: 0; }
+  .rate input:checked + label { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .rate input:focus-visible + label { outline: 1px dashed var(--ink); outline-offset: 3px; }
+  .rate-hint { font-size: 12px; color: var(--dim); margin-top: 4px; }
   .hp { position: absolute; left: -9999px; }
-  #status { margin-top: 12px; min-height: 1.4em; }
-  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .85rem; }
+  button[type=submit] {
+    font: inherit; font-weight: 600; background: var(--ink); color: var(--bg);
+    border: 0; padding: 10px 18px; cursor: pointer;
+  }
+  button[type=submit]:hover { background: #fff; }
+  #status { margin-top: 14px; min-height: 1.6em; color: var(--dim); }
+
+  footer { border-top: 1px solid var(--rule); padding: 20px 0 48px; color: var(--dim); font-size: 13px; }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1>ZEAR Productions</h1>
-    <!-- TODO(owner): replace with your own one-line description -->
-    <p>Solo-made games in progress. Grab a playtest build and tell me what you think.</p>
-    <nav>
-      <a href="#hadal">Hadal</a>
-      <a href="#ohafh">One House Away From Home</a>
-      <a href="#feedback">Leave feedback</a>
-    </nav>
+
+<div class="top">
+  <div class="col">
+    <h1>ZEAR Productions <span>/ playtest builds</span></h1>
+    <!-- TODO(owner): your own words go here -->
+    <p>I make games on my own. Two of them are far enough along that you can play them, badly lit and half
+      finished. If you try one, tell me what broke at the bottom of the page. No account needed.</p>
+    <p class="index"><a href="#hadal">Hadal</a> &middot; <a href="#ohafh">One House Away From Home</a> &middot; <a href="#feedback">feedback</a></p>
   </div>
-</header>
+</div>
 
-<main class="wrap">
-  <section>
-    <h2>Current projects</h2>
+<section class="hadal" id="hadal">
+  <!-- real ocean zones, decorative only -->
+  <div class="depth" aria-hidden="true">
+    <div style="top:96px">0 m</div>
+    <div style="top:22%">200 m</div>
+    <div style="top:44%">1,000 m</div>
+    <div style="top:66%">4,000 m</div>
+    <div style="top:86%">6,000 m</div>
+  </div>
+  <div class="col">
+    <h2>hadal</h2>
+    <p class="meta">deep-ocean evolution game &middot; Windows, macOS, Linux &middot; playtest build</p>
+    <p>You are a lab animal with a "hypergene". Every time you level up you pick one of three mutations, and your
+      body changes. Then you go back into the trench and try not to get eaten.</p>
+    <p>The trench is generated, and the ecosystem in it runs and evolves on its own whether you're watching or not.
+      There are 98 starter species, from 7 cm reef fish to a 20 m cave predator, and none of them keep the same body
+      for long. Their shapes and skin grow out of a genome.</p>
+    <p>It goes from the reef shelf down through five depth zones to the hadal floor. Fights run on stamina: dodge,
+      charge a bite, watch for the tell before something lunges. Storms push waves and currents around up top, and
+      you can leave the water if you want to.</p>
+    <a class="get" href="https://github.com/VoidR34ver/ZEAR-Productions/releases/latest">download the latest build</a>
+    <p class="meta" style="margin-top:14px">Pick the zip for your system, unzip it, run it. It updates itself to newer builds.</p>
+  </div>
+</section>
 
-    <article class="card hadal" id="hadal">
-      <div class="shots">
-        <div class="shot-ph">Screenshot coming</div>
-        <div class="shot-ph">Screenshot coming</div>
-      </div>
-      <div class="body">
-        <h3>Hadal</h3>
-        <span class="tag">Playtest build</span>
-        <p>You are a lab animal with a "hypergene" that lets you evolve every time you level up. You're set loose in a
-          procedurally generated ocean trench whose ecosystem lives and evolves on its own, from sunlit reef shelf down
-          to the hadal deep.</p>
-        <ul>
-          <li>Five depth zones with sub-biomes, from reef shelf to hadal trench</li>
-          <li>98 starter species, from 7 cm reef fish to a 20 m cave predator</li>
-          <li>Creature bodies and skin grown from a genome, so species keep changing</li>
-          <li>Combat with stamina, a burst dodge, charged bites and enemy tells</li>
-          <li>Pick one of three mutations at each level-up, five starting classes</li>
-          <li>Weather, storm-driven waves and currents, and you can leave the water</li>
-        </ul>
-        <h4>Playtest</h4>
-        <p class="small">Builds for Windows, macOS and Linux. Download the zip for your system, unzip, run.</p>
-        <a class="btn" href="https://github.com/VoidR34ver/ZEAR-Productions/releases/latest">Download latest build</a>
-      </div>
-    </article>
+<section class="ohafh" id="ohafh">
+  <div class="col">
+    <h2>One House Away From Home</h2>
+    <p class="meta">first-person survival horror &middot; Graub&uuml;nden, 1998 &middot; early playtest</p>
+    <p>What if RE4 and RE8 had a baby in RE1. A castle built through a mountain, fifteen buildings and 228 rooms,
+      every wing in a different architectural style and lit by its own colour of lamp. All of it rendered properly
+      and then crushed through a low-res PSX dither.</p>
+    <p>You get two guns. The ammo is also how you get through shootable locks, so every bullet you spend on a zombie
+      is a door you might not open later. There are named keys, ladders and a proper Resident Evil map. Zombies
+      hear what you do. Rooms echo the way rooms that size should.</p>
+    <p class="warn">It's early. The HUD is a placeholder, there's no terrain around the castle yet, some doors go
+      nowhere, and there isn't much enemy or story content.</p>
 
-    <article class="card ohafh" id="ohafh">
-      <div class="shots">
-        <div class="shot-ph">Screenshot coming</div>
-        <div class="shot-ph">Screenshot coming</div>
-      </div>
-      <div class="body">
-        <h3>One House Away From Home</h3>
-        <span class="tag">Early playtest</span>
-        <p>First-person gothic survival horror: what if RE4 and RE8 had a baby in RE1. Graubünden, 1998: a castle built
-          through a mountain, each area in its own architectural style. Every bullet is both your weapon and a key.</p>
-        <ul>
-          <li>One castle of 15 buildings and 228 rooms, all reachable</li>
-          <li>Two guns, and the ammo also opens shootable locks</li>
-          <li>Named keys, ladders and a Resident-Evil-style map</li>
-          <li>Zombies that hear the noise you make</li>
-          <li>Ray-traced echoes and room-sized reverb</li>
-        </ul>
-        <p class="small">Honest status: placeholder HUD, no terrain around the castle yet, some doors lead nowhere,
-          and enemies and story are thin.</p>
-        <h4>Playtest</h4>
-        <p class="small">Paste one line into a terminal. It downloads the newest build and starts it. Run it again to update.</p>
-        <p class="small"><strong>Linux</strong> (x86_64, Vulkan, needs curl and unzip)</p>
-        <div class="cmd">
-          <code id="cmd-linux">curl -sL https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.sh | sh</code>
-          <button class="btn" data-copy="cmd-linux">Copy</button>
-        </div>
-        <p class="small"><strong>Windows 10/11</strong> (64-bit, low-spec build, paste into PowerShell)</p>
-        <div class="cmd">
-          <code id="cmd-win">irm https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.ps1 | iex</code>
-          <button class="btn" data-copy="cmd-win">Copy</button>
-        </div>
-        <p class="small">No macOS build yet. Or download the zips directly from the
-          <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/tag/ohafh-latest">ohafh-latest release</a>.</p>
-        <p class="keys">Keys: WASD move, mouse look, Shift sprint, Ctrl crouch, E interact, 1 / 2 weapons, F flashlight,
-          left click fire, right click aim, M map, Esc pause.</p>
-      </div>
-    </article>
-  </section>
+    <h3>play it</h3>
+    <p>Paste one line into a terminal. It downloads the newest build and starts it. Run it again to update.</p>
+    <div class="cmd">
+      <span class="label">Linux, x86_64, Vulkan (needs curl and unzip)</span>
+      &nbsp;<button data-copy="cmd-linux">copy</button>
+      <pre id="cmd-linux">curl -sL https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.sh | sh</pre>
+    </div>
+    <div class="cmd">
+      <span class="label">Windows 10/11 in PowerShell, low-spec build</span>
+      &nbsp;<button data-copy="cmd-win">copy</button>
+      <pre id="cmd-win">irm https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.ps1 | iex</pre>
+    </div>
+    <p class="keys">No Mac build yet. The zips are also on the
+      <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/tag/ohafh-latest">release page</a>.</p>
+    <p class="keys"><kbd>WASD</kbd> move, mouse look, <kbd>Shift</kbd> sprint, <kbd>Ctrl</kbd> crouch,
+      <kbd>E</kbd> interact, <kbd>1</kbd>/<kbd>2</kbd> weapons, <kbd>F</kbd> flashlight, left click fire,
+      right click aim, <kbd>M</kbd> map, <kbd>Esc</kbd> pause.</p>
+  </div>
+</section>
 
-  <section id="feedback">
-    <h2>Anonymous feedback</h2>
-    <p class="small">No account, no name, no email. Just tell me how it played.</p>
+<section class="feedback" id="feedback">
+  <div class="col">
+    <h2>tell me what broke</h2>
+    <p>Anonymous. No name, no email, nothing to sign up for. Bugs, bad bits, good bits, all of it helps.</p>
     <form id="fb" novalidate>
-      <div class="row">
-        <div>
-          <label for="game">Game</label>
-          <select id="game" name="game" required>
-            <option value="">Pick one</option>
-            <option>Hadal</option>
-            <option>One House Away From Home</option>
-          </select>
-        </div>
-        <div>
-          <label for="build">Build (optional)</label>
-          <input id="build" name="build" type="text" placeholder="e.g. v20260929-2033 or 'latest'">
-        </div>
+      <div class="field">
+        <label for="game">which game</label>
+        <select id="game" name="game" required>
+          <option value="">choose</option>
+          <option>Hadal</option>
+          <option>One House Away From Home</option>
+        </select>
       </div>
-      <label>Rating</label>
-      <div class="stars" role="radiogroup" aria-label="Rating">
-        <input type="radio" id="r5" name="rating" value="5"><label for="r5" title="5">★</label>
-        <input type="radio" id="r4" name="rating" value="4"><label for="r4" title="4">★</label>
-        <input type="radio" id="r3" name="rating" value="3"><label for="r3" title="3">★</label>
-        <input type="radio" id="r2" name="rating" value="2"><label for="r2" title="2">★</label>
-        <input type="radio" id="r1" name="rating" value="1"><label for="r1" title="1">★</label>
+      <div class="field">
+        <label for="build">which build, if you know</label>
+        <input id="build" name="build" type="text" placeholder="latest">
       </div>
-      <label for="text">What worked, what didn't, what broke?</label>
-      <textarea id="text" name="text" maxlength="4000" required></textarea>
+      <div class="field">
+        <span class="lbl" id="rate-l">how was it</span>
+        <div class="rate" role="radiogroup" aria-labelledby="rate-l">
+          <input type="radio" id="r1" name="rating" value="1"><label for="r1">1</label>
+          <input type="radio" id="r2" name="rating" value="2"><label for="r2">2</label>
+          <input type="radio" id="r3" name="rating" value="3"><label for="r3">3</label>
+          <input type="radio" id="r4" name="rating" value="4"><label for="r4">4</label>
+          <input type="radio" id="r5" name="rating" value="5"><label for="r5">5</label>
+        </div>
+        <div class="rate-hint">1 = bad, 5 = great</div>
+      </div>
+      <div class="field">
+        <label for="text">what happened</label>
+        <textarea id="text" name="text" maxlength="4000" required></textarea>
+      </div>
       <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <div style="margin-top:16px"><button class="btn" type="submit">Send feedback</button></div>
-      <div id="status" class="small" role="status"></div>
+      <button type="submit">send</button>
+      <div id="status" role="status"></div>
     </form>
-  </section>
-</main>
+  </div>
+</section>
 
 <footer>
-  <div class="wrap">ZEAR Productions · builds hosted on
-    <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases">GitHub releases</a></div>
+  <div class="col">ZEAR Productions. Builds live on <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases">GitHub releases</a>.</div>
 </footer>
 
 <script>
   // Feedback endpoint: set once the owner picks a service (Formspree, Web3Forms, a Worker, ...).
-  // While empty the form validates but sends nothing anywhere.
+  // While empty the form checks input but sends nothing anywhere.
   const FEEDBACK_ENDPOINT = "";
 
   document.querySelectorAll("[data-copy]").forEach(btn => {
     btn.addEventListener("click", async () => {
       const text = document.getElementById(btn.dataset.copy).textContent;
-      try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
-      catch { btn.textContent = "Select it"; }
-      setTimeout(() => btn.textContent = "Copy", 1500);
+      try { await navigator.clipboard.writeText(text); btn.textContent = "copied"; }
+      catch { btn.textContent = "select it by hand"; }
+      setTimeout(() => btn.textContent = "copy", 1500);
     });
   });
 
@@ -227,14 +263,14 @@
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
     if (data.website) return;                      // honeypot: bots fill it, people never see it
-    if (!data.game) { status.textContent = "Pick which game this is about."; return; }
-    if (!data.text || !data.text.trim()) { status.textContent = "Write a few words first."; return; }
+    if (!data.game) { status.textContent = "Pick which game it's about."; return; }
+    if (!data.text || !data.text.trim()) { status.textContent = "Write something first."; return; }
     delete data.website;
     if (!FEEDBACK_ENDPOINT) {
-      status.textContent = "Preview only: feedback isn't connected yet, nothing was sent.";
+      status.textContent = "Preview only. Feedback isn't hooked up yet, so nothing was sent.";
       return;
     }
-    status.textContent = "Sending...";
+    status.textContent = "sending...";
     try {
       const res = await fetch(FEEDBACK_ENDPOINT, {
         method: "POST",
@@ -243,7 +279,7 @@
       });
       if (!res.ok) throw new Error(res.status);
       form.reset();
-      status.textContent = "Thanks, it's in.";
+      status.textContent = "Got it, thanks.";
     } catch {
       status.textContent = "That didn't go through. Try again in a bit.";
     }
