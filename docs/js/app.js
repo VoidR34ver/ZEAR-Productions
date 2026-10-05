@@ -11,15 +11,14 @@
                  "#FF7033", "#FFDBA8", "#FF853D", "#FFC26B", "#FFB370", "#FFDBAD", "#FFEBC7"];
 
   // TODO(owner): names for Hadal depth zones 2 to 4, if you want them shown.
-  const ZONE_NAMES = { 2: null, 3: null, 4: null };
+  const ZONE_NAMES = {};
 
   // Which wing each One House gallery shot shows.
-  const WING_NAMES = { "O-03": "Great hall · Gothic", "O-04": "Old chapel · Romanesque", "O-05": "Greenhouse · moonlit glasshouse",
-                       "O-06": "West gallery · burial galleries in the rock", "O-07": "Cloister ward · the cloister walk",
+  const WING_NAMES = { "O-03": "Great hall · Gothic", "O-04": "Old chapel · Romanesque", "O-06": "West gallery · burial galleries in the rock", "O-07": "Cloister ward · the cloister walk",
                        "O-08": "Guest wing · 1920s lounge" };
 
   const TABS = ["zear", "hadal", "ohafh"];
-  const THEME_BG = { zear: "#f1ebe0", hadal: "#031014", ohafh: "#1d0c09" };
+  const THEME_BG = { zear: "#ffffff", hadal: "#000000", ohafh: "#1e100a" };
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (REDUCED) document.documentElement.classList.add("static");
 
@@ -224,8 +223,8 @@
     const dive = gsap.timeline({ scrollTrigger: { trigger: $(".h-dive", root), pin: true, scrub: 1, end: "+=320%",
       onUpdate: self => snow.kick(self.getVelocity()) } });
     dive
-      .to($(".h-dive", root), { backgroundColor: "#010508", ease: "power1.in", duration: 1 }, 0)
-      .to(depth, { d: 6200, ease: "power1.in", duration: 1,
+      .to($(".h-dive", root), { backgroundColor: "#000000", ease: "power1.in", duration: 1 }, 0)
+      .to(depth, { d: 11000, ease: "power1.in", duration: 1,
         onUpdate: () => { dval.textContent = Math.round(depth.d).toLocaleString("en-US"); dzone.textContent = zoneFor(depth.d); } }, 0)
       .to($(".h-title", root), { scale: 10, opacity: 0, ease: "power3.in", duration: 0.4 }, 0)
       .to($(".h-dive .scroll-cue", root), { opacity: 0, duration: 0.1 }, 0)
@@ -262,6 +261,7 @@
     gsap.fromTo($(".scale-bar i", root), { scaleX: 0.00023 }, { scaleX: 1, ease: "power2.inOut",
       scrollTrigger: { trigger: $(".scale", root), start: "top 75%", end: "top 25%", scrub: 1,
         onUpdate: self => gsap.to(idg, { opacity: self.progress > 0.97 ? 1 : 0, duration: 0.3, overwrite: "auto" }) } });
+    clipReveal(root, ".scale-shot");
 
     hscroll($(".h-zones", root));
 
@@ -392,7 +392,7 @@
       .to($(".a1", root), { opacity: 0, y: -20, duration: 0.3 }, 1.8)
       .fromTo($(".a2", root), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 1.9)
       .to([R[5], R[4], R[3]], { y: 0, rotate: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "back.out(1.6)" }, 2)
-      .to(R, { filter: "brightness(1.4) drop-shadow(0 0 16px #c9793f)", duration: 0.4 }, 2.6);
+      .to(R, { filter: "brightness(1.4) drop-shadow(0 0 16px #c9a36a)", duration: 0.4 }, 2.6);
 
     hscroll($(".o-gallery", root));
     clipReveal(root, ".feat .shot");

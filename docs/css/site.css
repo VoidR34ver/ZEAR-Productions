@@ -12,13 +12,16 @@
   --mono: "Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   --fraktur: "Fraktur", "Old English Text MT", serif;
 
-  --paper: #f1ebe0; --ink: #1c1915; --muted: #625b4f; --rule: #d3c9b7;
-  --petrol: #1d4f5c; --sea: #031014; --foam: #d9ecea; --aqua: #8fd3cc;
-  --oxblood: #3b1d18; --oxdeep: #1d0c09; --bone: #eee3cf; --bone-dim: #c2b192; --ember: #c9793f;
+  /* Studio: plain black on white; the game images carry the colour.
+     Hadal: the game's own surface water, fading to the black of the deep; accent = the hunter's red stripe.
+     One House: wood shadow and the palas carpet red from the screenshots; accent = picture-frame gilt. */
+  --paper: #ffffff; --ink: #0b0b0b; --muted: #5e5e5e; --rule: #dcdcdc;
+  --petrol: #0b3a60; --surface: #044e8e; --sea: #000000; --foam: #f3f6f8; --aqua: #e0283a;
+  --oxblood: #4c0504; --oxdeep: #1e100a; --bone: #efe4d0; --bone-dim: #b89d78; --ember: #c9a36a;
 
-  --bg: var(--paper); --fg: var(--ink); --dim: var(--muted); --acc: var(--petrol);
+  --bg: var(--paper); --fg: var(--ink); --dim: var(--muted); --acc: var(--ink);
 }
-body[data-tab="hadal"] { --bg: var(--sea); --fg: var(--foam); --dim: #8fb2b0; --acc: var(--aqua); }
+body[data-tab="hadal"] { --bg: var(--sea); --fg: var(--foam); --dim: #93a7b8; --acc: var(--aqua); }
 body[data-tab="ohafh"] { --bg: var(--oxdeep); --fg: var(--bone); --dim: var(--bone-dim); --acc: var(--ember); }
 
 * { box-sizing: border-box; }
@@ -33,8 +36,7 @@ em { font-style: italic; }
 .tabbar {
   position: fixed; inset: 0 0 auto 0; z-index: 50; height: 56px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px;
-  color: var(--fg); background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--fg); background: var(--bg);
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
   transition: background-color .6s, color .6s;
 }
@@ -112,12 +114,12 @@ main { min-height: 100vh; }
 .door:hover .shot img { transform: scale(1.05); }
 
 .z-strip .panel { width: 70vw; }
-.z-strip .big em { color: var(--petrol); }
+.z-strip .big em { color: inherit; }
 
 /* ======================= HADAL ======================= */
-.h-dive { background: #2b8a94; color: var(--foam); display: grid; place-items: center; }
+.h-dive { background: var(--surface); color: var(--foam); display: grid; place-items: center; }
 .snow { position: absolute; inset: 0; width: 100%; height: 100%; }
-.depth-meter { position: absolute; left: 16px; bottom: 28px; font: 13px var(--mono); color: rgba(217,236,234,.8); z-index: 2; }
+.depth-meter { position: absolute; left: 16px; bottom: 28px; font: 13px var(--mono); color: rgba(243,246,248,.8); z-index: 2; }
 .depth-meter .d-val { font-size: 28px; font-variant-numeric: tabular-nums; }
 .depth-meter .d-zone { display: block; margin-top: 4px; opacity: .7; }
 @media (min-width: 700px) { .depth-meter { left: 40px; } }
@@ -139,7 +141,7 @@ main { min-height: 100vh; }
 .evo-steps { position: relative; min-height: 7.5em; }
 .evo-steps .step { position: absolute; top: 0; left: 0; right: 0; font: 400 clamp(26px, 3.2vw, 42px)/1.15 var(--serif); opacity: 0; }
 .evo-steps .step b { font-weight: 400; color: var(--aqua); display: block; }
-.evo-bar { height: 2px; background: rgba(217,236,234,.18); margin-top: 16px; }
+.evo-bar { height: 2px; background: rgba(243,246,248,.18); margin-top: 16px; }
 .evo-bar i { display: block; height: 100%; width: 0; background: var(--aqua); }
 .evo-stage { position: relative; aspect-ratio: 16 / 10; width: 100%; }
 .evo-stage .evo { position: absolute; inset: 0; }
@@ -154,7 +156,7 @@ main { min-height: 100vh; }
 .scale-row { display: flex; gap: 16px; align-items: baseline; font: 400 clamp(28px, 4vw, 52px)/1 var(--serif); }
 .scale-row .scale-label { font: 14px var(--sans); color: var(--dim); }
 .scale-row:last-child { justify-content: flex-end; }
-.scale-bar { height: 3px; margin: 18px 0; background: rgba(217,236,234,.14); }
+.scale-bar { height: 3px; margin: 18px 0; background: rgba(243,246,248,.14); }
 .scale-bar i { display: block; height: 100%; width: 100%; background: var(--aqua); transform-origin: left; }
 
 .h-zones .panel:not(.intro) .shot { width: min(72vw, 900px); aspect-ratio: 16 / 9; }
@@ -163,7 +165,7 @@ main { min-height: 100vh; }
 @media (min-width: 900px) { .h-pair { grid-template-columns: 7fr 5fr; padding: 16vh 40px; align-items: start; } .pair-b { margin-top: 24vh; } }
 .h-pair .shot { aspect-ratio: 16 / 10; margin-bottom: 18px; }
 .h-pair .pair-b .shot { aspect-ratio: 4 / 5; }
-.h-pair p { max-width: 40ch; color: #b9d3d1; }
+.h-pair p { max-width: 40ch; color: var(--dim); }
 .h-pair b { color: var(--foam); font-weight: 600; }
 
 .h-get { padding: 16vh 16px 12vh; text-align: center; }
@@ -174,14 +176,14 @@ main { min-height: 100vh; }
 .get-post { color: var(--dim); font-size: 15px; }
 
 /* ======================= OHAfH ======================= */
-.o-crush { background: #0d0806; display: grid; place-items: center; }
+.o-crush { background: var(--oxdeep); display: grid; place-items: center; }
 .crush { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .crush-final { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; }
 .o-hero-copy { position: relative; z-index: 2; text-align: center; padding: 0 16px; }
 .o-place { font: 13px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--bone-dim); opacity: 0; }
-.o-title { margin: 0; font: 400 clamp(56px, 11vw, 168px)/0.95 var(--fraktur); color: var(--bone); text-shadow: 4px 4px 0 #5a1d14; opacity: 0; }
+.o-title { margin: 0; font: 400 clamp(56px, 11vw, 168px)/0.95 var(--fraktur); color: var(--bone); text-shadow: 4px 4px 0 var(--oxblood); opacity: 0; }
 .o-crush-line { margin-top: 24px; font: 400 clamp(22px, 2.6vw, 34px)/1.2 var(--serif); opacity: 0; text-shadow: 0 2px 12px #000, 0 0 3px #000; }
-.o-title { text-shadow: 4px 4px 0 #5a1d14, 0 0 40px rgba(0,0,0,.6); }
+.o-title { text-shadow: 4px 4px 0 var(--oxblood), 0 0 40px rgba(0,0,0,.6); }
 .o-crush-line em { color: var(--ember); }
 
 .o-castle { display: grid; gap: 56px; padding: 18vh 16px; max-width: 1280px; margin: 0 auto; }
@@ -191,7 +193,7 @@ main { min-height: 100vh; }
 .o-castle-copy { font: 400 clamp(24px, 2.4vw, 32px)/1.25 var(--serif); max-width: 24ch; }
 .o-wings { list-style: none; counter-reset: w; margin: 0; padding: 0; columns: 2 220px; column-gap: 32px; }
 .o-wings li { counter-increment: w; break-inside: avoid; display: flex; align-items: baseline; gap: 14px;
-  padding: 12px 0; border-top: 1px solid rgba(238,227,207,.16); font: 400 24px/1.2 var(--serif); }
+  padding: 12px 0; border-top: 1px solid rgba(239,228,208,.16); font: 400 24px/1.2 var(--serif); }
 .o-wings li::before { content: counter(w, decimal-leading-zero); font: 12px var(--mono); color: var(--bone-dim); min-width: 22px; }
 .o-wings li::after { content: ""; margin-left: auto; width: 9px; height: 9px; border-radius: 50%; background: var(--lamp, var(--ember)); box-shadow: 0 0 14px 3px var(--lamp, var(--ember)); opacity: .9; align-self: center; }
 
@@ -278,3 +280,4 @@ kbd { font: 13px var(--mono); border-bottom: 1px solid currentColor; }
 .door .shot.ph { background-color: transparent; }
 .o-status { max-width: 860px; margin: 0 auto; padding: 4vh 16px 0; }
 .o-status .o-warn { margin-bottom: 0; }
+.scale-shot { margin-top: 48px; aspect-ratio: 21 / 9; max-width: 100%; }
