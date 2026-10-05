@@ -4,318 +4,301 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ZEAR Productions</title>
-<meta name="description" content="Playtest builds from ZEAR Productions.">
-<style>
-  @font-face { font-family: "Instrument Serif"; src: url(fonts/instrument-serif-latin-400-normal.woff2) format("woff2"); font-display: swap; }
-  @font-face { font-family: "Instrument Serif"; src: url(fonts/instrument-serif-latin-400-italic.woff2) format("woff2"); font-style: italic; font-display: swap; }
-  @font-face { font-family: "Plex Sans"; src: url(fonts/ibm-plex-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-  @font-face { font-family: "Plex Sans"; src: url(fonts/ibm-plex-sans-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
-  @font-face { font-family: "Plex Sans"; src: url(fonts/ibm-plex-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
-  @font-face { font-family: "Plex Mono"; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); font-display: swap; }
-  @font-face { font-family: "Fraktur"; src: url(fonts/unifrakturmaguntia-latin-400-normal.woff2) format("woff2"); font-display: swap; }
-
-  :root {
-    --paper: #f1ebe0;
-    --ink: #1c1915;
-    --muted: #625b4f;
-    --rule: #d3c9b7;
-    --petrol: #1d4f5c;
-    --oxblood: #3b1d18;
-    --oxblood-deep: #2a130f;
-    --bone: #eee3cf;
-    --bone-dim: #c9b99b;
-    --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
-    --sans: "Plex Sans", "Helvetica Neue", Arial, sans-serif;
-    --mono: "Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font: 17px/1.6 var(--sans);
-  }
-  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  p { margin: 0 0 1em; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-  @media (min-width: 700px) { .wrap { padding: 0 40px; } }
-
-  /* ---------- masthead ---------- */
-  .bar { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px 24px;
-         padding: 22px 0; border-bottom: 1px solid var(--ink); font-size: 15px; }
-  .bar strong { font-weight: 600; letter-spacing: .01em; }
-  .bar nav { display: flex; gap: 20px; flex-wrap: wrap; }
-  .bar nav a { text-decoration: none; }
-  .bar nav a:hover { text-decoration: underline; }
-
-  .lede { padding: 72px 0 96px; display: grid; gap: 32px; }
-  .lede h1 { font: 400 clamp(46px, 8.4vw, 112px)/0.95 var(--serif); margin: 0; letter-spacing: -0.015em; max-width: 11ch; }
-  .lede h1 em { font-style: italic; }
-  .lede .note { max-width: 40ch; color: var(--muted); }
-  @media (min-width: 900px) {
-    .lede { grid-template-columns: 1fr 340px; align-items: end; }
-    .lede .note { margin-bottom: 10px; }
-  }
-
-  /* ---------- hadal: asymmetric split + staggered list ---------- */
-  .hadal { border-top: 1px solid var(--ink); padding: 56px 0 104px; }
-  .split { display: grid; gap: 24px 64px; }
-  .split > *, .play > * { min-width: 0; }
-  @media (min-width: 900px) { .split { grid-template-columns: 5fr 7fr; } }
-  .num { font: 14px var(--mono); color: var(--muted); margin-bottom: 12px; }
-  .hadal h2 { font: italic 400 clamp(84px, 15vw, 188px)/0.8 var(--serif); margin: 0 0 24px; color: var(--petrol); letter-spacing: -0.03em; }
-  .facts { list-style: none; margin: 0; padding: 0; font-size: 15px; color: var(--muted); }
-  .facts li { padding: 6px 0; border-top: 1px solid var(--rule); }
-  .facts li:last-child { border-bottom: 1px solid var(--rule); }
-  .hadal .body p:first-child { font: 400 clamp(24px, 2.6vw, 30px)/1.25 var(--serif); }
-  .get { display: inline-block; margin-top: 8px; padding: 12px 20px; background: var(--petrol); color: var(--paper);
-         text-decoration: none; font-weight: 600; }
-  .get:hover { background: var(--ink); }
-  .small { font-size: 14px; color: var(--muted); }
-
-  .descent { list-style: none; margin: 80px 0 0; padding: 0; counter-reset: d; }
-  .descent li { display: grid; grid-template-columns: 72px 1fr; gap: 0 16px; padding: 18px 0;
-                border-top: 1px solid var(--rule); max-width: 640px; }
-  .descent li::before { counter-increment: d; content: counter(d, decimal-leading-zero); font: 14px/1.9 var(--mono); }
-  .descent li:nth-child(1) { color: #3f7d89; }
-  .descent li:nth-child(2) { color: #2f6976; margin-left: 6%; }
-  .descent li:nth-child(3) { color: #225563; margin-left: 12%; }
-  .descent li:nth-child(4) { color: #18414d; margin-left: 18%; }
-  .descent li:nth-child(5) { color: #0f2c35; margin-left: 24%; }
-  .descent li:nth-child(6) { color: #0a1d24; margin-left: 30%; border-bottom: 1px solid var(--rule); }
-  .descent .t { font: 400 22px/1.3 var(--serif); }
-  @media (max-width: 700px) { .descent li { margin-left: 0 !important; grid-template-columns: 44px 1fr; } }
-
-  /* ---------- ohafh: full-bleed band, editorial text ---------- */
-  .ohafh { background: var(--oxblood); color: var(--bone); padding: 96px 0 104px; }
-  .ohafh .num { color: var(--bone-dim); }
-  .ohafh h2 { font: 400 clamp(52px, 10vw, 128px)/0.95 "Fraktur", "Old English Text MT", serif; margin: 0 0 20px; }
-  .ohafh .meta { font-size: 15px; color: var(--bone-dim); margin-bottom: 48px; }
-  .cols { columns: 2 320px; column-gap: 56px; max-width: 900px; }
-  .cols p { break-inside: avoid; }
-  .pull { font: italic 400 clamp(28px, 3.6vw, 44px)/1.15 var(--serif); max-width: 22ch; margin: 56px 0; }
-  .warn { max-width: 56ch; color: var(--bone-dim); font-style: italic; }
-  .play { display: grid; gap: 32px 64px; margin-top: 72px; padding-top: 32px; border-top: 1px solid #6a3b31; }
-  @media (min-width: 900px) { .play { grid-template-columns: 4fr 8fr; } }
-  .play h3 { font: 400 40px/1 var(--serif); margin: 0 0 12px; }
-  .cmd { margin-bottom: 24px; }
-  .cmd .label { font-size: 14px; color: var(--bone-dim); display: flex; justify-content: space-between; gap: 12px; }
-  .cmd button { font: inherit; background: none; border: 0; padding: 0; color: var(--bone); cursor: pointer;
-                text-decoration: underline; text-underline-offset: 3px; }
-  .cmd pre { margin: 6px 0 0; padding: 12px 14px; background: var(--oxblood-deep); overflow-x: auto;
-             font: 13.5px/1.5 var(--mono); color: var(--bone); }
-  kbd { font: 13px var(--mono); }
-  .keys { font-size: 14px; color: var(--bone-dim); }
-
-  /* ---------- feedback: split ---------- */
-  .feedback { padding: 96px 0 112px; }
-  .feedback h2 { font: 400 clamp(48px, 7vw, 88px)/0.95 var(--serif); margin: 0 0 20px; max-width: 8ch; }
-  .feedback .split { align-items: start; }
-  form { max-width: 560px; }
-  .field { margin-bottom: 26px; }
-  .field > label, .field > .lbl { display: block; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
-  select, input[type=text], textarea {
-    width: 100%; font: inherit; color: var(--ink); background: transparent;
-    border: 0; border-bottom: 1px solid var(--ink); padding: 8px 0; border-radius: 0;
-  }
-  select { -webkit-appearance: none; appearance: none; cursor: pointer;
-    background: linear-gradient(45deg, transparent 50%, var(--ink) 50%) right 4px center / 7px 7px no-repeat; }
-  textarea { border: 1px solid var(--ink); padding: 12px; min-height: 170px; resize: vertical; }
-  select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--petrol); outline-offset: 2px; }
-  .rate { display: flex; }
-  .rate input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-  .rate label { width: 48px; height: 44px; display: grid; place-items: center; cursor: pointer;
-                border: 1px solid var(--ink); margin-left: -1px; font: 20px var(--serif); }
-  .rate label:first-of-type { margin-left: 0; }
-  .rate input:checked + label { background: var(--ink); color: var(--paper); }
-  .rate input:focus-visible + label { outline: 2px solid var(--petrol); outline-offset: 3px; }
-  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .hp { position: absolute; left: -9999px; }
-  button[type=submit] { font: 600 16px var(--sans); background: var(--ink); color: var(--paper);
-                        border: 0; padding: 13px 24px; cursor: pointer; }
-  button[type=submit]:hover { background: var(--petrol); }
-  #status { margin-top: 14px; min-height: 1.6em; color: var(--muted); }
-
-  footer { border-top: 1px solid var(--ink); padding: 22px 0 48px; font-size: 14px; color: var(--muted); }
-</style>
+<meta name="description" content="Playtest builds from ZEAR Productions: Hadal and One House Away From Home.">
+<link rel="stylesheet" href="css/site.css">
 </head>
-<body>
+<body data-tab="zear">
 
-<header class="wrap">
-  <div class="bar">
-    <strong>ZEAR Productions</strong>
-    <nav><a href="#hadal">Hadal</a><a href="#ohafh">One House Away From Home</a><a href="#feedback">Feedback</a></nav>
-  </div>
-  <div class="lede">
-    <!-- TODO(owner): your own words for the headline and the note -->
-    <h1>Two unfinished games. <em>Both playable.</em></h1>
-    <p class="note">I make games on my own. These two are far enough along to try. Download one, play for a bit,
-      and tell me what broke at the bottom of the page. No account needed.</p>
-  </div>
+<!-- ================= TAB BAR ================= -->
+<header class="tabbar">
+  <a class="mark" href="#zear" data-goto="zear">ZEAR</a>
+  <nav role="tablist" aria-label="Sections">
+    <a role="tab" href="#zear" data-goto="zear">Studio</a>
+    <a role="tab" href="#hadal" data-goto="hadal">Hadal</a>
+    <a role="tab" href="#ohafh" data-goto="ohafh"><span class="long">One House Away From Home</span><span class="short">OHAfH</span></a>
+    <span class="indicator" aria-hidden="true"></span>
+  </nav>
 </header>
+<div class="wipe" aria-hidden="true"></div>
 
-<section class="hadal" id="hadal">
-  <div class="wrap">
-    <div class="split">
-      <div>
-        <div class="num">01</div>
-        <h2>Hadal</h2>
-        <ul class="facts">
-          <li>Deep-ocean evolution game</li>
-          <li>Windows, macOS, Linux</li>
-          <li>Playtest build</li>
-        </ul>
-      </div>
-      <div class="body">
-        <p>You are a lab animal with a "hypergene". Every level-up you choose a mutation, and your body changes.</p>
-        <p>The trench is generated, and the ecosystem in it runs and evolves on its own whether you're watching or
-          not. None of the species keep the same body for long: their shapes and skin grow out of a genome, so what
-          hunted you last time might look different now.</p>
-        <a class="get" href="https://github.com/VoidR34ver/ZEAR-Productions/releases/latest">Download the latest build</a>
-        <p class="small" style="margin-top:12px">Pick the zip for your system, unzip it, run it. It updates itself to newer builds.</p>
-      </div>
+<main>
+
+<!-- ======================================================================
+     ZEAR TAB
+     ====================================================================== -->
+<section class="tab" id="tab-zear" data-name="zear" role="tabpanel">
+
+  <!-- 1. giant word splits open -->
+  <div class="z-hero scene">
+    <div class="z-word" aria-label="ZEAR">
+      <span>Z</span><span>E</span><span>A</span><span>R</span>
     </div>
+    <p class="z-sub">Productions</p>
+    <!-- TODO(owner): your own line -->
+    <p class="z-line"><span>Two games. Both unfinished. <em>Both playable.</em></span></p>
+    <div class="scroll-cue">scroll</div>
+  </div>
 
-    <ol class="descent" aria-label="What's in Hadal">
-      <li><span class="t">Five depth zones, from the reef shelf down to the hadal trench.</span></li>
-      <li><span class="t">98 starter species, from 7 cm reef fish to a 20 m cave predator.</span></li>
-      <li><span class="t">Three mutation offers at every level-up, five starting classes.</span></li>
-      <li><span class="t">Fights on stamina: a burst dodge, charged bites, and tells before something lunges.</span></li>
-      <li><span class="t">Weather, storm-driven waves and currents.</span></li>
-      <li><span class="t">You can leave the water.</span></li>
+  <!-- 2. two doors slide in -->
+  <div class="z-doors scene">
+    <a class="door door-hadal" href="#hadal" data-goto="hadal">
+      <figure class="shot" data-id="Z-01" data-src="assets/zear/Z-01" data-note="Hadal key art or best screenshot, vertical crop works"></figure>
+      <div class="door-text">
+        <span class="door-num">01</span>
+        <span class="door-title">Hadal</span>
+        <span class="door-tag">Evolve or get eaten</span>
+        <span class="door-go">Open</span>
+      </div>
+    </a>
+    <a class="door door-ohafh" href="#ohafh" data-goto="ohafh">
+      <figure class="shot" data-id="Z-02" data-src="assets/zear/Z-02" data-note="One House key art or best screenshot, vertical crop works"></figure>
+      <div class="door-text">
+        <span class="door-num">02</span>
+        <span class="door-title">One House Away From Home</span>
+        <span class="door-tag">Every bullet is a key</span>
+        <span class="door-go">Open</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- 3. sideways statements -->
+  <div class="z-strip hscroll">
+    <div class="track">
+      <div class="panel"><span class="big">Made by one person.</span></div>
+      <div class="panel"><span class="big">Built in Godot.</span></div>
+      <div class="panel"><span class="big">Playtest builds, <em>not releases.</em></span></div>
+      <div class="panel"><span class="big">Tell me what broke.</span></div>
+    </div>
+  </div>
+
+  <div class="fb-slot" data-game=""></div>
+</section>
+
+
+<!-- ======================================================================
+     HADAL TAB
+     ====================================================================== -->
+<section class="tab" id="tab-hadal" data-name="hadal" role="tabpanel" hidden>
+
+  <!-- 1. the descent: colour darkens, depth counts, title zooms through -->
+  <div class="h-dive scene">
+    <canvas class="snow" aria-hidden="true"></canvas>
+    <div class="depth-meter" aria-hidden="true"><span class="d-val">0</span> m <span class="d-zone">surface</span></div>
+    <h1 class="h-title">Hadal</h1>
+    <div class="h-dive-copy">
+      <p class="l1">You are a lab animal</p>
+      <p class="l2">with a <em>hypergene.</em></p>
+      <p class="l3">Every level-up, your body changes.</p>
+    </div>
+    <div class="scroll-cue">dive</div>
+  </div>
+
+  <!-- 2. circle mask reveal -->
+  <div class="h-iris scene">
+    <div class="iris">
+      <figure class="shot" data-id="H-01" data-src="assets/hadal/H-01" data-note="Hero: the player creature in open water, wide, as pretty as it gets"></figure>
+    </div>
+    <h2 class="iris-text">The trench evolves<br><em>without you.</em></h2>
+  </div>
+
+  <!-- 3. mutation stages crossfade -->
+  <div class="h-evolve scene">
+    <div class="evo-copy">
+      <span class="kicker">Mutation</span>
+      <div class="evo-steps">
+        <p class="step s1"><b>Start small.</b> Pick one of five starting classes.</p>
+        <p class="step s2"><b>Level up.</b> Three mutation offers. Take one.</p>
+        <p class="step s3"><b>Keep going.</b> Nothing about your body is fixed.</p>
+      </div>
+      <div class="evo-bar"><i></i></div>
+    </div>
+    <div class="evo-stage">
+      <figure class="shot evo e1" data-id="H-03" data-src="assets/hadal/H-03" data-note="Same creature, stage 1: starting body"></figure>
+      <figure class="shot evo e2" data-id="H-04" data-src="assets/hadal/H-04" data-note="Same creature, stage 2: after a mutation or two"></figure>
+      <figure class="shot evo e3" data-id="H-05" data-src="assets/hadal/H-05" data-note="Same creature, stage 3: heavily evolved"></figure>
+    </div>
+  </div>
+
+  <!-- 4. numbers -->
+  <div class="h-stats">
+    <div class="stat"><span class="n" data-count="98">98</span><span class="u">starter species</span></div>
+    <div class="stat"><span class="n" data-count="5">5</span><span class="u">depth zones</span></div>
+    <div class="stat"><span class="n" data-count="3">3</span><span class="u">mutations offered per level</span></div>
+    <div class="scale">
+      <div class="scale-row"><span>7 cm</span><span class="scale-label">smallest reef fish</span></div>
+      <div class="scale-bar"><i></i></div>
+      <div class="scale-row"><span>20 m</span><span class="scale-label">cave predator</span></div>
+    </div>
+  </div>
+
+  <!-- 5. zones, sideways -->
+  <div class="h-zones hscroll">
+    <div class="track">
+      <div class="panel intro"><span class="big">Five zones down.</span><span class="small">Reef shelf to hadal trench.</span></div>
+      <div class="panel"><figure class="shot" data-id="H-09" data-src="assets/hadal/H-09" data-note="Zone 1: reef shelf"></figure><span class="cap">01 &middot; Reef shelf</span></div>
+      <div class="panel"><figure class="shot" data-id="H-10" data-src="assets/hadal/H-10" data-note="Zone 2"></figure><span class="cap">02 &middot; <span data-zone-name="2">Zone two</span></span></div>
+      <div class="panel"><figure class="shot" data-id="H-11" data-src="assets/hadal/H-11" data-note="Zone 3"></figure><span class="cap">03 &middot; <span data-zone-name="3">Zone three</span></span></div>
+      <div class="panel"><figure class="shot" data-id="H-12" data-src="assets/hadal/H-12" data-note="Zone 4"></figure><span class="cap">04 &middot; <span data-zone-name="4">Zone four</span></span></div>
+      <div class="panel"><figure class="shot" data-id="H-13" data-src="assets/hadal/H-13" data-note="Zone 5: hadal trench"></figure><span class="cap">05 &middot; Hadal trench</span></div>
+    </div>
+  </div>
+
+  <!-- 6. parallax pair -->
+  <div class="h-pair">
+    <div class="pair-a">
+      <figure class="shot" data-id="H-14" data-src="assets/hadal/H-14" data-note="Combat: mid-bite or mid-dodge, something big lunging"></figure>
+      <p><b>Fights run on stamina.</b> A burst dodge, charged bites, and a tell before something lunges.</p>
+    </div>
+    <div class="pair-b">
+      <figure class="shot" data-id="H-15" data-src="assets/hadal/H-15" data-note="Surface in a storm, waves, ideally the player breaking the surface"></figure>
+      <p><b>Storms move the sea.</b> Waves and currents up top, and you can leave the water.</p>
+    </div>
+  </div>
+
+  <!-- 7. get it -->
+  <div class="h-get">
+    <p class="get-pre">Windows &middot; macOS &middot; Linux &middot; playtest build</p>
+    <a class="get-btn" href="https://github.com/VoidR34ver/ZEAR-Productions/releases/latest">Download Hadal</a>
+    <p class="get-post">Pick the zip for your system, unzip it, run it. It updates itself to newer builds.</p>
+  </div>
+
+  <div class="fb-slot" data-game="Hadal"></div>
+</section>
+
+
+<!-- ======================================================================
+     OHAfH TAB
+     ====================================================================== -->
+<section class="tab" id="tab-ohafh" data-name="ohafh" role="tabpanel" hidden>
+
+  <!-- 1. sharp image gets crushed into PSX dither -->
+  <div class="o-crush scene">
+    <canvas class="crush" aria-hidden="true"></canvas>
+    <img class="crush-src" data-src="assets/ohafh/O-02" alt="" hidden>
+    <div class="o-hero-copy">
+      <p class="o-place">Graub&uuml;nden, 1998</p>
+      <h1 class="o-title">One House<br>Away From Home</h1>
+      <p class="o-crush-line">Rendered properly. <em>Then crushed through a PSX dither.</em></p>
+    </div>
+    <div class="scroll-cue">enter</div>
+  </div>
+
+  <!-- 2. counts + building list -->
+  <div class="o-castle">
+    <div class="o-counts">
+      <div class="stat"><span class="n" data-count="15">15</span><span class="u">buildings</span></div>
+      <div class="stat"><span class="n" data-count="228">228</span><span class="u">rooms, all reachable</span></div>
+      <p class="o-castle-copy">A castle built through a mountain. Every wing in a different architectural style, lit by its own colour of lamp.</p>
+    </div>
+    <ol class="o-wings">
+      <li>Guest wing</li><li>Lower ward</li><li>Great hall</li><li>Palas</li><li>Great tower</li>
+      <li>Greenhouse</li><li>Burial galleries</li><li>Core hall</li><li>East gallery</li><li>Kitchens</li>
+      <li>Donjon</li><li>Hall range</li><li>Cloister ward</li><li>Chapel</li><li>Renaissance wing</li>
     </ol>
   </div>
-</section>
 
-<section class="ohafh" id="ohafh">
-  <div class="wrap">
-    <div class="num">02</div>
-    <h2>One House Away From Home</h2>
-    <p class="meta">First-person survival horror &middot; Graub&uuml;nden, 1998 &middot; Early playtest</p>
-
-    <div class="cols">
-      <p>What if RE4 and RE8 had a baby in RE1. A castle built through a mountain: fifteen buildings and 228 rooms,
-        every wing in a different architectural style and lit by its own colour of lamp. All of it rendered properly,
-        then crushed through a low-res PSX dither.</p>
-      <p>You get two guns, named keys, ladders and a proper Resident Evil map. Zombies hear what you do. Rooms echo
-        the way rooms that size should.</p>
-    </div>
-
-    <p class="pull">Every bullet you spend on a zombie is a lock you might not shoot open later.</p>
-
-    <p class="warn">It's early. The HUD is a placeholder, there's no terrain around the castle yet, some doors go
-      nowhere, and there isn't much enemy or story content.</p>
-
-    <div class="play">
-      <div>
-        <h3>Play it</h3>
-        <p class="small" style="color:var(--bone-dim)">Paste one line into a terminal. It downloads the newest build
-          and starts it. Run it again to update.</p>
-      </div>
-      <div>
-        <div class="cmd">
-          <div class="label"><span>Linux &middot; x86_64, Vulkan, needs curl and unzip</span><button data-copy="cmd-linux">Copy</button></div>
-          <pre id="cmd-linux">curl -sL https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.sh | sh</pre>
-        </div>
-        <div class="cmd">
-          <div class="label"><span>Windows 10/11 &middot; PowerShell, low-spec build</span><button data-copy="cmd-win">Copy</button></div>
-          <pre id="cmd-win">irm https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.ps1 | iex</pre>
-        </div>
-        <p class="keys">No Mac build yet. The zips are also on the
-          <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/tag/ohafh-latest">release page</a>.</p>
-        <p class="keys"><kbd>WASD</kbd> move, mouse look, <kbd>Shift</kbd> sprint, <kbd>Ctrl</kbd> crouch,
-          <kbd>E</kbd> interact, <kbd>1</kbd>/<kbd>2</kbd> weapons, <kbd>F</kbd> flashlight, left click fire,
-          right click aim, <kbd>M</kbd> map, <kbd>Esc</kbd> pause.</p>
-      </div>
+  <!-- 3. bullets disappear as you scroll -->
+  <div class="o-ammo scene">
+    <div class="rounds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ammo-lines">
+      <p class="a a1">Two guns. Not much ammo.</p>
+      <p class="a a2">Spend a round on the zombie in the corridor,</p>
+      <p class="a a3">or keep it for the lock on the next door.</p>
+      <p class="a a4"><em>Every bullet is a key.</em></p>
     </div>
   </div>
+
+  <!-- 4. wings, sideways -->
+  <div class="o-gallery hscroll">
+    <div class="track">
+      <div class="panel intro"><span class="big">Every wing<br>its own style.</span></div>
+      <div class="panel"><figure class="shot" data-id="O-03" data-src="assets/ohafh/O-03" data-note="Wing 1 (your pick), PSX filter on"></figure><span class="cap" data-wing="O-03">Wing</span></div>
+      <div class="panel"><figure class="shot" data-id="O-04" data-src="assets/ohafh/O-04" data-note="Wing 2"></figure><span class="cap" data-wing="O-04">Wing</span></div>
+      <div class="panel"><figure class="shot" data-id="O-05" data-src="assets/ohafh/O-05" data-note="Wing 3"></figure><span class="cap" data-wing="O-05">Wing</span></div>
+      <div class="panel"><figure class="shot" data-id="O-06" data-src="assets/ohafh/O-06" data-note="Wing 4"></figure><span class="cap" data-wing="O-06">Wing</span></div>
+      <div class="panel"><figure class="shot" data-id="O-07" data-src="assets/ohafh/O-07" data-note="Wing 5"></figure><span class="cap" data-wing="O-07">Wing</span></div>
+      <div class="panel"><figure class="shot" data-id="O-08" data-src="assets/ohafh/O-08" data-note="Wing 6"></figure><span class="cap" data-wing="O-08">Wing</span></div>
+    </div>
+  </div>
+
+  <!-- 5. feature trio, staggered -->
+  <div class="o-feats">
+    <div class="feat f1">
+      <figure class="shot" data-id="O-09" data-src="assets/ohafh/O-09" data-note="Aiming at a shootable lock"></figure>
+      <p><b>Shootable locks.</b> Named keys and ladders too.</p>
+    </div>
+    <div class="feat f2">
+      <figure class="shot" data-id="O-10" data-src="assets/ohafh/O-10" data-note="Zombie in a corridor, flashlight on it"></figure>
+      <p><b>Zombies hear you.</b> Every noise has a type, and they react to it.</p>
+    </div>
+    <div class="feat f3">
+      <figure class="shot" data-id="O-11" data-src="assets/ohafh/O-11" data-note="The map screen"></figure>
+      <p><b>A proper map.</b> Resident Evil style.</p>
+    </div>
+  </div>
+
+  <!-- 6. honest status + play -->
+  <div class="o-play">
+    <p class="o-warn">It's early. The HUD is a placeholder, there's no terrain around the castle yet, some doors go nowhere, and there isn't much enemy or story content.</p>
+    <h2>Play it</h2>
+    <p class="o-play-sub">Paste one line into a terminal. It downloads the newest build and starts it. Run it again to update.</p>
+    <div class="cmd">
+      <div class="label"><span>Linux &middot; x86_64, Vulkan, needs curl and unzip</span><button data-copy="cmd-linux">Copy</button></div>
+      <pre id="cmd-linux">curl -sL https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.sh | sh</pre>
+    </div>
+    <div class="cmd">
+      <div class="label"><span>Windows 10/11 &middot; PowerShell, low-spec build</span><button data-copy="cmd-win">Copy</button></div>
+      <pre id="cmd-win">irm https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/OHAfH/play.ps1 | iex</pre>
+    </div>
+    <p class="keys">No Mac build yet. The zips are also on the <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/tag/ohafh-latest">release page</a>.</p>
+    <p class="keys"><kbd>WASD</kbd> move, mouse look, <kbd>Shift</kbd> sprint, <kbd>Ctrl</kbd> crouch, <kbd>E</kbd> interact, <kbd>1</kbd>/<kbd>2</kbd> weapons, <kbd>F</kbd> flashlight, left click fire, right click aim, <kbd>M</kbd> map, <kbd>Esc</kbd> pause.</p>
+  </div>
+
+  <div class="fb-slot" data-game="One House Away From Home"></div>
 </section>
 
-<section class="feedback" id="feedback">
-  <div class="wrap split">
-    <div>
+</main>
+
+<footer class="foot">ZEAR Productions. Builds live on <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases">GitHub releases</a>.</footer>
+
+<template id="fb-tpl">
+  <div class="fb">
+    <div class="fb-head">
       <h2>Tell me what broke.</h2>
-      <p class="small" style="max-width:34ch">Anonymous. No name, no email, nothing to sign up for. Bugs, bad bits
-        and good bits all help.</p>
+      <p>Anonymous. No name, no email, nothing to sign up for.</p>
     </div>
-    <form id="fb" novalidate>
+    <form novalidate>
       <div class="field">
-        <label for="game">Which game</label>
-        <select id="game" name="game" required>
+        <label>Which game</label>
+        <select name="game" required>
           <option value="">Choose</option>
           <option>Hadal</option>
           <option>One House Away From Home</option>
+          <option>Just the website</option>
         </select>
       </div>
       <div class="field">
-        <label for="build">Which build, if you know</label>
-        <input id="build" name="build" type="text" placeholder="latest">
+        <label>Which build, if you know</label>
+        <input name="build" type="text" placeholder="latest">
       </div>
       <div class="field">
-        <span class="lbl" id="rate-l">How was it</span>
-        <div class="rate" role="radiogroup" aria-labelledby="rate-l">
-          <input type="radio" id="r1" name="rating" value="1"><label for="r1">1</label>
-          <input type="radio" id="r2" name="rating" value="2"><label for="r2">2</label>
-          <input type="radio" id="r3" name="rating" value="3"><label for="r3">3</label>
-          <input type="radio" id="r4" name="rating" value="4"><label for="r4">4</label>
-          <input type="radio" id="r5" name="rating" value="5"><label for="r5">5</label>
-        </div>
+        <span class="lbl">How was it</span>
+        <div class="rate" role="radiogroup"></div>
         <div class="hint">1 is bad, 5 is great</div>
       </div>
       <div class="field">
-        <label for="text">What happened</label>
-        <textarea id="text" name="text" maxlength="4000" required></textarea>
+        <label>What happened</label>
+        <textarea name="text" maxlength="4000" required></textarea>
       </div>
       <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit">Send</button>
-      <div id="status" role="status"></div>
+      <div class="status" role="status"></div>
     </form>
   </div>
-</section>
+</template>
 
-<footer>
-  <div class="wrap">ZEAR Productions. Builds live on <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases">GitHub releases</a>.</div>
-</footer>
-
-<script>
-  // Feedback endpoint: set once the owner picks a service (Formspree, Web3Forms, a Worker, ...).
-  // While empty the form checks input but sends nothing anywhere.
-  const FEEDBACK_ENDPOINT = "";
-
-  document.querySelectorAll("[data-copy]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const text = document.getElementById(btn.dataset.copy).textContent;
-      try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
-      catch { btn.textContent = "Select it by hand"; }
-      setTimeout(() => btn.textContent = "Copy", 1500);
-    });
-  });
-
-  const form = document.getElementById("fb");
-  const status = document.getElementById("status");
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
-    if (data.website) return;                      // honeypot: bots fill it, people never see it
-    if (!data.game) { status.textContent = "Pick which game it's about."; return; }
-    if (!data.text || !data.text.trim()) { status.textContent = "Write something first."; return; }
-    delete data.website;
-    if (!FEEDBACK_ENDPOINT) {
-      status.textContent = "Preview only. Feedback isn't hooked up yet, so nothing was sent.";
-      return;
-    }
-    status.textContent = "Sending...";
-    try {
-      const res = await fetch(FEEDBACK_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(res.status);
-      form.reset();
-      status.textContent = "Got it, thanks.";
-    } catch {
-      status.textContent = "That didn't go through. Try again in a bit.";
-    }
-  });
-</script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
