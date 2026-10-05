@@ -1,0 +1,4124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#000000">
+<title>OUROBOROS: OCULUS</title>
+<style>
+:root{
+  --bg:#000;
+  --fg:#fff;
+  --red:#ff0000;
+  --dred:#880000;
+  --dim:#555;
+  --dimmer:#222;
+  --cell:min(10vw,42px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{background:#000;color:#fff;font-family:'Courier New',monospace;overflow:hidden;height:100%;width:100%;position:fixed;overscroll-behavior:none}
+body{image-rendering:pixelated;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;display:flex;justify-content:center;align-items:flex-start}
+
+#game{width:100%;max-width:480px;height:100%;max-height:100vh;display:flex;flex-direction:column;position:relative;background:#000}
+
+/* CRT overlay */
+#crt{position:absolute;inset:0;pointer-events:none;z-index:100;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 3px);mix-blend-mode:overlay;opacity:0.6}
+#crt::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.5) 100%)}
+
+/* Eye area */
+#eyeBox{flex:0 0 auto;height:22vh;min-height:130px;max-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:8px 0}
+#eyeCanvas{image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(255,0,0,0.4))}
+#eyeSpeech{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:2px;color:#fff;min-height:14px;font-family:'Courier New',monospace;text-transform:lowercase}
+.glitchText{position:relative;display:inline-block}
+.glitchText::before,.glitchText::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;overflow:hidden}
+.glitchText::before{color:#ff0000;animation:glitch1 0.4s infinite steps(2);clip-path:inset(0 0 50% 0)}
+.glitchText::after{color:#00aaff;animation:glitch2 0.4s infinite steps(2);clip-path:inset(50% 0 0 0)}
+@keyframes glitch1{0%,100%{transform:translate(0,0)}50%{transform:translate(-1px,-1px)}}
+@keyframes glitch2{0%,100%{transform:translate(0,0)}50%{transform:translate(1px,1px)}}
+
+/* HUD */
+#hud{flex:0 0 auto;padding:6px 10px;border-top:1px solid #222;border-bottom:1px solid #222;font-size:11px;display:flex;flex-direction:column;gap:4px}
+.hudRow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hudItem{display:flex;align-items:center;gap:4px;letter-spacing:1px}
+.flicker{color:var(--red);font-size:14px;text-shadow:0 0 4px var(--red)}
+.flicker.spent{color:var(--dimmer);text-shadow:none}
+#quotaBar{height:6px;background:#111;border:1px solid #222;position:relative;overflow:hidden}
+#quotaFill{height:100%;background:var(--fg);width:0%;transition:width 0.3s ease}
+#quotaFill.danger{background:var(--red);box-shadow:0 0 6px var(--red)}
+#quotaFill.cleared{background:var(--red);animation:pulseFill 1s infinite}
+@keyframes pulseFill{0%,100%{opacity:1}50%{opacity:0.6}}
+
+/* Boss HP bar */
+#bossHpBar{display:none;flex-direction:column;gap:2px;margin-top:4px;padding-top:4px;border-top:1px solid #400}
+#bossHpBar.show{display:flex}
+.bossLabel{font-size:10px;letter-spacing:3px;color:var(--red);text-align:center;text-shadow:0 0 6px var(--red);font-weight:bold;text-transform:uppercase}
+.bossBarWrap{height:8px;background:#100;border:1px solid #500;position:relative;overflow:hidden}
+#bossHpFill{height:100%;background:linear-gradient(90deg,#f00,#600);width:100%;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 8px rgba(255,0,0,0.5)}
+#bossHpFill.low{background:linear-gradient(90deg,#f60,#300);animation:bossPulse 1s infinite}
+#bossHpFill.critical{background:linear-gradient(90deg,#f00,#900);animation:bossPulse 0.4s infinite;box-shadow:0 0 16px var(--red)}
+@keyframes bossPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+.bossHpTxt{font-size:9px;color:#f66;text-align:center;letter-spacing:1px}
+
+/* Weeping Eye tear */
+body.weepingActive #eyeCanvas{filter:drop-shadow(0 0 8px rgba(180,80,255,0.6))}
+body.weepingActive.bossPhase2 #eyeCanvas{filter:drop-shadow(0 0 12px rgba(220,80,255,0.8))}
+.tear{position:absolute;top:50%;left:50%;width:2px;height:8px;background:linear-gradient(180deg,#f00,transparent);opacity:0.9;animation:tearFall 2s forwards;z-index:3;pointer-events:none;box-shadow:0 0 4px #f00}
+@keyframes tearFall{0%{opacity:0;transform:translateY(-4px) scale(0.5,0.5)}15%{opacity:1;transform:translateY(0) scale(1,1)}100%{opacity:0;transform:translateY(60px) scale(1,8)}}
+
+/* Phase 2 atmospheric */
+body.bossPhase2.weepingActive #eyeBox{background:radial-gradient(ellipse at center,rgba(180,40,120,0.15) 0%,transparent 70%)}
+
+/* ==================== SCORE QUEUE PANEL ==================== */
+#scoreQueue{
+  position:absolute;
+  right:-8px;
+  top:50%;
+  transform:translateY(-50%);
+  width:90px;
+  max-height:90%;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  z-index:8;
+  pointer-events:none;
+  overflow:hidden;
+}
+.scoreChip{
+  background:rgba(0,0,0,0.9);
+  border:1px solid #444;
+  padding:4px 6px;
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  color:#fff;
+  text-align:right;
+  opacity:0;
+  transform:translateX(40px) scale(0.8);
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap;
+  box-shadow:0 0 6px rgba(0,0,0,0.8);
+  position:relative;
+}
+.scoreChip.show{opacity:1;transform:translateX(0) scale(1)}
+.scoreChip.out{opacity:0;transform:translateX(-20px) scale(0.6)}
+.scoreChip .label{color:#888;font-size:8px;letter-spacing:1px;display:block;line-height:1.2}
+.scoreChip .math{font-weight:bold;font-size:11px;color:#fff}
+.scoreChip .chip-val{color:#fff}
+.scoreChip .mult-val{color:var(--red);text-shadow:0 0 4px var(--red)}
+.scoreChip .op{color:#888}
+.scoreChip .total-val{color:#fc0;font-size:14px;text-shadow:0 0 6px #fc0;display:block;margin-top:2px}
+.scoreChip.multiplying .mult-val{animation:multPulse 0.5s}
+@keyframes multPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4);color:#fff}}
+.scoreChip.placement{border-color:#666}
+.scoreChip.row{border-color:#fc0;box-shadow:0 0 8px rgba(255,200,0,0.4)}
+.scoreChip.col{border-color:#0cf;box-shadow:0 0 8px rgba(0,200,255,0.4)}
+.scoreChip.box{border-color:#c6f;box-shadow:0 0 8px rgba(200,100,255,0.4)}
+.scoreChip.triple{border-color:#fff;box-shadow:0 0 12px #fff,inset 0 0 8px rgba(255,255,255,0.3);background:linear-gradient(135deg,#300,#000)}
+.scoreChip.ouroboros{border-color:#f00;background:radial-gradient(circle,rgba(40,0,0,0.95),rgba(0,0,0,0.95));box-shadow:0 0 12px #f00;animation:ouroChipPulse 1s infinite}
+.scoreChip.ouroboros-full{border-color:#fc0;background:linear-gradient(135deg,#400,#220);box-shadow:0 0 20px #fc0,0 0 40px #f00;animation:ouroFullPulse 0.6s infinite}
+@keyframes ouroChipPulse{0%,100%{box-shadow:0 0 8px #f00}50%{box-shadow:0 0 16px #f00}}
+@keyframes ouroFullPulse{0%,100%{box-shadow:0 0 20px #fc0,0 0 40px #f00}50%{box-shadow:0 0 30px #fc0,0 0 60px #f00;transform:scale(1.05)}}
+
+/* ==================== OUROBOROS SNAKE ==================== */
+#ouroborosSvg{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:6;
+  width:100%;
+  height:100%;
+  display:none;
+}
+#ouroborosSvg.show{display:block}
+.snakePath{
+  fill:none;
+  stroke:#f00;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:4 3;
+  filter:drop-shadow(0 0 4px rgba(255,0,0,0.8));
+  animation:snakeCoil 8s linear infinite;
+}
+@keyframes snakeCoil{
+  0%{stroke-dashoffset:0}
+  100%{stroke-dashoffset:-140}
+}
+.snakePath.full{
+  stroke:#fc0;
+  stroke-width:4;
+  filter:drop-shadow(0 0 8px #fc0) drop-shadow(0 0 16px #f60);
+  animation:snakeCoil 4s linear infinite;
+}
+
+/* Linked rows: subtle tint */
+.cell.ouroLinked{background:#1a0a0a !important}
+.cell.ouroLinked.given{background:#200c0c !important}
+
+/* Ouroboros activation banner */
+#ouroBanner{
+  position:absolute;
+  top:30%;
+  left:0;
+  right:0;
+  text-align:center;
+  font-size:26px;
+  letter-spacing:8px;
+  font-weight:900;
+  color:#f00;
+  text-shadow:0 0 12px #f00,0 0 24px #900;
+  z-index:130;
+  pointer-events:none;
+  opacity:0;
+  font-family:'Courier New',monospace;
+}
+#ouroBanner.show{animation:ouroBanner 2.2s forwards}
+@keyframes ouroBanner{
+  0%{opacity:0;transform:scale(0.3) rotate(-10deg);letter-spacing:0}
+  20%{opacity:1;transform:scale(1.3) rotate(2deg);letter-spacing:16px}
+  40%{opacity:1;transform:scale(1) rotate(0);letter-spacing:10px}
+  80%{opacity:1;letter-spacing:8px}
+  100%{opacity:0;letter-spacing:24px}
+}
+#ouroBanner .sub{display:block;font-size:11px;letter-spacing:4px;color:#fff;margin-top:6px;font-weight:normal}
+
+/* Board */
+#boardWrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;position:relative;padding:4px;min-height:0}
+#board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));gap:0;position:relative}
+.cell{width:var(--cell);height:var(--cell);background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell) * 0.5);font-family:'Courier New',monospace;font-weight:bold;color:#fff;position:relative;cursor:pointer;overflow:hidden}
+.cell.given{color:#999;background:#0a0a0a}
+.cell.placed{color:#fff}
+.cell.selected{background:#222;box-shadow:inset 0 0 0 2px #fff}
+.cell.highlight{background:#0a0a0a}
+.cell.scar{background:#220000;color:#660000 !important}
+.cell.scar::after{content:'✕';position:absolute;color:var(--red);font-size:calc(var(--cell) * 0.7);opacity:0.4}
+.cell.flash{animation:cellFlash 0.5s}
+@keyframes cellFlash{0%{background:#fff;color:#000}100%{background:#000}}
+.cell.reject{animation:cellReject 0.4s}
+@keyframes cellReject{0%,100%{background:#000}25%{background:#600;box-shadow:inset 0 0 0 2px #f00}50%{background:#300}75%{background:#600;box-shadow:inset 0 0 0 2px #f00}}
+.cell.complete{animation:cellComplete 0.8s}
+@keyframes cellComplete{0%{background:#fff}50%{background:#fff}100%{background:#000}}
+.cell.locked::before{content:'🔒';position:absolute;font-size:calc(var(--cell) * 0.4);opacity:0.7}
+.cell.glass{box-shadow:inset 0 0 0 1px rgba(200,200,255,0.5)}
+.cell.glass::before{content:'⟡';position:absolute;top:1px;right:2px;font-size:8px;color:#aaf;opacity:0.8}
+.cell.gold{box-shadow:inset 0 0 0 1px rgba(255,200,0,0.4)}
+.cell.gold::before{content:'✦';position:absolute;top:1px;right:2px;font-size:8px;color:#fc0;opacity:0.9}
+.cell.mirror{box-shadow:inset 0 0 0 1px rgba(0,200,255,0.4)}
+.cell.mirror::before{content:'◐';position:absolute;top:1px;right:2px;font-size:8px;color:#0cf;opacity:0.9}
+.cell.chain{box-shadow:inset 0 0 0 1px rgba(200,100,255,0.4)}
+.cell.chain::before{content:'⬖';position:absolute;top:1px;right:2px;font-size:8px;color:#c6f;opacity:0.9}
+.cell.echo{box-shadow:inset 0 0 0 1px rgba(255,100,200,0.4)}
+.cell.echo::before{content:'◈';position:absolute;top:1px;right:2px;font-size:8px;color:#f6c;opacity:0.9}
+.cell.demanded{box-shadow:inset 0 0 0 2px var(--red);animation:demandPulse 1s infinite}
+@keyframes demandPulse{0%,100%{box-shadow:inset 0 0 0 2px var(--red)}50%{box-shadow:inset 0 0 0 2px #fff}}
+.cell.eyeTarget{background:#1a0a0a;box-shadow:inset 0 0 0 1px #a00}
+
+/* thicker borders for 3x3 */
+.cell[data-r="0"],.cell[data-r="3"],.cell[data-r="6"]{border-top:2px solid #fff}
+.cell[data-r="8"]{border-bottom:2px solid #fff}
+.cell[data-c="0"],.cell[data-c="3"],.cell[data-c="6"]{border-left:2px solid #fff}
+.cell[data-c="8"]{border-right:2px solid #fff}
+
+.pencil{position:absolute;inset:1px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);font-size:calc(var(--cell) * 0.22);color:#666;pointer-events:none}
+.pencil span{display:flex;align-items:center;justify-content:center}
+
+/* Score popups */
+.popup{position:absolute;color:var(--red);font-weight:bold;pointer-events:none;animation:popup 1.2s forwards;font-size:14px;text-shadow:0 0 4px rgba(255,0,0,0.6);z-index:10;white-space:nowrap}
+@keyframes popup{0%{opacity:0;transform:translateY(0) scale(0.5)}20%{opacity:1;transform:translateY(-10px) scale(1.2)}100%{opacity:0;transform:translateY(-40px) scale(1)}}
+
+/* Number pad */
+#pad{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:6px;border-top:1px solid #222}
+.padBtn{aspect-ratio:1;background:#0a0a0a;border:1px solid #333;color:#fff;font-size:18px;font-family:'Courier New',monospace;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.1s}
+.padBtn:active{background:#fff;color:#000}
+.padBtn.pencilActive{background:#111;color:#888;border-color:#666}
+.padBtn.pencilMode{background:#220;color:#ff0;border-color:#aa0}
+.padBtn.eraseBtn{color:var(--red)}
+
+/* Consumables */
+#consumables{flex:0 0 auto;display:flex;gap:4px;padding:4px 6px;border-top:1px solid #222;justify-content:space-between;align-items:center;min-height:40px}
+.consSlot{width:36px;height:36px;border:1px solid #333;background:#0a0a0a;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative}
+.consSlot.empty{opacity:0.3}
+.consSlot.active{border-color:var(--red);box-shadow:0 0 6px var(--red)}
+.consSlot .tip{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:#000;border:1px solid #fff;padding:4px 8px;font-size:10px;white-space:nowrap;display:none;z-index:50}
+.consSlot:active .tip{display:block}
+#menuBtn{background:#000;border:1px solid #555;color:#fff;padding:6px 10px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;cursor:pointer}
+
+/* Modals */
+.modal{position:absolute;inset:0;background:rgba(0,0,0,0.95);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.modal.show{display:flex}
+.modal h1{font-size:22px;letter-spacing:4px;margin-bottom:10px;text-align:center;text-transform:uppercase}
+.modal h2{font-size:14px;letter-spacing:2px;margin-bottom:10px;text-align:center;color:#aaa;text-transform:uppercase}
+.modal p{font-size:12px;text-align:center;margin-bottom:16px;color:#ccc;line-height:1.5}
+.modal .big{font-size:36px;color:var(--red);margin:10px 0;text-shadow:0 0 10px var(--red)}
+.modal button{background:#000;border:1px solid #fff;color:#fff;padding:10px 20px;font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;cursor:pointer;margin:4px;text-transform:uppercase}
+.modal button:hover,.modal button:active{background:#fff;color:#000}
+.modal button:disabled{opacity:0.3;cursor:not-allowed}
+
+/* Shop */
+#shopItems{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:400px;margin:10px 0}
+.shopItem{border:1px solid #444;padding:8px;background:#0a0a0a;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-height:100px}
+.shopItem:active,.shopItem.hover{border-color:#fff;background:#111}
+.shopItem.sold{opacity:0.3;pointer-events:none}
+.shopItem.rare{border-color:#fc0}
+.shopItem.joker{border-color:#c6f}
+.shopItem .nm{font-size:11px;letter-spacing:1px;font-weight:bold}
+.shopItem .desc{font-size:9px;color:#aaa;flex:1;line-height:1.3}
+.shopItem .cost{font-size:12px;color:#fc0;text-align:right}
+
+/* Title screen */
+#titleLogo{font-size:28px;letter-spacing:6px;text-align:center;line-height:1.3;margin-bottom:20px}
+#titleLogo .sub{font-size:12px;letter-spacing:4px;color:var(--red);display:block;margin-top:8px}
+.menuBtns{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+
+/* Settings */
+.setting{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:300px;margin:4px 0;padding:6px 0;border-bottom:1px solid #222;font-size:12px}
+.toggle{width:40px;height:20px;background:#222;border:1px solid #555;position:relative;cursor:pointer}
+.toggle.on{background:var(--red)}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;background:#fff;top:2px;left:2px;transition:left 0.2s}
+.toggle.on::after{left:22px}
+
+/* Inventory display tooltips on long press - simpler approach */
+.tooltip{position:fixed;background:#000;border:1px solid #fff;padding:6px 10px;font-size:10px;max-width:200px;z-index:999;pointer-events:none;display:none;line-height:1.4}
+.tooltip.show{display:block}
+
+/* Upgrades list */
+#upgradeList{font-size:10px;color:#888;max-width:400px;text-align:left;max-height:30vh;overflow-y:auto;width:100%;padding:4px 8px;border:1px solid #222;margin:8px 0}
+#upgradeList div{padding:2px 0;border-bottom:1px solid #111}
+
+/* Shake */
+.shake{animation:shake 0.3s}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,2px)}}
+.shake-heavy{animation:shakeHeavy 0.5s}
+@keyframes shakeHeavy{0%,100%{transform:translate(0,0)}10%{transform:translate(-4px,2px)}20%{transform:translate(4px,-2px)}30%{transform:translate(-3px,3px)}40%{transform:translate(3px,-3px)}50%{transform:translate(-2px,2px)}60%{transform:translate(2px,-2px)}70%{transform:translate(-1px,1px)}}
+
+/* Eye boss state */
+body.bossActive #eyeBox{background:radial-gradient(ellipse at center,rgba(100,0,0,0.3) 0%,transparent 70%)}
+
+/* Demand indicator */
+#demandIndicator{position:absolute;top:4px;right:8px;color:var(--red);font-size:10px;text-shadow:0 0 4px var(--red);z-index:5}
+
+/* Telegraph (next boss attack) */
+#telegraph{position:absolute;top:4px;left:8px;color:var(--red);font-size:9px;z-index:5;opacity:0.8}
+
+/* Timer for hourglass */
+#timer{position:absolute;top:4px;right:50%;transform:translateX(50%);color:var(--red);font-size:14px;font-weight:bold;text-shadow:0 0 4px var(--red);z-index:5;display:none}
+#timer.show{display:block}
+#timer.warning{animation:timerPulse 0.5s infinite}
+@keyframes timerPulse{0%,100%{color:var(--red);transform:translateX(50%) scale(1)}50%{color:#fff;transform:translateX(50%) scale(1.1)}}
+
+/* Small utility */
+.sep{height:1px;background:#222;width:80%;margin:10px auto}
+.small{font-size:10px;color:#666}
+.coins{color:#fc0}
+.warn{color:var(--red)}
+.ok{color:#0f0}
+
+/* === JUICE === */
+
+/* Chip × Mult reveal panel — appears above board on scoring */
+#scoreReveal{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  background:rgba(0,0,0,0.92);
+  border:2px solid var(--red);
+  padding:12px 20px;
+  z-index:60;
+  display:none;
+  font-family:'Courier New',monospace;
+  text-align:center;
+  pointer-events:none;
+  box-shadow:0 0 20px rgba(255,0,0,0.4), inset 0 0 20px rgba(255,0,0,0.1);
+  min-width:180px;
+}
+#scoreReveal.show{display:block;animation:scoreRevealIn 0.9s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes scoreRevealIn{
+  0%{transform:translate(-50%,-50%) scale(0.3);opacity:0}
+  15%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+  25%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  75%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(0.9);opacity:0}
+}
+#scoreReveal .chips{color:#fff;font-size:22px;font-weight:bold;display:inline-block;text-shadow:0 0 8px rgba(255,255,255,0.6)}
+#scoreReveal .mult{color:var(--red);font-size:22px;font-weight:bold;display:inline-block;text-shadow:0 0 8px rgba(255,0,0,0.8)}
+#scoreReveal .x{color:#888;margin:0 6px;font-size:18px}
+#scoreReveal .total{color:#fc0;font-size:26px;margin-top:6px;font-weight:bold;text-shadow:0 0 10px rgba(255,204,0,0.6)}
+#scoreReveal .combo{color:#fff;font-size:10px;letter-spacing:3px;margin-top:4px;opacity:0.8}
+
+/* Streak counter */
+#streakBox{position:absolute;top:50%;left:4px;transform:translateY(-50%);z-index:5;text-align:center;font-size:9px;letter-spacing:1px;opacity:0;transition:opacity 0.3s;pointer-events:none;writing-mode:vertical-rl;text-orientation:mixed}
+#streakBox.show{opacity:1}
+#streakBox .streakNum{font-size:20px;color:var(--red);font-weight:bold;text-shadow:0 0 6px var(--red),0 0 12px var(--red);writing-mode:horizontal-tb;display:block;margin:0 auto 2px}
+#streakBox .streakLabel{color:#aaa;font-size:9px;letter-spacing:3px;writing-mode:vertical-rl;display:block}
+#streakBox.big .streakNum{font-size:28px;animation:streakBounce 0.4s}
+@keyframes streakBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+
+/* Big scoring number popups - overhaul */
+.popup{position:absolute;color:var(--red);font-weight:bold;pointer-events:none;animation:popup 1.4s cubic-bezier(.2,1.2,.4,1) forwards;font-size:16px;text-shadow:0 0 6px rgba(255,0,0,0.8),0 0 12px rgba(255,0,0,0.4);z-index:10;white-space:nowrap;letter-spacing:1px}
+@keyframes popup{
+  0%{opacity:0;transform:translateY(5px) scale(0.3)}
+  15%{opacity:1;transform:translateY(-8px) scale(1.3)}
+  30%{opacity:1;transform:translateY(-14px) scale(1.1)}
+  100%{opacity:0;transform:translateY(-60px) scale(1)}
+}
+.popup.huge{font-size:28px;text-shadow:0 0 10px #fff,0 0 20px var(--red),0 0 30px var(--red);color:#fff;animation:popupHuge 2s cubic-bezier(.2,1.3,.4,1) forwards}
+@keyframes popupHuge{
+  0%{opacity:0;transform:translateY(0) scale(0.1) rotate(-10deg)}
+  10%{opacity:1;transform:translateY(-10px) scale(1.8) rotate(2deg)}
+  25%{opacity:1;transform:translateY(-16px) scale(1.5) rotate(-1deg)}
+  100%{opacity:0;transform:translateY(-80px) scale(1.2) rotate(0deg)}
+}
+.popup.combo-text{color:#fff;font-size:14px;letter-spacing:3px;text-shadow:0 0 6px var(--red),0 0 12px var(--red)}
+
+/* Screen flash */
+#flashOverlay{position:absolute;inset:0;background:#fff;opacity:0;z-index:90;pointer-events:none}
+#flashOverlay.flash{animation:screenFlash 0.3s}
+@keyframes screenFlash{0%{opacity:0}20%{opacity:0.7}100%{opacity:0}}
+#flashOverlay.flashRed{animation:screenFlashRed 0.4s;background:#f00}
+@keyframes screenFlashRed{0%{opacity:0}20%{opacity:0.5}100%{opacity:0}}
+#flashOverlay.flashGold{animation:screenFlashGold 0.5s;background:#fc0}
+@keyframes screenFlashGold{0%{opacity:0}20%{opacity:0.3}100%{opacity:0}}
+
+/* Score counter animations */
+#scoreTxt.pulse{animation:scorePulse 0.4s}
+@keyframes scorePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2);color:var(--red);text-shadow:0 0 8px var(--red)}}
+#scoreTxt.mega{animation:scoreMega 0.8s}
+@keyframes scoreMega{0%,100%{transform:scale(1)}30%{transform:scale(1.5);color:#fc0;text-shadow:0 0 12px #fc0}60%{transform:scale(1.3);color:#fff;text-shadow:0 0 8px #fff}}
+
+/* Quota bar juice */
+#quotaFill{background:linear-gradient(90deg,#888 0%,#fff 50%,#fff 100%);background-size:200% 100%;animation:quotaShimmer 3s linear infinite}
+@keyframes quotaShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+#quotaFill.cleared{background:linear-gradient(90deg,#800 0%,var(--red) 50%,#ff4444 100%);background-size:200% 100%;animation:quotaPulse 0.6s infinite}
+@keyframes quotaPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5) drop-shadow(0 0 8px var(--red))}}
+
+/* Cell placement - more dramatic flash */
+.cell.placed-anim{animation:cellPlaced 0.5s}
+@keyframes cellPlaced{
+  0%{background:#fff;color:#000;transform:scale(1.2);box-shadow:0 0 20px #fff}
+  40%{background:#fff;color:#000;transform:scale(1.1)}
+  100%{background:#000;transform:scale(1)}
+}
+
+/* Cell completion - more dramatic wave */
+.cell.complete{animation:cellCompleteWave 1s}
+@keyframes cellCompleteWave{
+  0%{background:#000}
+  20%{background:#fff;box-shadow:inset 0 0 10px #fff,0 0 10px #fff;color:#000}
+  40%{background:#fc0;box-shadow:inset 0 0 15px #fc0,0 0 15px #fc0;color:#000}
+  70%{background:var(--red);box-shadow:inset 0 0 10px var(--red);color:#fff}
+  100%{background:#000}
+}
+
+/* Cell triple sight - reality breaks */
+.cell.triple-complete{animation:cellTriple 1.2s}
+@keyframes cellTriple{
+  0%{background:#000}
+  10%{background:#fff;transform:scale(1.5);box-shadow:0 0 30px #fff}
+  30%{background:#fc0;transform:scale(1.3);box-shadow:0 0 30px #fc0}
+  50%{background:var(--red);transform:scale(1.4);box-shadow:0 0 40px var(--red)}
+  70%{background:#fff;transform:scale(1.2)}
+  100%{background:#000;transform:scale(1)}
+}
+
+/* Eye boss reactions */
+#eyeCanvas.violent{animation:eyeViolent 0.5s}
+@keyframes eyeViolent{0%,100%{transform:translate(0,0) rotate(0deg)}25%{transform:translate(-3px,2px) rotate(-1deg)}50%{transform:translate(4px,-1px) rotate(1deg)}75%{transform:translate(-2px,3px) rotate(-0.5deg)}}
+
+/* SHOP JUICE */
+.shopItem{
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  animation:shopItemIn 0.5s cubic-bezier(.3,1.5,.5,1) backwards;
+}
+.shopItem:nth-child(1){animation-delay:0.05s}
+.shopItem:nth-child(2){animation-delay:0.15s}
+.shopItem:nth-child(3){animation-delay:0.25s}
+.shopItem:nth-child(4){animation-delay:0.35s}
+@keyframes shopItemIn{
+  0%{opacity:0;transform:translateY(20px) scale(0.8)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.shopItem:active{transform:scale(0.95)}
+.shopItem.rare{
+  border-color:#fc0;
+  box-shadow:0 0 8px rgba(255,204,0,0.3),inset 0 0 15px rgba(255,204,0,0.08);
+  animation:shopItemIn 0.5s cubic-bezier(.3,1.5,.5,1) backwards, rareGlow 2s infinite ease-in-out 0.5s;
+}
+@keyframes rareGlow{
+  0%,100%{box-shadow:0 0 8px rgba(255,204,0,0.3),inset 0 0 15px rgba(255,204,0,0.08)}
+  50%{box-shadow:0 0 16px rgba(255,204,0,0.6),inset 0 0 25px rgba(255,204,0,0.15)}
+}
+.shopItem.rare::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,204,0,0.2),transparent);
+  animation:shimmer 3s infinite;
+}
+@keyframes shimmer{0%{left:-100%}50%,100%{left:200%}}
+.shopItem.joker{
+  border-color:#c6f;
+  box-shadow:0 0 8px rgba(204,102,255,0.4),inset 0 0 15px rgba(204,102,255,0.08);
+  animation:shopItemIn 0.5s cubic-bezier(.3,1.5,.5,1) backwards, jokerGlow 1.8s infinite ease-in-out 0.3s;
+}
+@keyframes jokerGlow{
+  0%,100%{box-shadow:0 0 8px rgba(204,102,255,0.4),inset 0 0 15px rgba(204,102,255,0.08)}
+  50%{box-shadow:0 0 20px rgba(204,102,255,0.8),inset 0 0 30px rgba(204,102,255,0.2)}
+}
+.shopItem.joker::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(204,102,255,0.3),transparent);
+  animation:shimmer 2.5s infinite;
+}
+.shopItem.joker .nm{color:#fce}
+.shopItem.rare .nm{color:#fe4}
+
+.shopItem.sold{
+  opacity:0.2;
+  transform:scale(0.9);
+  filter:grayscale(1);
+}
+
+/* Merchant header juice */
+#shopModal h1{
+  animation:shopTitle 1s cubic-bezier(.3,1.5,.5,1);
+}
+@keyframes shopTitle{
+  0%{opacity:0;letter-spacing:20px}
+  100%{opacity:1;letter-spacing:4px}
+}
+
+/* Coin counter animation */
+.coins.pulse{animation:coinPulse 0.3s}
+@keyframes coinPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3);color:#fff;text-shadow:0 0 6px #fc0}}
+
+/* Flicker lost animation */
+.flicker.losing{animation:flickerLost 0.5s}
+@keyframes flickerLost{0%{transform:scale(1);color:var(--red)}50%{transform:scale(1.8) rotate(20deg);color:#fff}100%{transform:scale(1);opacity:0.2;color:#222}}
+
+/* Valid placement cell glow on hover (select) */
+.cell.selected{background:#222;box-shadow:inset 0 0 0 2px #fff, 0 0 8px rgba(255,255,255,0.3);color:#fff !important}
+
+/* Number pad feedback */
+.padBtn:active{background:#fff;color:#000;transform:scale(0.9);box-shadow:0 0 8px rgba(255,255,255,0.5)}
+
+/* Consumable use glow */
+.consSlot.active{
+  border-color:var(--red);
+  box-shadow:0 0 10px var(--red),inset 0 0 10px rgba(255,0,0,0.3);
+  animation:consActive 0.8s infinite;
+}
+@keyframes consActive{
+  0%,100%{box-shadow:0 0 10px var(--red),inset 0 0 10px rgba(255,0,0,0.3)}
+  50%{box-shadow:0 0 20px var(--red),inset 0 0 20px rgba(255,0,0,0.5)}
+}
+
+/* Floor transition flash */
+#floorBanner{
+  position:absolute;
+  top:50%;
+  left:0;
+  right:0;
+  text-align:center;
+  font-size:40px;
+  letter-spacing:8px;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:0 0 20px var(--red),0 0 40px var(--red);
+  z-index:95;
+  display:none;
+  pointer-events:none;
+  transform:translateY(-50%);
+}
+#floorBanner.show{display:block;animation:floorBannerAnim 2s forwards}
+@keyframes floorBannerAnim{
+  0%{opacity:0;letter-spacing:40px;transform:translateY(-50%) scale(0.5)}
+  20%{opacity:1;letter-spacing:8px;transform:translateY(-50%) scale(1)}
+  70%{opacity:1;letter-spacing:8px;transform:translateY(-50%) scale(1)}
+  100%{opacity:0;letter-spacing:2px;transform:translateY(-50%) scale(0.9)}
+}
+#floorBanner .sub{display:block;font-size:12px;letter-spacing:4px;color:var(--red);margin-top:8px}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="crt"></div>
+
+  <!-- Eye -->
+  <div id="eyeBox">
+    <canvas id="eyeCanvas" width="192" height="96"></canvas>
+    <div id="eyeSpeech"></div>
+    <div id="demandIndicator"></div>
+    <div id="telegraph"></div>
+    <div id="timer"></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hudRow">
+      <div class="hudItem" id="floorTxt">FLOOR 1/9</div>
+      <div class="hudItem coins" id="coinsTxt">◆ 0</div>
+      <div class="hudItem" id="flickersTxt"></div>
+    </div>
+    <div id="quotaBar"><div id="quotaFill"></div></div>
+    <div class="hudRow">
+      <div class="hudItem small" id="scoreTxt">0 / 300</div>
+      <div class="hudItem small" id="multTxt">×1</div>
+    </div>
+    <div id="bossHpBar">
+      <div class="bossLabel" id="bossName">BOSS</div>
+      <div class="bossBarWrap"><div id="bossHpFill"></div></div>
+      <div class="bossHpTxt" id="bossHpTxt">0 / 0</div>
+    </div>
+  </div>
+
+  <!-- Board -->
+  <div id="boardWrap">
+    <div id="board"></div>
+    <svg id="ouroborosSvg" viewBox="0 0 400 400" preserveAspectRatio="none"></svg>
+    <div id="scoreReveal">
+      <div><span class="chips" id="revealChips">0</span><span class="x">×</span><span class="mult" id="revealMult">1</span></div>
+      <div class="total" id="revealTotal">+0</div>
+      <div class="combo" id="revealCombo"></div>
+    </div>
+    <div id="streakBox">
+      <div class="streakNum" id="streakNum">0</div>
+      <div class="streakLabel">STREAK</div>
+    </div>
+    <div id="scoreQueue"></div>
+  </div>
+
+  <div id="flashOverlay"></div>
+  <div id="floorBanner"></div>
+  <div id="ouroBanner"></div>
+
+  <!-- Number pad -->
+  <div id="pad">
+    <button class="padBtn" data-n="1">1</button>
+    <button class="padBtn" data-n="2">2</button>
+    <button class="padBtn" data-n="3">3</button>
+    <button class="padBtn" data-n="4">4</button>
+    <button class="padBtn" data-n="5">5</button>
+    <button class="padBtn" data-n="6">6</button>
+    <button class="padBtn" data-n="7">7</button>
+    <button class="padBtn" data-n="8">8</button>
+    <button class="padBtn" data-n="9">9</button>
+    <button class="padBtn pencilActive" id="pencilToggle">✎</button>
+  </div>
+
+  <!-- Consumables + menu -->
+  <div id="consumables">
+    <div style="display:flex;gap:4px" id="consSlots"></div>
+    <button id="menuBtn">≡ MENU</button>
+  </div>
+
+  <!-- TITLE MODAL -->
+  <div class="modal show" id="titleModal">
+    <div id="titleLogo">
+      OUROBOROS
+      <span class="sub">: OCULUS</span>
+    </div>
+    <p class="small" id="metaStats">◆ 0 wins · best floor 0</p>
+    <div class="menuBtns">
+      <button id="btnNewRun">NEW RUN</button>
+      <button id="btnContinue">CONTINUE</button>
+      <button id="btnMeta">UPGRADES</button>
+      <button id="btnSettings">SETTINGS</button>
+      <button id="btnHow">HOW TO PLAY</button>
+    </div>
+  </div>
+
+  <!-- SHOP MODAL -->
+  <div class="modal" id="shopModal">
+    <h1>THE MERCHANT</h1>
+    <p class="small">eyes closed. spend wisely.</p>
+    <div class="hudRow" style="gap:20px;margin:8px 0">
+      <div class="coins">◆ <span id="shopCoins">0</span></div>
+      <div class="small">FLOOR <span id="shopFloor">1</span></div>
+    </div>
+    <div id="shopItems"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="btnReroll">REROLL (◆5)</button>
+      <button id="btnLeaveShop">CONTINUE →</button>
+    </div>
+    <div class="small" style="margin-top:12px;max-width:360px;text-align:center">
+      Your build:
+      <div id="upgradeList"></div>
+    </div>
+  </div>
+
+  <!-- GAME OVER MODAL -->
+  <div class="modal" id="goModal">
+    <h1 id="goTitle">THE EYE CLOSES</h1>
+    <div class="glitchText big" id="goMsg" data-text="">—</div>
+    <p id="goStats" class="small"></p>
+    <div class="menuBtns">
+      <button id="btnRestart">NEW RUN</button>
+      <button id="btnToTitle">TITLE</button>
+    </div>
+  </div>
+
+  <!-- VICTORY MODAL -->
+  <div class="modal" id="winModal">
+    <h1>THE EYE CLOSES</h1>
+    <div class="glitchText big" data-text="thank you">thank you</div>
+    <p class="small">begin again.</p>
+    <div class="sep"></div>
+    <h2>CHOOSE A PERMANENT UPGRADE</h2>
+    <div id="permaChoices" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:360px"></div>
+    <button id="btnWinDone" style="margin-top:16px" disabled>CONTINUE</button>
+  </div>
+
+  <!-- META UPGRADES MODAL -->
+  <div class="modal" id="metaModal">
+    <h1>PERMANENT UPGRADES</h1>
+    <p class="small">Select ONE active permanent upgrade.</p>
+    <div id="metaList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:360px;margin:10px 0"></div>
+    <button id="btnMetaBack">← BACK</button>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal" id="settingsModal">
+    <h1>SETTINGS</h1>
+    <div class="setting"><span>MUSIC</span><div class="toggle on" data-set="music"></div></div>
+    <div class="setting"><span>SOUND FX</span><div class="toggle on" data-set="sfx"></div></div>
+    <div class="setting"><span>CRT SCANLINES</span><div class="toggle on" data-set="crt"></div></div>
+    <div class="setting"><span>EYE SPEAKS</span><div class="toggle on" data-set="speech"></div></div>
+    <div class="setting"><span>GLITCH EFFECTS</span><div class="toggle on" data-set="glitch"></div></div>
+    <div class="setting"><span>SCREEN SHAKE</span><div class="toggle on" data-set="shake"></div></div>
+    <div class="sep"></div>
+    <button id="btnWipe" style="border-color:#f00;color:#f00">WIPE ALL DATA</button>
+    <button id="btnSettingsBack" style="margin-top:10px">← BACK</button>
+  </div>
+
+  <!-- PAUSE MODAL -->
+  <div class="modal" id="pauseModal">
+    <h1>PAUSED</h1>
+    <p class="small glitchText" data-text="I can wait">I can wait</p>
+    <div class="menuBtns">
+      <button id="btnResume">RESUME</button>
+      <button id="btnPauseSettings">SETTINGS</button>
+      <button id="btnAbandon">ABANDON RUN</button>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY -->
+  <div class="modal" id="howModal">
+    <h1>HOW TO PLAY</h1>
+    <div style="max-width:360px;font-size:11px;line-height:1.6;color:#ccc;text-align:left;max-height:70vh;overflow-y:auto;padding:0 8px">
+      <p><b>GOAL:</b> Reach the quota ◆ on each floor. Beat 9 floors. Defeat the Eye.</p>
+      <p style="margin-top:8px"><b>PLACE NUMBERS:</b> Tap empty cell, tap number. Each cell has ONE correct digit — placing anything else costs a Flicker, even if it would be sudoku-legal. The Eye demands precision.</p>
+      <p style="margin-top:8px"><b>COMPLETIONS:</b> Finishing a row, column, or box scores big bonuses. Multiple at once = combos.</p>
+      <p style="margin-top:8px"><b>FLICKERS (✦):</b> Wrong placements cost a Flicker but the cell stays empty — try again. When Flickers run out, mistakes cost 50 score instead.</p>
+      <p style="margin-top:8px"><b>PENCIL MODE (✎):</b> Tap the pencil to toggle. In pencil mode, numbers act as notes (no scoring). Tap again to place for real.</p>
+      <p style="margin-top:8px"><b>MODIFIER CELLS:</b></p>
+      <p>⟡ Glass — ×2 chips on placement</p>
+      <p>✦ Gold — +25 bonus chips</p>
+      <p>◐ Mirror — scores the mirrored cell too</p>
+      <p>⬖ Chain — +3 mult if adjacent was just placed</p>
+      <p>◈ Echo — next placement scores ×2</p>
+      <p>🔒 Locked — unlocks when row/col/box completes</p>
+      <p style="margin-top:8px"><b>MERCHANT:</b> Between floors. Buy consumables, upgrades, rare artifacts. Spend wisely.</p>
+      <p style="margin-top:8px"><b>THE EYE:</b> Floor 9. It speaks. It attacks. Every 3 placements, it acts.</p>
+    </div>
+    <button id="btnHowBack" style="margin-top:12px">← BACK</button>
+  </div>
+
+  <!-- REWIND MODAL - dead-end recovery -->
+  <div class="modal" id="rewindModal">
+    <h1 class="glitchText" data-text="the path closes">THE PATH CLOSES</h1>
+    <p class="small" style="max-width:320px">Your placements have left no valid solution. The Eye offers mercy.</p>
+    <div class="big" style="font-size:20px;margin:14px 0;color:var(--red)">REWIND <span id="rewindSteps">0</span> PLACEMENTS</div>
+    <div class="menuBtns">
+      <button id="btnRewind">ACCEPT REWIND</button>
+      <button id="btnRefuseRewind" style="border-color:#555;color:#888">REFUSE · END RUN</button>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+const STATE = {
+  // Run
+  inRun: false,
+  floor: 1,
+  maxFloor: 9,
+  quota: 300,
+  score: 0,
+  coins: 0,
+  flickers: 3,
+  maxFlickers: 3,
+
+  // Board
+  board: null,       // 9x9: {value, given, placed, modifier, scar, locked, solution}
+  selectedCell: null,
+  lastPlaced: null,  // {r,c} for chain cells
+  pencilMode: false,
+  pencils: null,     // 9x9 Set of notes
+
+  // Scoring modifiers
+  baseMult: 1,
+  echoActive: false,
+  doublerActive: 0,  // multiplier for next placement
+  hungerActive: false,
+
+  // New active buffs
+  cascadeDropCharges: 0,
+  frenzyCharges: 0,
+  bloodPactActive: false,
+  multLeechArmed: false,
+  floorMultBonus: 0,
+  mirrorMindNext: false,
+  placementCount: 0,
+
+  // Ouroboros: links two rows together
+  ouroActive: false,
+  ouroRows: null,        // [rowA, rowB] when active
+  ouroFullFired: false,  // set true when full saturation already scored
+
+  // Upgrades owned this run
+  upgrades: [],      // array of upgrade ids
+  consumables: [],   // inventory of consumable ids
+  consumableSlots: 3,
+
+  // Persistent bonuses from upgrades
+  rowBonus: 0,
+  colBonus: 0,
+  boxBonus: 0,
+  tripleMult: 1,
+  digitBonus: {},    // {digit: bonus chips}
+  cascadeMult: 0,
+  devourCoins: 0,
+  extraShopMods: {glass:0, gold:0, mirror:0},
+  jokers: [],        // joker ids
+
+  // Boss / floor state
+  bossMode: null,    // null | 'weeping' | 'hourglass' | 'warden' | 'eye'
+  bossHp: 0,
+  bossMaxHp: 0,
+  bossPhase: 1,      // 1 or 2 (phase 2 at 50% HP)
+  bossPlacementCount: 0, // for triggering abilities
+  bossDefeated: false,
+  timer: 0,
+  timerInterval: null,
+  eyeHP: 100,        // legacy, kept for final boss veins animation
+  eyePlacements: 0,
+  eyeNextAttack: null,
+  demandDigit: null,
+
+  // Streak & juice
+  streak: 0,
+  maxStreak: 0,
+  displayedScore: 0,  // for animated counter
+  scoreAnimFrame: null,
+
+  // Shop
+  shopItems: [],
+  shopRerollsUsed: 0,
+  freeReroll: false,
+
+  // Meta (persistent)
+  meta: {
+    wins: 0,
+    bestFloor: 0,
+    runsPlayed: 0,
+    unlockedPermas: [],
+    activePerma: null,
+    settings: {crt:true, speech:true, glitch:true, shake:true, music:true, sfx:true}
+  }
+};
+
+/* ============================================================
+   PERSISTENCE
+   ============================================================ */
+const SAVE_KEY = 'ouroboros_oculus_save';
+const META_KEY = 'ouroboros_oculus_meta';
+
+function saveRun(){
+  if(!STATE.inRun) { localStorage.removeItem(SAVE_KEY); return; }
+  const data = {
+    floor: STATE.floor, quota: STATE.quota, score: STATE.score, coins: STATE.coins,
+    flickers: STATE.flickers, maxFlickers: STATE.maxFlickers,
+    board: STATE.board, lastPlaced: STATE.lastPlaced,
+    upgrades: STATE.upgrades, consumables: STATE.consumables, consumableSlots: STATE.consumableSlots,
+    rowBonus: STATE.rowBonus, colBonus: STATE.colBonus, boxBonus: STATE.boxBonus,
+    tripleMult: STATE.tripleMult, digitBonus: STATE.digitBonus, cascadeMult: STATE.cascadeMult,
+    devourCoins: STATE.devourCoins, extraShopMods: STATE.extraShopMods, jokers: STATE.jokers,
+    pencils: STATE.pencils ? STATE.pencils.map(row => row.map(s => [...s])) : null
+  };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e){}
+}
+
+function loadRun(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    Object.assign(STATE, data);
+    STATE.inRun = true;
+    if(data.pencils) STATE.pencils = data.pencils.map(row => row.map(arr => new Set(arr)));
+    else STATE.pencils = make9Set();
+    return true;
+  } catch(e){ return false; }
+}
+
+function saveMeta(){
+  try { localStorage.setItem(META_KEY, JSON.stringify(STATE.meta)); } catch(e){}
+}
+
+function loadMeta(){
+  try {
+    const raw = localStorage.getItem(META_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      STATE.meta = Object.assign(STATE.meta, d);
+      if(!STATE.meta.settings) STATE.meta.settings = {crt:true, speech:true, glitch:true, shake:true, music:true, sfx:true};
+      if(STATE.meta.settings.music === undefined) STATE.meta.settings.music = true;
+      if(STATE.meta.settings.sfx === undefined) STATE.meta.settings.sfx = true;
+      if(!STATE.meta.unlockedPermas) STATE.meta.unlockedPermas = [];
+    }
+  } catch(e){}
+}
+
+function make9Set(){
+  const a = [];
+  for(let r=0;r<9;r++){ a.push([]); for(let c=0;c<9;c++) a[r].push(new Set()); }
+  return a;
+}
+
+/* ============================================================
+   SUDOKU GENERATION
+   ============================================================ */
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function generateCompleteGrid(){
+  // Start with base Latin-square-like sudoku
+  const base = [[1,2,3,4,5,6,7,8,9]];
+  const pattern = (r,c) => (3*(r%3) + Math.floor(r/3) + c) % 9;
+  const rBase = [0,1,2];
+  const rows = [];
+  for(const rg of shuffle([...rBase])){
+    for(const r of shuffle([...rBase])){
+      rows.push(rg*3 + r);
+    }
+  }
+  const cols = [];
+  for(const cg of shuffle([...rBase])){
+    for(const c of shuffle([...rBase])){
+      cols.push(cg*3 + c);
+    }
+  }
+  const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+  const grid = [];
+  for(let r=0;r<9;r++){
+    grid.push([]);
+    for(let c=0;c<9;c++){
+      grid[r].push(nums[pattern(rows[r], cols[c])]);
+    }
+  }
+  return grid;
+}
+
+function generatePuzzle(givens, floor){
+  const solution = generateCompleteGrid();
+  const puzzle = solution.map(r => r.slice());
+  // Remove cells one by one, ensuring the puzzle still has a unique solution.
+  // If removing a cell breaks uniqueness, put it back and try another.
+  const cells = [];
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) cells.push([r,c]);
+  shuffle(cells);
+  let remaining = 81;
+  let attempts = 0;
+  const maxAttempts = cells.length * 2;
+  for(const [r,c] of cells){
+    if(remaining <= givens) break;
+    attempts++;
+    if(attempts > maxAttempts) break;
+    const prev = puzzle[r][c];
+    puzzle[r][c] = 0;
+    // Verify still uniquely solvable
+    if(hasUniqueSolution(puzzle)){
+      remaining--;
+    } else {
+      // Revert - can't remove this cell without creating ambiguity
+      puzzle[r][c] = prev;
+    }
+  }
+  // Build board object
+  const board = [];
+  for(let r=0;r<9;r++){
+    const row = [];
+    for(let c=0;c<9;c++){
+      row.push({
+        value: puzzle[r][c],
+        given: puzzle[r][c] !== 0,
+        placed: false,
+        modifier: null,
+        scar: false,
+        locked: false,
+        solution: solution[r][c]
+      });
+    }
+    board.push(row);
+  }
+  // Inject modifiers
+  injectModifiers(board, floor);
+  return board;
+}
+
+// Count solutions up to 2 (we only care if it's 0, 1, or more than 1)
+function countSolutions(grid, limit){
+  limit = limit || 2;
+  const g = grid.map(r => r.slice());
+  let count = 0;
+  function solve(){
+    if(count >= limit) return;
+    // Find empty with fewest candidates (heuristic for speed)
+    let bestR = -1, bestC = -1, bestCands = null, bestLen = 10;
+    for(let r=0;r<9;r++){
+      for(let c=0;c<9;c++){
+        if(g[r][c] === 0){
+          const cands = candidatesAt(g, r, c);
+          if(cands.length < bestLen){
+            bestLen = cands.length;
+            bestR = r; bestC = c; bestCands = cands;
+            if(bestLen === 0) return; // dead end
+            if(bestLen === 1) break;
+          }
+        }
+      }
+      if(bestLen === 1) break;
+    }
+    if(bestR === -1){
+      count++;
+      return;
+    }
+    for(const n of bestCands){
+      g[bestR][bestC] = n;
+      solve();
+      if(count >= limit){ g[bestR][bestC] = 0; return; }
+      g[bestR][bestC] = 0;
+    }
+  }
+  solve();
+  return count;
+}
+
+function candidatesAt(grid, r, c){
+  const used = new Set();
+  for(let i=0;i<9;i++){
+    if(grid[r][i]) used.add(grid[r][i]);
+    if(grid[i][c]) used.add(grid[i][c]);
+  }
+  const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+    if(grid[br+i][bc+j]) used.add(grid[br+i][bc+j]);
+  }
+  const out = [];
+  for(let n=1;n<=9;n++) if(!used.has(n)) out.push(n);
+  return out;
+}
+
+function hasUniqueSolution(grid){
+  return countSolutions(grid, 2) === 1;
+}
+
+// Check if the current board state can still reach the unique solution
+// (ie. no placed values conflict with cell.solution)
+function isBoardSolvable(board){
+  // Build a grid from the current board state (includes given + placed, excludes scars/locks)
+  const grid = [];
+  for(let r=0;r<9;r++){
+    const row = [];
+    for(let c=0;c<9;c++){
+      const cell = board[r][c];
+      if(cell.scar || cell.locked) row.push(0);
+      else row.push(cell.value || 0);
+    }
+    grid.push(row);
+  }
+  // Check each filled cell is sudoku-legal right now
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      if(grid[r][c] === 0) continue;
+      const n = grid[r][c];
+      grid[r][c] = 0;
+      const cands = candidatesAt(grid, r, c);
+      grid[r][c] = n;
+      if(!cands.includes(n)) return false;
+    }
+  }
+  // Check there's still at least one empty cell with a candidate
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      if(grid[r][c] === 0 && !board[r][c].locked && !board[r][c].scar){
+        const cands = candidatesAt(grid, r, c);
+        if(cands.length === 0) return false;
+      }
+    }
+  }
+  return true;
+}
+
+function injectModifiers(board, floor){
+  const FLOOR_MODIFIERS = {
+    3: {count: 2, types: ['glass', 'gold']},
+    4: {count: 3, types: ['glass', 'gold', 'mirror']},
+    5: {count: 3, types: ['glass', 'gold', 'mirror']},
+    6: {count: 4, types: ['glass', 'gold', 'mirror', 'chain']},
+    7: {count: 5, types: ['glass', 'gold', 'mirror', 'chain', 'echo']},
+    8: {count: 6, types: ['glass', 'gold', 'mirror', 'chain', 'echo']},
+    9: {count: 7, types: ['glass', 'gold', 'mirror', 'chain', 'echo']}
+  };
+  const cfg = FLOOR_MODIFIERS[floor];
+  if(!cfg) return;
+  let count = cfg.count;
+  // Extra modifiers from upgrades
+  count += (STATE.extraShopMods.glass + STATE.extraShopMods.gold + STATE.extraShopMods.mirror);
+  const empties = [];
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(!board[r][c].given) empties.push([r,c]);
+  shuffle(empties);
+  const extras = [];
+  for(let i=0;i<STATE.extraShopMods.glass;i++) extras.push('glass');
+  for(let i=0;i<STATE.extraShopMods.gold;i++) extras.push('gold');
+  for(let i=0;i<STATE.extraShopMods.mirror;i++) extras.push('mirror');
+  for(let i=0;i<count && i<empties.length;i++){
+    const [r,c] = empties[i];
+    let type;
+    if(i < extras.length) type = extras[i];
+    else type = cfg.types[Math.floor(Math.random()*cfg.types.length)];
+    board[r][c].modifier = type;
+  }
+}
+
+function injectLocks(board, pct){
+  // For Warden boss
+  const empties = [];
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(!board[r][c].given && !board[r][c].modifier) empties.push([r,c]);
+  shuffle(empties);
+  const n = Math.floor(empties.length * pct);
+  for(let i=0;i<n;i++){
+    const [r,c] = empties[i];
+    board[r][c].locked = true;
+  }
+}
+
+/* ============================================================
+   SCORING
+   ============================================================ */
+function isValidPlacement(board, r, c, n){
+  if(board[r][c].given || board[r][c].placed) return false;
+  if(board[r][c].locked) return false;
+  // CORE RULE: the placement must match the cell's true solution.
+  // Sudoku-legal-but-wrong is still a mistake - the Eye demands precision.
+  if(board[r][c].solution !== n) return false;
+  return true;
+}
+
+// Sudoku-rules-only check (used for things like locked-cell reveal logic)
+function isSudokuLegal(board, r, c, n){
+  if(board[r][c].given || board[r][c].placed) return false;
+  // Row check
+  for(let i=0;i<9;i++) if(i!==c && board[r][i].value===n) return false;
+  // Col check
+  for(let i=0;i<9;i++) if(i!==r && board[i][c].value===n) return false;
+  // Box check
+  const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+    if(br+i===r && bc+j===c) continue;
+    if(board[br+i][bc+j].value===n) return false;
+  }
+  return true;
+}
+
+function isRowComplete(board, r){
+  for(let c=0;c<9;c++){
+    if(!board[r][c].value || board[r][c].scar) return false;
+  }
+  return true;
+}
+function isColComplete(board, c){
+  for(let r=0;r<9;r++){
+    if(!board[r][c].value || board[r][c].scar) return false;
+  }
+  return true;
+}
+function isBoxComplete(board, br, bc){
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+    if(!board[br*3+i][bc*3+j].value || board[br*3+i][bc*3+j].scar) return false;
+  }
+  return true;
+}
+
+function placeNumber(r, c, n, isMirror=false){
+  const cell = STATE.board[r][c];
+  if(cell.given || cell.placed || cell.locked || cell.scar) return false;
+
+  const valid = isValidPlacement(STATE.board, r, c, n);
+
+  if(!valid){
+    // Invalid placement: take damage but don't lock the cell - try again
+    const prevFlickers = STATE.flickers;
+    STATE.flickers = Math.max(0, STATE.flickers - 1);
+    STATE.streak = 0; // break streak
+    let damageMsg = '';
+    if(STATE.flickers <= 0){
+      // Out of flickers - lose score
+      STATE.score = Math.max(0, STATE.score - 50);
+      speakEye('pick[' + Math.floor(Math.random()*5) + ']hurt');
+      damageMsg = '-50';
+      sfxHurt();
+      screenFlash('red');
+    } else {
+      speakEye('pick[' + Math.floor(Math.random()*5) + ']scar');
+      damageMsg = '✦ LOST';
+      sfxMistake();
+      // Animate the flicker being lost
+      animateFlickerLost(prevFlickers);
+    }
+    shake('heavy');
+    const el = cellEl(r,c);
+    if(el){
+      // Brief red flash on the cell to show the rejection
+      el.classList.add('reject');
+      setTimeout(() => el.classList.remove('reject'), 400);
+      popup(el, damageMsg, '#ff0000');
+    }
+    updateStreakDisplay();
+    render();
+    saveRun();
+    return true;
+  }
+
+  // Demand check (boss)
+  if(STATE.demandDigit !== null && n !== STATE.demandDigit && !isMirror){
+    speakEye('pick[0]demand');
+    flashWarning(`MUST BE ${STATE.demandDigit}`);
+    return false;
+  }
+  if(STATE.demandDigit !== null && n === STATE.demandDigit) STATE.demandDigit = null;
+
+  cell.value = n;
+  cell.placed = true;
+  STATE.lastPlaced = {r, c};
+  if(!isMirror) sfxPlace(n);
+
+  // --- CALCULATE SCORE ---
+  let chips = n;
+  let mult = STATE.baseMult;
+
+  // Digit bonus
+  if(STATE.digitBonus[n]) chips += STATE.digitBonus[n];
+
+  // Serpent's Eye joker
+  if(STATE.jokers.includes('serpent')){
+    if(hasAdjacentGiven(r,c)) chips += 5;
+  }
+
+  // Number Priest joker (digit 7 x3)
+  if(STATE.jokers.includes('priest') && n === 7) chips *= 3;
+
+  // Modifier effects
+  const mod = cell.modifier;
+  if(mod === 'glass'){ chips *= 2; }
+  if(mod === 'gold'){ chips += 25; }
+  if(mod === 'chain'){
+    if(STATE.lastPlaced && isAdjacent(STATE.lastPlaced, {r,c})){
+      mult += 3;
+    }
+  }
+  if(mod === 'echo'){ STATE.echoActive = true; }
+
+  // Echo active from previous
+  let echoedThis = false;
+  if(STATE.echoActive && !isMirror){
+    // This placement scores twice (after modifiers)
+    echoedThis = true;
+    STATE.echoActive = false;
+  }
+
+  // Doubler consumable
+  if(STATE.doublerActive > 0 && !isMirror){
+    mult *= STATE.doublerActive;
+    STATE.doublerActive = 0;
+  }
+
+  // Unblinking joker (first placement each floor x5)
+  if(STATE.jokers.includes('unblinking') && !STATE.firstPlacedThisFloor){
+    mult *= 5;
+    STATE.firstPlacedThisFloor = true;
+  }
+
+  // Void Pact joker
+  if(STATE.jokers.includes('void')){
+    mult *= 3;
+  }
+
+  // --- NEW MULT SOURCES ---
+
+  if(!isMirror){
+    STATE.placementCount++;
+  }
+
+  // Floor-stacking bonuses (bloodPact, multLeech, hungryNumbers, ritualCircle)
+  mult += STATE.floorMultBonus;
+
+  // Blood Pact: ×2 mult for rest of floor
+  if(STATE.bloodPactActive) mult *= 2;
+
+  // Cascade Drop: +1 mult, countdown
+  if(STATE.cascadeDropCharges > 0 && !isMirror){
+    mult += 1;
+    STATE.cascadeDropCharges--;
+  }
+
+  // Frenzy: ×2 for next N placements
+  if(STATE.frenzyCharges > 0 && !isMirror){
+    mult *= 2;
+    STATE.frenzyCharges--;
+  }
+
+  // Heartbeat upgrade: odd-numbered placements (1,3,5...) +2 mult
+  if(STATE.upgrades.includes('heartbeat') && !isMirror){
+    if(STATE.placementCount % 2 === 1) mult += 2;
+  }
+
+  // Third Eye: every 7th placement ×3
+  if(STATE.upgrades.includes('thirdEye') && !isMirror){
+    if(STATE.placementCount % 7 === 0) mult *= 3;
+  }
+
+  // Cross Pattern: row 5 or column 5 (index 4) +4 mult
+  if(STATE.upgrades.includes('crossPattern')){
+    if(r === 4 || c === 4) mult += 4;
+  }
+
+  // Corner Seal: corner 3×3 box +3 mult
+  if(STATE.upgrades.includes('cornerSeal')){
+    const br = Math.floor(r/3), bc = Math.floor(c/3);
+    if((br === 0 || br === 2) && (bc === 0 || bc === 2)) mult += 3;
+  }
+
+  // Mirror Mind: next placement gets +3 mult if previous triggered mirror
+  if(STATE.mirrorMindNext && !isMirror){
+    mult += 3;
+    STATE.mirrorMindNext = false;
+  }
+  // Arm mirrorMind if Mirror upgrade is owned and this IS a mirror trigger
+  if(STATE.upgrades.includes('mirrorMind') && mod === 'mirror' && !isMirror){
+    STATE.mirrorMindNext = true;
+  }
+
+  // Feast joker: every 10th placement, permanent +1 mult for floor
+  if(STATE.jokers.includes('feast') && !isMirror && STATE.placementCount % 10 === 0){
+    STATE.floorMultBonus += 1;
+    flashWarning('FEAST +1 MULT');
+  }
+
+  // Check for completions BEFORE scoring to get cascade
+  const completions = checkCompletions(r, c);
+  let completionBonus = 0;
+  let completionMult = 0;
+  let completionCount = completions.row + completions.col + completions.box;
+
+  if(completions.row){ completionBonus += 45 + STATE.rowBonus; }
+  if(completions.col){ completionBonus += 45 + STATE.colBonus; }
+  if(completions.box){ completionBonus += 45 + STATE.boxBonus; }
+
+  let comboLabel = '';
+  let isTriple = false;
+  let isBigCombo = false;
+  // Triple Sight / combo detection (for FX only - scoring is via queue)
+  if(completions.row && completions.col && completions.box){
+    speakEye('pick[0]triple');
+    shake('heavy');
+    sfxTriple();
+    comboLabel = 'TRIPLE SIGHT';
+    isTriple = true;
+    screenFlash('gold');
+  } else if(completionCount >= 2){
+    speakEye('pick[0]combo');
+    shake();
+    sfxComplete();
+    comboLabel = completionCount === 2 ? 'DOUBLE' : 'COMBO';
+    isBigCombo = true;
+    screenFlash('white');
+  } else if(completionCount === 1){
+    sfxComplete();
+    comboLabel = completions.row ? 'ROW' : completions.col ? 'COLUMN' : 'BOX';
+  }
+
+  // Cascade
+  if(STATE.cascadeMult > 0 && completionCount > 0){
+    mult += completionCount * STATE.cascadeMult;
+  }
+
+  // Hunger consumable
+  if(STATE.hungerActive && completionCount > 0){
+    mult *= 3;
+    STATE.hungerActive = false;
+  }
+
+  // Mult Leech: armed + this completion → +5 mult for rest of floor
+  if(STATE.multLeechArmed && completionCount > 0){
+    STATE.floorMultBonus += 5;
+    STATE.multLeechArmed = false;
+    flashWarning('MULT LEECH +5');
+  }
+
+  // Ritual Circle: completing a box gives permanent +2 base mult this floor
+  if(STATE.upgrades.includes('ritualCircle') && completions.box){
+    STATE.floorMultBonus += 2;
+  }
+
+  // Ouroboros joker bonus (extra column scoring when row completes)
+  let jokerOuroboros = 0;
+  if(STATE.jokers.includes('ouroboros') && completions.row && !completions.col){
+    jokerOuroboros = 20 + STATE.colBonus;
+  }
+
+  // Ouroboros pair/full bonuses (the linked-rows mechanic)
+  let ouroPairBonus = 0;
+  let ouroFullBonus = 0;
+  if(completions.ouroPair){
+    ouroPairBonus = 45 + STATE.rowBonus;
+  }
+  if(completions.ouroFull){
+    ouroFullBonus = 500;
+    STATE.floorMultBonus += 5;
+    STATE.ouroFullFired = true;
+  }
+
+  // Streak bonus - dopamine fuel
+  STATE.streak++;
+  STATE.maxStreak = Math.max(STATE.maxStreak, STATE.streak);
+  if(STATE.streak >= 5){
+    mult += Math.floor(STATE.streak / 5);
+  }
+
+  // ===== BUILD SCORE QUEUE =====
+  // Each event has: {label, chips, mult, total, type}
+  // Type affects color/styling. They animate in sequence.
+  const queue = [];
+
+  // Base placement
+  const placeChips = Math.floor(chips);
+  queue.push({
+    label: `PLACE ${n}`,
+    chips: placeChips,
+    mult: mult,
+    total: placeChips * mult,
+    type: 'placement'
+  });
+
+  // Echo doubles the placement (simulated as a second event)
+  if(echoedThis){
+    queue.push({
+      label: 'ECHO',
+      chips: placeChips,
+      mult: mult,
+      total: placeChips * mult,
+      type: 'placement'
+    });
+  }
+
+  // Individual completion events
+  if(completions.row){
+    const c = 45 + STATE.rowBonus;
+    queue.push({label:'ROW', chips:c, mult:mult, total:c * mult, type:'row'});
+  }
+  if(completions.col){
+    const c = 45 + STATE.colBonus;
+    queue.push({label:'COLUMN', chips:c, mult:mult, total:c * mult, type:'col'});
+  }
+  if(completions.box){
+    const c = 45 + STATE.boxBonus;
+    queue.push({label:'BOX', chips:c, mult:mult, total:c * mult, type:'box'});
+  }
+  if(jokerOuroboros > 0){
+    queue.push({label:'OUROBOROS JOKER', chips:jokerOuroboros, mult:mult, total:jokerOuroboros * mult, type:'col'});
+  }
+  if(ouroPairBonus > 0){
+    queue.push({label:'OUROBOROS', chips:ouroPairBonus, mult:mult, total:ouroPairBonus * mult, type:'ouroboros'});
+  }
+  if(isTriple){
+    const tc = 200 * STATE.tripleMult;
+    queue.push({label:'TRIPLE SIGHT', chips:tc, mult:mult, total:tc * mult, type:'triple'});
+  } else if(isBigCombo){
+    queue.push({label:'COMBO', chips:80, mult:mult, total:80 * mult, type:'triple'});
+  }
+  if(ouroFullBonus > 0){
+    queue.push({label:'OUROBOROS FULL', chips:ouroFullBonus, mult:mult * 2, total:ouroFullBonus * mult * 2, type:'ouroboros-full'});
+  }
+
+  // Calculate total for internal state tracking
+  let queueSum = 0;
+  queue.forEach(ev => queueSum += ev.total);
+
+  const prevScore = STATE.score;
+  // Process the queue with animation; score is added event by event
+  // (boss damage happens inside each event animation step)
+  processScoreQueue(queue, r, c);
+
+  // Devour: coins per completion
+  const completionTally = completionCount + (completions.ouroPair ? 1 : 0);
+  if(STATE.devourCoins > 0 && completionTally > 0){
+    STATE.coins += STATE.devourCoins * completionTally;
+    flashCoins();
+  }
+
+  const finalGain = queueSum;
+
+  // Animate placement
+  const el = cellEl(r,c);
+  if(el){
+    el.classList.remove('placed-anim');
+    void el.offsetWidth;
+    el.classList.add('placed-anim');
+  }
+
+  // Popup - scale drama with size
+  if(el){
+    if(isTriple){
+      popup(el, `+${finalGain}`, '#fff', 'huge');
+      setTimeout(() => popup(el, 'TRIPLE SIGHT', '#fff', 'combo-text'), 200);
+    } else if(isBigCombo || finalGain >= 200){
+      popup(el, `+${finalGain}`, '#fff', 'huge');
+    } else {
+      popup(el, `+${finalGain}`, completionCount ? '#fc0' : '#fff');
+    }
+  }
+
+  if(completionCount > 0){
+    flashCompletions(r, c, completions, isTriple);
+  }
+
+  // Score counter pulse
+  const scoreEl = document.getElementById('scoreTxt');
+  scoreEl.classList.remove('pulse', 'mega');
+  void scoreEl.offsetWidth;
+  if(isTriple || finalGain >= 500) scoreEl.classList.add('mega');
+  else scoreEl.classList.add('pulse');
+
+  // Animate score counter
+  animateScoreCounter(prevScore, STATE.score);
+
+  // Update streak display
+  updateStreakDisplay(isBigCombo || isTriple);
+
+  // Eye reactions to big plays
+  if(isTriple){
+    eyeViolentReact();
+    EYE.targetDilation = 2.5;
+    setTimeout(() => { EYE.targetDilation = 1; }, 800);
+  } else if(isBigCombo){
+    EYE.targetDilation = 1.8;
+    setTimeout(() => { EYE.targetDilation = 1; }, 500);
+  }
+
+  // Unlock adjacent lockeds if structure completed
+  if(completions.row || completions.col || completions.box){
+    unlockFromCompletions(r, c, completions);
+  }
+
+  // Mirror cell: also place mirror
+  if(mod === 'mirror' && !isMirror){
+    const mr = 8 - r, mc = 8 - c;
+    if(mr !== r || mc !== c){
+      const mirrorCell = STATE.board[mr][mc];
+      if(!mirrorCell.given && !mirrorCell.placed && !mirrorCell.locked){
+        if(isValidPlacement(STATE.board, mr, mc, n)){
+          setTimeout(() => placeNumber(mr, mc, n, true), 150);
+        }
+      }
+    }
+  }
+
+  // Eye boss: increment placement counter
+  if(STATE.bossMode === 'eye'){
+    STATE.eyePlacements++;
+    STATE.eyeHP = Math.max(0, STATE.eyeHP - Math.floor(baseGain / 500));
+    if(STATE.eyePlacements % 3 === 0){
+      setTimeout(() => executeEyeAttack(), 400);
+    } else {
+      // Telegraph next attack
+      telegraphNextAttack();
+    }
+  }
+
+  // Check quota reached (non-boss floors only)
+  if(!STATE.bossMode && STATE.score >= STATE.quota){
+    setTimeout(() => completeFloor(), 800);
+  }
+
+  // Track placement history for rewind
+  if(!isMirror){
+    pushHistory({r, c, prevValue: 0, prevPlaced: false});
+  }
+
+  render();
+  saveRun();
+
+  // After placement: check if the puzzle is now unsolvable (dead-end)
+  // Only check for regular placements that aren't quota-reaching
+  if(!isMirror && STATE.score < STATE.quota){
+    setTimeout(() => {
+      if(!isBoardSolvable(STATE.board)){
+        offerRewind();
+      }
+    }, 600); // delay so it feels intentional after juice settles
+  }
+
+  return true;
+}
+
+// Placement history for rewind
+function pushHistory(entry){
+  if(!STATE.history) STATE.history = [];
+  STATE.history.push(entry);
+  if(STATE.history.length > 10) STATE.history.shift();
+}
+
+function offerRewind(){
+  // Find how far back we need to go to make the board solvable
+  if(!STATE.history || STATE.history.length === 0) return;
+  // Try undoing one step at a time
+  const snapshot = JSON.parse(JSON.stringify(STATE.board.map(row => row.map(c => ({
+    value: c.value, placed: c.placed, scar: c.scar
+  })))));
+  let stepsBack = 0;
+  for(let i = STATE.history.length - 1; i >= 0; i--){
+    const h = STATE.history[i];
+    STATE.board[h.r][h.c].value = h.prevValue;
+    STATE.board[h.r][h.c].placed = h.prevPlaced;
+    stepsBack++;
+    if(isBoardSolvable(STATE.board)){
+      break;
+    }
+  }
+  if(!isBoardSolvable(STATE.board)){
+    // Restore and just warn
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      STATE.board[r][c].value = snapshot[r][c].value;
+      STATE.board[r][c].placed = snapshot[r][c].placed;
+      STATE.board[r][c].scar = snapshot[r][c].scar;
+    }
+    stepsBack = 0;
+  }
+  // Restore snapshot for now - we'll actually rewind if player confirms
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+    STATE.board[r][c].value = snapshot[r][c].value;
+    STATE.board[r][c].placed = snapshot[r][c].placed;
+    STATE.board[r][c].scar = snapshot[r][c].scar;
+  }
+
+  if(stepsBack === 0) return; // can't recover
+
+  // Show rewind modal
+  showRewindModal(stepsBack);
+}
+
+function showRewindModal(steps){
+  const modal = document.getElementById('rewindModal');
+  if(!modal) return;
+  document.getElementById('rewindSteps').textContent = steps;
+  modal.classList.add('show');
+}
+
+function doRewind(steps){
+  for(let i = 0; i < steps; i++){
+    const h = STATE.history.pop();
+    if(!h) break;
+    const cell = STATE.board[h.r][h.c];
+    cell.value = h.prevValue;
+    cell.placed = h.prevPlaced;
+    cell.scar = false;
+  }
+  STATE.streak = Math.max(0, STATE.streak - steps);
+  render();
+  saveRun();
+  document.getElementById('rewindModal').classList.remove('show');
+  speakEye('warn:rewound');
+}
+
+function hasAdjacentGiven(r,c){
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  for(const [dr,dc] of dirs){
+    const nr = r+dr, nc = c+dc;
+    if(nr>=0 && nr<9 && nc>=0 && nc<9 && STATE.board[nr][nc].given) return true;
+  }
+  return false;
+}
+
+function isAdjacent(a,b){
+  return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
+}
+
+function checkCompletions(r, c){
+  const result = {row: false, col: false, box: false, ouroPair: false, ouroFull: false, ouroExtraRow: -1};
+  if(isRowComplete(STATE.board, r)) result.row = true;
+  if(isColComplete(STATE.board, c)) result.col = true;
+  const br = Math.floor(r/3), bc = Math.floor(c/3);
+  if(isBoxComplete(STATE.board, br, bc)) result.box = true;
+
+  // Ouroboros: if this row is one of the linked rows, check if the pair together covers 1-9
+  if(STATE.ouroRows && (r === STATE.ouroRows[0] || r === STATE.ouroRows[1])){
+    const other = r === STATE.ouroRows[0] ? STATE.ouroRows[1] : STATE.ouroRows[0];
+    const pairDigits = new Set();
+    let filledCount = 0;
+    for(let i=0;i<9;i++){
+      const v1 = STATE.board[r][i].value, v2 = STATE.board[other][i].value;
+      if(v1 && !STATE.board[r][i].scar){ pairDigits.add(v1); filledCount++; }
+      if(v2 && !STATE.board[other][i].scar){ pairDigits.add(v2); filledCount++; }
+    }
+    // Pair completion: 9 distinct digits covered
+    if(pairDigits.size === 9){
+      result.ouroPair = true;
+      // Mark both rows as complete
+      result.row = true;
+      if(other !== r) result.ouroExtraRow = other;
+      // Full saturation: both rows entirely filled (no empty cells)
+      if(filledCount === 18 && !STATE.ouroFullFired){
+        result.ouroFull = true;
+      }
+    }
+  }
+
+  return result;
+}
+
+function flashCompletions(r, c, comp, isTriple){
+  const cls = isTriple ? 'triple-complete' : 'complete';
+  if(comp.row) for(let i=0;i<9;i++){ const e = cellEl(r,i); if(e) e.classList.add(cls); }
+  if(comp.ouroExtraRow >= 0){
+    for(let i=0;i<9;i++){ const e = cellEl(comp.ouroExtraRow,i); if(e) e.classList.add(cls); }
+  }
+  if(comp.col) for(let i=0;i<9;i++){ const e = cellEl(i,c); if(e) e.classList.add(cls); }
+  if(comp.box){
+    const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+    for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+      const e = cellEl(br+i, bc+j); if(e) e.classList.add(cls);
+    }
+  }
+  setTimeout(() => {
+    document.querySelectorAll('.cell.complete,.cell.triple-complete').forEach(el => {
+      el.classList.remove('complete', 'triple-complete');
+    });
+  }, isTriple ? 1200 : 1000);
+}
+
+function unlockFromCompletions(r, c, comp){
+  const toUnlock = new Set();
+  if(comp.row) for(let i=0;i<9;i++) if(STATE.board[r][i].locked) toUnlock.add(`${r},${i}`);
+  if(comp.col) for(let i=0;i<9;i++) if(STATE.board[i][c].locked) toUnlock.add(`${i},${c}`);
+  if(comp.box){
+    const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+    for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+      if(STATE.board[br+i][bc+j].locked) toUnlock.add(`${br+i},${bc+j}`);
+    }
+  }
+  toUnlock.forEach(k => {
+    const [rr, cc] = k.split(',').map(Number);
+    STATE.board[rr][cc].locked = false;
+    const el = cellEl(rr, cc);
+    if(el) el.classList.add('flash');
+  });
+}
+
+/* ============================================================
+   BOSS: THE EYE
+   ============================================================ */
+const EYE_ATTACKS = [
+  {id:'lock', icon:'⚡', desc:'LOCK CELL'},
+  {id:'scar', icon:'💢', desc:'SCAR CELL'},
+  {id:'demand', icon:'🎯', desc:'DEMAND DIGIT'},
+  {id:'drain', icon:'🩸', desc:'DRAIN MULT'}
+];
+
+function telegraphNextAttack(){
+  if(STATE.bossMode !== 'eye') return;
+  const attack = EYE_ATTACKS[Math.floor(Math.random()*EYE_ATTACKS.length)];
+  STATE.eyeNextAttack = attack;
+  document.getElementById('telegraph').textContent = `NEXT: ${attack.icon} ${attack.desc}`;
+}
+
+function executeEyeAttack(){
+  if(!STATE.eyeNextAttack) return;
+  const a = STATE.eyeNextAttack;
+  document.getElementById('telegraph').textContent = '';
+
+  if(a.id === 'lock'){
+    const empties = [];
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      if(!STATE.board[r][c].value && !STATE.board[r][c].locked) empties.push([r,c]);
+    }
+    if(empties.length){
+      const [r,c] = empties[Math.floor(Math.random()*empties.length)];
+      STATE.board[r][c].locked = true;
+      speakEye('eye[attack]lock');
+      const el = cellEl(r,c); if(el) el.classList.add('flash');
+    }
+  } else if(a.id === 'scar'){
+    const placed = [];
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      if(STATE.board[r][c].placed && !STATE.board[r][c].scar) placed.push([r,c]);
+    }
+    if(placed.length){
+      const [r,c] = placed[Math.floor(Math.random()*placed.length)];
+      STATE.board[r][c].scar = true;
+      speakEye('eye[attack]scar');
+      const el = cellEl(r,c); if(el) el.classList.add('flash');
+    }
+  } else if(a.id === 'demand'){
+    STATE.demandDigit = Math.floor(Math.random()*9) + 1;
+    speakEye('eye[attack]demand');
+  } else if(a.id === 'drain'){
+    STATE.baseMult = Math.max(1, STATE.baseMult - 1);
+    speakEye('eye[attack]drain');
+  }
+  STATE.eyeNextAttack = null;
+  shake();
+  render();
+  saveRun();
+}
+
+/* ============================================================
+   BOSS HP SYSTEM
+   ============================================================ */
+function damageBoss(amt){
+  if(!STATE.bossMode || STATE.bossDefeated) return;
+  const wasPhase1 = STATE.bossPhase === 1;
+  STATE.bossHp = Math.max(0, STATE.bossHp - amt);
+
+  // Phase 2 transition at 50% HP
+  if(wasPhase1 && STATE.bossHp <= STATE.bossMaxHp * 0.5 && STATE.bossHp > 0){
+    enterBossPhase2();
+  }
+
+  renderBossHp();
+
+  // Track placements for ability triggers
+  STATE.bossPlacementCount++;
+  checkBossAbility();
+
+  // Boss death
+  if(STATE.bossHp <= 0){
+    slayBoss();
+  }
+}
+
+function renderBossHp(){
+  const bar = document.getElementById('bossHpFill');
+  const txt = document.getElementById('bossHpTxt');
+  if(!bar || !txt) return;
+  if(STATE.bossMode && STATE.bossMaxHp > 0){
+    const pct = Math.max(0, (STATE.bossHp / STATE.bossMaxHp) * 100);
+    bar.style.width = pct + '%';
+    bar.classList.toggle('low', pct < 50);
+    bar.classList.toggle('critical', pct < 20);
+    txt.textContent = `${STATE.bossHp} / ${STATE.bossMaxHp}`;
+  }
+}
+
+function enterBossPhase2(){
+  STATE.bossPhase = 2;
+  document.body.classList.add('bossPhase2');
+  shake('heavy');
+  screenFlash('red');
+  if(STATE.bossMode === 'weeping'){
+    speakEye('weep[phase2]');
+  } else if(STATE.bossMode === 'eye'){
+    speakEye('eye[phase2]');
+  } else {
+    speakEye('warn:phase 2');
+  }
+}
+
+function checkBossAbility(){
+  if(!STATE.bossMode || STATE.bossDefeated) return;
+  // Each boss has its own trigger cadence
+  if(STATE.bossMode === 'weeping'){
+    const interval = STATE.bossPhase === 2 ? 3 : 4;
+    if(STATE.bossPlacementCount % interval === 0){
+      setTimeout(() => weepingSorrow(), 400);
+    }
+  }
+  // hourglass / warden / eye keep their current mechanics (handled elsewhere)
+}
+
+function weepingSorrow(){
+  // Scar one placed cell + reveal one empty cell's correct digit as pencil mark
+  const placed = [];
+  const empty = [];
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell = STATE.board[r][c];
+      if(cell.placed && !cell.scar && !cell.given) placed.push([r,c]);
+      if(!cell.value && !cell.locked && !cell.scar) empty.push([r,c]);
+    }
+  }
+
+  // Take away
+  if(placed.length){
+    const [sr, sc] = placed[Math.floor(Math.random()*placed.length)];
+    STATE.board[sr][sc].scar = true;
+    const el = cellEl(sr,sc); if(el) el.classList.add('flash');
+    spawnTear(sr, sc);
+  }
+
+  // Give something back (the pity)
+  if(empty.length){
+    const [er, ec] = empty[Math.floor(Math.random()*empty.length)];
+    STATE.pencils[er][ec].add(STATE.board[er][ec].solution);
+    const el = cellEl(er,ec); if(el) el.classList.add('wave1');
+    setTimeout(() => { if(el) el.classList.remove('wave1'); }, 600);
+  }
+
+  speakEye('weep[sorrow]');
+  shake();
+  render();
+  saveRun();
+}
+
+function spawnTear(r, c){
+  // Visual red tear from the weeping eye
+  const eyeBox = document.getElementById('eyeBox');
+  if(!eyeBox) return;
+  const tear = document.createElement('div');
+  tear.className = 'tear';
+  eyeBox.appendChild(tear);
+  setTimeout(() => tear.remove(), 2000);
+}
+
+function slayBoss(){
+  STATE.bossDefeated = true;
+  STATE.bossHp = 0;
+  stopTimer();
+  document.getElementById('timer').classList.remove('show');
+
+  // Big celebration
+  shake('heavy');
+  screenFlash('gold');
+  sfxWin();
+  speakEye('boss[slain]');
+
+  // Bounty: coins for slaying
+  const bounty = Math.floor(STATE.bossMaxHp / 100) + 10;
+  STATE.coins += bounty;
+  flashCoins();
+  flashWarning(`BOSS SLAIN · +${bounty} coins`);
+
+  // Move to overkill phase: the player can keep placing for extra rewards
+  // The remaining board still scores but points become coins (overkill bonus)
+  setTimeout(() => {
+    flashWarning('OVERKILL: points now coins');
+  }, 1500);
+
+  // Auto-advance after a breath
+  setTimeout(() => {
+    completeFloor();
+  }, 4500);
+}
+
+/* ============================================================
+   FLOOR FLOW
+   ============================================================ */
+const FLOOR_CONFIG = [
+  {floor:1, givens:38, quota:300},
+  {floor:2, givens:35, quota:600},
+  {floor:3, givens:32, quota:1200, boss:'weeping', bossHp:1500, bossName:'THE WEEPING EYE'},
+  {floor:4, givens:30, quota:2400},
+  {floor:5, givens:28, quota:5000, boss:'hourglass', bossHp:6000, bossName:'THE HOURGLASS'},
+  {floor:6, givens:26, quota:10000},
+  {floor:7, givens:24, quota:20000},
+  {floor:8, givens:22, quota:40000, boss:'warden', bossHp:45000, bossName:'THE WARDEN'},
+  {floor:9, givens:24, quota:80000, boss:'eye', bossHp:100000, bossName:'THE EYE'}
+];
+
+function startNewRun(){
+  STATE.inRun = true;
+  STATE.floor = 1;
+  STATE.score = 0;
+  STATE.coins = 0;
+  STATE.flickers = 3;
+  STATE.maxFlickers = 3;
+  STATE.baseMult = 1;
+  STATE.echoActive = false;
+  STATE.doublerActive = 0;
+  STATE.hungerActive = false;
+  STATE.upgrades = [];
+  STATE.consumables = [];
+  STATE.consumableSlots = 3;
+  STATE.rowBonus = 0;
+  STATE.colBonus = 0;
+  STATE.boxBonus = 0;
+  STATE.tripleMult = 1;
+  STATE.digitBonus = {};
+  STATE.cascadeMult = 0;
+  STATE.devourCoins = 0;
+  STATE.extraShopMods = {glass:0, gold:0, mirror:0};
+  STATE.jokers = [];
+  STATE.bossMode = null;
+  STATE.demandDigit = null;
+  STATE.shopRerollsUsed = 0;
+  STATE.freeReroll = false;
+
+  // Apply permanent upgrades
+  if(STATE.meta.activePerma){
+    applyPerma(STATE.meta.activePerma);
+  }
+
+  STATE.meta.runsPlayed++;
+  saveMeta();
+
+  loadFloor();
+  hideAll();
+  speakEye('floor[1]');
+  ensureAudio();
+  startMusic('floor');
+}
+
+function applyPerma(id){
+  if(id === 'keen') STATE.consumableSlots++;
+  if(id === 'golden') STATE.coins = 5;
+  if(id === 'lucky'){
+    const rolls = ['rowSigil','colSigil','boxSigil','cascade','devour'];
+    const roll = rolls[Math.floor(Math.random()*rolls.length)];
+    purchaseUpgrade({id: roll, kind:'upgrade'}, true);
+  }
+  if(id === 'savant'){
+    const d = Math.floor(Math.random()*9)+1;
+    STATE.digitBonus[d] = (STATE.digitBonus[d]||0) + 2;
+  }
+  // foresight: applied in shop
+}
+
+function loadFloor(){
+  const cfg = FLOOR_CONFIG[STATE.floor - 1];
+  STATE.quota = cfg.quota;
+  STATE.score = 0;
+  STATE.displayedScore = 0;
+  STATE.flickers = STATE.maxFlickers;
+  STATE.streak = 0;
+  STATE.cascadeDropCharges = 0;
+  STATE.frenzyCharges = 0;
+  STATE.bloodPactActive = false;
+  STATE.multLeechArmed = false;
+  STATE.floorMultBonus = 0;
+  STATE.mirrorMindNext = false;
+  STATE.placementCount = 0;
+
+  // Roll Ouroboros (10% chance, any floor including bosses)
+  STATE.ouroRows = null;
+  STATE.ouroFullFired = false;
+  if(Math.random() < 0.10){
+    const rows = [0,1,2,3,4,5,6,7,8];
+    shuffle(rows);
+    STATE.ouroRows = [rows[0], rows[1]].sort((a,b) => a-b);
+  }
+
+  STATE.board = generatePuzzle(cfg.givens, STATE.floor);
+  STATE.pencils = make9Set();
+  STATE.lastPlaced = null;
+  STATE.selectedCell = null;
+  STATE.firstPlacedThisFloor = false;
+  STATE.bossMode = cfg.boss || null;
+  STATE.bossHp = cfg.bossHp || 0;
+  STATE.bossMaxHp = cfg.bossHp || 0;
+  STATE.bossPhase = 1;
+  STATE.bossPlacementCount = 0;
+  STATE.bossDefeated = false;
+  STATE.demandDigit = null;
+  STATE.eyePlacements = 0;
+  STATE.eyeHP = 100;
+  STATE.eyeNextAttack = null;
+  STATE.history = [];
+
+  document.body.classList.toggle('bossActive', STATE.bossMode === 'eye');
+  document.body.classList.toggle('weepingActive', STATE.bossMode === 'weeping');
+
+  // Music per boss
+  if(STATE.bossMode === 'eye'){
+    setMusicMode('boss');
+    sfxBoss();
+  } else if(STATE.bossMode === 'weeping'){
+    setMusicMode('weeping');
+    sfxBoss();
+  } else if(STATE.bossMode === 'hourglass'){
+    setMusicMode('hourglass');
+    sfxBoss();
+  } else if(STATE.bossMode === 'warden'){
+    setMusicMode('warden');
+    sfxBoss();
+  } else {
+    setMusicMode('floor');
+  }
+
+  // Apply boss specials
+  if(cfg.boss === 'warden'){
+    injectLocks(STATE.board, 0.35);
+  }
+
+  if(cfg.boss === 'hourglass'){
+    STATE.timer = 600;
+    startTimer();
+    document.getElementById('timer').classList.add('show');
+  } else {
+    stopTimer();
+    document.getElementById('timer').classList.remove('show');
+  }
+
+  if(cfg.boss === 'eye'){
+    telegraphNextAttack();
+  } else {
+    document.getElementById('telegraph').textContent = '';
+  }
+
+  // Floor banner
+  if(cfg.boss){
+    showFloorBanner(`FLOOR ${STATE.floor}`, cfg.bossName);
+  } else {
+    showFloorBanner(`FLOOR ${STATE.floor}`, `QUOTA ${cfg.quota}`);
+  }
+
+  // Boss HP bar show/hide
+  const hpBar = document.getElementById('bossHpBar');
+  if(hpBar){
+    hpBar.classList.toggle('show', !!cfg.boss);
+    if(cfg.boss){
+      document.getElementById('bossName').textContent = cfg.bossName;
+    }
+  }
+
+  updateStreakDisplay();
+  renderBossHp();
+  renderOuroboros();
+  render();
+  saveRun();
+
+  // Announce ouroboros after a brief delay so the floor banner shows first
+  if(STATE.ouroRows){
+    setTimeout(() => {
+      showOuroBanner();
+      speakEye('ouro[wake]');
+    }, 1400);
+  }
+}
+
+function startTimer(){
+  stopTimer();
+  updateTimer();
+  STATE.timerInterval = setInterval(() => {
+    STATE.timer--;
+    updateTimer();
+    if(STATE.timer <= 0){
+      stopTimer();
+      if(STATE.score < STATE.quota) gameOver('the hourglass runs dry');
+    }
+  }, 1000);
+}
+function stopTimer(){ if(STATE.timerInterval){ clearInterval(STATE.timerInterval); STATE.timerInterval = null; } }
+function updateTimer(){
+  const el = document.getElementById('timer');
+  if(!el) return;
+  const m = Math.floor(STATE.timer/60), s = STATE.timer%60;
+  el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+  el.classList.toggle('warning', STATE.timer <= 60);
+}
+
+function completeFloor(){
+  stopTimer();
+  document.getElementById('timer').classList.remove('show');
+
+  let coinsEarned = 5;
+
+  if(STATE.bossMode && STATE.bossDefeated){
+    // Bounty scales with boss difficulty (already partly given at kill)
+    // Here we calculate overkill bonus: unused board progress = coins
+    let overkillCoins = 0;
+    // How much score did we rack up past boss death?
+    const overkillScore = Math.max(0, STATE.score - STATE.bossMaxHp);
+    overkillCoins = Math.floor(overkillScore / 500);
+    coinsEarned += overkillCoins;
+
+    // Full board clear = bonus
+    let emptyCount = 0;
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      if(!STATE.board[r][c].value) emptyCount++;
+    }
+    if(emptyCount === 0) coinsEarned += 20;
+  } else {
+    // Normal quota floor
+    const over = STATE.score - STATE.quota;
+    const overPct = over / STATE.quota;
+    coinsEarned += Math.min(8, Math.floor(overPct / 0.2));
+  }
+
+  coinsEarned += STATE.flickers * 10;
+
+  STATE.coins += coinsEarned;
+
+  // Hollow Crown joker
+  if(STATE.jokers.includes('crown')){
+    let emptyCount = 0;
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(!STATE.board[r][c].value) emptyCount++;
+    STATE.score += emptyCount * 50;
+  }
+
+  // The Patient joker: +1 mult per empty row (retroactive bonus coins)
+  if(STATE.jokers.includes('patient')){
+    let emptyRows = 0;
+    for(let r=0;r<9;r++){
+      let anyVal = false;
+      for(let c=0;c<9;c++) if(STATE.board[r][c].value) { anyVal = true; break; }
+      if(!anyVal) emptyRows++;
+    }
+    if(emptyRows > 0){
+      const bonus = emptyRows * 100;
+      STATE.score += bonus;
+      flashWarning(`PATIENT +${bonus}`);
+    }
+  }
+
+  STATE.meta.bestFloor = Math.max(STATE.meta.bestFloor, STATE.floor);
+  saveMeta();
+
+  if(STATE.floor >= STATE.maxFloor){
+    winRun();
+    return;
+  }
+
+  // Show shop
+  speakEye('floor[done]');
+  STATE.floor++;
+  sfxShop();
+  openShop();
+}
+
+function gameOver(reason){
+  stopTimer();
+  stopMusic();
+  STATE.inRun = false;
+  localStorage.removeItem(SAVE_KEY);
+  const msgs = [
+    'of course.',
+    'try again.',
+    'you were always going to lose.',
+    'numbers... numbers...',
+    '▓▒ predictable ▒▓'
+  ];
+  const msg = reason || msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('goTitle').textContent = 'THE EYE OPENS';
+  document.getElementById('goMsg').textContent = msg;
+  document.getElementById('goMsg').setAttribute('data-text', msg);
+  document.getElementById('goStats').textContent = `Floor ${STATE.floor} · Score ${STATE.score}`;
+  show('goModal');
+}
+
+function winRun(){
+  stopTimer();
+  stopMusic();
+  sfxWin();
+  STATE.inRun = false;
+  STATE.meta.wins++;
+  localStorage.removeItem(SAVE_KEY);
+
+  // Offer permanent upgrade
+  const all = ['keen','golden','foresight','lucky','savant'];
+  const available = all.filter(x => !STATE.meta.unlockedPermas.includes(x));
+  const offer = shuffle(available).slice(0, Math.min(3, available.length));
+
+  const container = document.getElementById('permaChoices');
+  container.innerHTML = '';
+
+  if(offer.length === 0){
+    container.innerHTML = '<p class="small" style="text-align:center;color:#888">All permanent upgrades unlocked. You remain.</p>';
+    document.getElementById('btnWinDone').disabled = false;
+  } else {
+    offer.forEach(id => {
+      const info = PERMA_INFO[id];
+      const btn = document.createElement('button');
+      btn.innerHTML = `<div style="text-align:left">
+        <div style="font-size:13px">${info.name}</div>
+        <div class="small" style="color:#aaa">${info.desc}</div>
+      </div>`;
+      btn.onclick = () => {
+        STATE.meta.unlockedPermas.push(id);
+        if(!STATE.meta.activePerma) STATE.meta.activePerma = id;
+        saveMeta();
+        document.getElementById('btnWinDone').disabled = false;
+        container.querySelectorAll('button').forEach(b => b.disabled = true);
+        btn.style.borderColor = '#fc0';
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  saveMeta();
+  show('winModal');
+}
+
+const PERMA_INFO = {
+  keen: {name:'KEEN EYE', desc:'Start each run with +1 consumable slot.'},
+  golden: {name:'GOLDEN START', desc:'Start each run with 5 coins.'},
+  foresight: {name:'FORESIGHT', desc:'First shop each run has a guaranteed rare.'},
+  lucky: {name:'BORN LUCKY', desc:'Start each run with a random common upgrade.'},
+  savant: {name:'DIGIT SAVANT', desc:'One random digit scores +2 chips permanently.'}
+};
+
+/* ============================================================
+   SHOP
+   ============================================================ */
+const SHOP_POOL = {
+  // Consumables
+  wildcard: {kind:'consumable', name:'WILDCARD', desc:'Auto-fill a cell with its correct digit.', cost:5, icon:'★'},
+  seer: {kind:'consumable', name:'SEER\'S DROP', desc:'Reveal correct digit for a cell as pencil mark.', cost:4, icon:'◉'},
+  doubler: {kind:'consumable', name:'DOUBLER', desc:'Next placement scores ×2.', cost:4, icon:'2×'},
+  quadrupler: {kind:'consumable', name:'QUADRUPLER', desc:'Next placement scores ×4.', cost:8, rare:true, icon:'4×'},
+  purge: {kind:'consumable', name:'PURGE', desc:'Clear a placed number / scar from a cell.', cost:3, icon:'⊗'},
+  glimpse: {kind:'consumable', name:'GLIMPSE', desc:'Reveal all correct digits as pencil marks.', cost:7, icon:'◎'},
+  hunger: {kind:'consumable', name:'HUNGER', desc:'Next completion scores ×3.', cost:6, icon:'✧'},
+  freeze: {kind:'consumable', name:'FREEZE', desc:'Stop the hourglass for 60 seconds.', cost:5, icon:'❄'},
+  cascadeDrop: {kind:'consumable', name:'CASCADE DROP', desc:'Next 3 placements each score +1 mult.', cost:7, icon:'≡'},
+  bloodPact: {kind:'consumable', name:'BLOOD PACT', desc:'Lose 1 Flicker. Gain ×2 mult for this floor.', cost:6, icon:'✚', rare:true},
+  frenzy: {kind:'consumable', name:'FRENZY', desc:'Next 5 placements score ×2.', cost:9, icon:'⚡', rare:true},
+  multLeech: {kind:'consumable', name:'MULT LEECH', desc:'Next completion: +5 mult for rest of floor.', cost:8, icon:'❖'},
+
+  // Upgrades
+  rowSigil: {kind:'upgrade', name:'ROW SIGIL', desc:'+20 bonus to all row completions.', cost:10},
+  colSigil: {kind:'upgrade', name:'COLUMN SIGIL', desc:'+20 bonus to all column completions.', cost:10},
+  boxSigil: {kind:'upgrade', name:'BOX SIGIL', desc:'+20 bonus to all box completions.', cost:10},
+  tripleSigil: {kind:'upgrade', name:'TRIPLE SIGIL', desc:'Triple Sight bonus doubled.', cost:18, rare:true},
+  cascade: {kind:'upgrade', name:'CASCADE', desc:'+1 mult per structure completed in same placement.', cost:14},
+  hoarder: {kind:'upgrade', name:'HOARDER', desc:'+1 consumable slot (max 5 slots).', cost:8},
+  devour: {kind:'upgrade', name:'DEVOUR', desc:'+1 coin per structure completed.', cost:12},
+  digit7: {kind:'upgrade', name:'FIXATION: 7', desc:'Placing 7 gives +10 chips.', cost:8},
+  digit3: {kind:'upgrade', name:'FIXATION: 3', desc:'Placing 3 gives +10 chips.', cost:8},
+  digit5: {kind:'upgrade', name:'FIXATION: 5', desc:'Placing 5 gives +10 chips.', cost:8},
+  digit9: {kind:'upgrade', name:'FIXATION: 9', desc:'Placing 9 gives +10 chips.', cost:10},
+  basemult: {kind:'upgrade', name:'INNER RESOLVE', desc:'+1 base mult.', cost:15, rare:true},
+  flicker: {kind:'upgrade', name:'STEADY HAND', desc:'+1 max Flicker per floor.', cost:12},
+  heartbeat: {kind:'upgrade', name:'HEARTBEAT', desc:'Odd-numbered placements (1st, 3rd, 5th...) score +2 mult.', cost:13},
+  thirdEye: {kind:'upgrade', name:'THIRD EYE', desc:'Every 7th placement scores ×3.', cost:16, rare:true},
+  crossPattern: {kind:'upgrade', name:'CROSS PATTERN', desc:'Placing on row 5 or column 5 gives +4 mult.', cost:13},
+  cornerSeal: {kind:'upgrade', name:'CORNER SEAL', desc:'Placing in a corner 3×3 box gives +3 mult.', cost:11},
+  hungryNumbers: {kind:'upgrade', name:'HUNGRY NUMBERS', desc:'Using a consumable gives +1 mult for rest of floor.', cost:12},
+  ritualCircle: {kind:'upgrade', name:'RITUAL CIRCLE', desc:'Completing a box adds +2 to base mult for this floor (stacks).', cost:18, rare:true},
+  mirrorMind: {kind:'upgrade', name:'MIRROR MIND', desc:'When Mirror triggers, +3 mult for your next placement.', cost:14},
+
+  // Cell transforms
+  glassVein: {kind:'transform', name:'GLASS VEIN', desc:'+2 Glass cells on future boards.', cost:16, rare:true},
+  goldenAge: {kind:'transform', name:'GOLDEN AGE', desc:'+2 Gold cells on future boards.', cost:16, rare:true},
+  mirrorWorld: {kind:'transform', name:'MIRROR WORLD', desc:'+2 Mirror cells on future boards.', cost:20, rare:true},
+
+  // Jokers
+  unblinking: {kind:'joker', name:'THE UNBLINKING', desc:'First placement each floor scores ×5.', cost:25},
+  crown: {kind:'joker', name:'HOLLOW CROWN', desc:'Empty cells at floor end each give +50 chips.', cost:22},
+  serpent: {kind:'joker', name:'SERPENT\'S EYE', desc:'Placing adjacent to a given digit gives +5 chips.', cost:20},
+  priest: {kind:'joker', name:'NUMBER PRIEST', desc:'The digit 7 scores ×3.', cost:28},
+  void: {kind:'joker', name:'VOID PACT', desc:'All mult ×3. But lose 25% score on floor start.', cost:30},
+  patient: {kind:'joker', name:'THE PATIENT', desc:'+1 mult for each empty row remaining at floor end (applies retroactively).', cost:24},
+  ouroboros: {kind:'joker', name:'OUROBOROS', desc:'When you complete a row, its mult bonus also applies to the matching column.', cost:32, rare:true},
+  feast: {kind:'joker', name:'FEAST', desc:'After every 10th placement, gain +1 permanent base mult for this floor.', cost:30, rare:true}
+};
+
+function rollShop(floor){
+  const items = [];
+  const pool = Object.keys(SHOP_POOL);
+
+  // Foresight: guarantee a rare on first shop
+  const foresight = STATE.meta.activePerma === 'foresight' && floor === 2;
+
+  // 4 items
+  for(let i=0;i<4;i++){
+    let picks = shuffle(pool.slice());
+    let id;
+    // Roll based on weights
+    for(const p of picks){
+      const it = SHOP_POOL[p];
+      const roll = Math.random();
+      if(it.kind === 'joker' && roll > 0.08) continue;
+      if(it.rare && roll > 0.25) continue;
+      if(items.find(x => x.id === p)) continue;
+      id = p;
+      break;
+    }
+    if(!id){
+      id = picks.find(p => !items.find(x => x.id === p)) || picks[0];
+    }
+    items.push({id, ...SHOP_POOL[id], sold:false});
+  }
+
+  // Foresight injection
+  if(foresight && !items.find(x => x.rare || x.kind === 'joker')){
+    const rares = Object.keys(SHOP_POOL).filter(k => SHOP_POOL[k].rare || SHOP_POOL[k].kind === 'joker');
+    const pick = rares[Math.floor(Math.random()*rares.length)];
+    items[0] = {id:pick, ...SHOP_POOL[pick], sold:false};
+  }
+
+  return items;
+}
+
+function openShop(){
+  STATE.shopItems = rollShop(STATE.floor);
+  STATE.shopRerollsUsed = 0;
+  STATE.freeReroll = true;
+  renderShop();
+  show('shopModal');
+}
+
+function renderShop(){
+  document.getElementById('shopCoins').textContent = STATE.coins;
+  document.getElementById('shopFloor').textContent = STATE.floor;
+  const itemsDiv = document.getElementById('shopItems');
+  itemsDiv.innerHTML = '';
+
+  STATE.shopItems.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'shopItem' + (item.rare?' rare':'') + (item.kind==='joker'?' joker':'') + (item.sold?' sold':'');
+    el.innerHTML = `
+      <div class="nm">${item.name}</div>
+      <div class="desc">${item.desc}</div>
+      <div class="cost">◆ ${item.cost}</div>
+    `;
+    el.onclick = () => {
+      if(item.sold) return;
+      if(STATE.coins < item.cost) { flashWarning('NOT ENOUGH COINS'); return; }
+      purchaseShopItem(idx);
+    };
+    itemsDiv.appendChild(el);
+  });
+
+  // Reroll btn
+  const rerollBtn = document.getElementById('btnReroll');
+  const cost = STATE.freeReroll ? 0 : 5;
+  rerollBtn.textContent = STATE.freeReroll ? 'REROLL (FREE)' : `REROLL (◆${cost})`;
+  rerollBtn.disabled = !STATE.freeReroll && STATE.coins < cost;
+
+  // Upgrade list
+  const upList = document.getElementById('upgradeList');
+  upList.innerHTML = '';
+  const all = [...STATE.upgrades, ...STATE.jokers];
+  if(all.length === 0){
+    upList.innerHTML = '<div class="small">—</div>';
+  } else {
+    all.forEach(id => {
+      const info = SHOP_POOL[id];
+      if(info) upList.innerHTML += `<div>${info.kind==='joker'?'★ ':''}${info.name}</div>`;
+    });
+  }
+}
+
+function purchaseShopItem(idx){
+  const item = STATE.shopItems[idx];
+  if(item.sold) return;
+
+  // Consumable: check slot
+  if(item.kind === 'consumable'){
+    if(STATE.consumables.length >= STATE.consumableSlots){
+      flashWarning('INVENTORY FULL');
+      return;
+    }
+    STATE.consumables.push(item.id);
+  } else {
+    purchaseUpgrade(item);
+  }
+
+  STATE.coins -= item.cost;
+  item.sold = true;
+  sfxCoin();
+  renderShop();
+  saveRun();
+}
+
+function purchaseUpgrade(item, free=false){
+  if(item.kind === 'upgrade'){
+    STATE.upgrades.push(item.id);
+    // Apply effect
+    switch(item.id){
+      case 'rowSigil': STATE.rowBonus += 20; break;
+      case 'colSigil': STATE.colBonus += 20; break;
+      case 'boxSigil': STATE.boxBonus += 20; break;
+      case 'tripleSigil': STATE.tripleMult *= 2; break;
+      case 'cascade': STATE.cascadeMult += 1; break;
+      case 'hoarder': STATE.consumableSlots = Math.min(5, STATE.consumableSlots + 1); break;
+      case 'devour': STATE.devourCoins += 1; break;
+      case 'digit7': STATE.digitBonus[7] = (STATE.digitBonus[7]||0) + 10; break;
+      case 'digit3': STATE.digitBonus[3] = (STATE.digitBonus[3]||0) + 10; break;
+      case 'digit5': STATE.digitBonus[5] = (STATE.digitBonus[5]||0) + 10; break;
+      case 'digit9': STATE.digitBonus[9] = (STATE.digitBonus[9]||0) + 10; break;
+      case 'basemult': STATE.baseMult += 1; break;
+      case 'flicker': STATE.maxFlickers += 1; break;
+    }
+  } else if(item.kind === 'transform'){
+    STATE.upgrades.push(item.id);
+    switch(item.id){
+      case 'glassVein': STATE.extraShopMods.glass += 2; break;
+      case 'goldenAge': STATE.extraShopMods.gold += 2; break;
+      case 'mirrorWorld': STATE.extraShopMods.mirror += 2; break;
+    }
+  } else if(item.kind === 'joker'){
+    STATE.jokers.push(item.id);
+    if(item.id === 'void'){
+      // take effect immediately
+    }
+  }
+}
+
+function doReroll(){
+  if(STATE.freeReroll){ STATE.freeReroll = false; }
+  else { if(STATE.coins < 5) return; STATE.coins -= 5; }
+  STATE.shopRerollsUsed++;
+  STATE.shopItems = rollShop(STATE.floor);
+  renderShop();
+  saveRun();
+}
+
+function leaveShop(){
+  hideAll();
+  loadFloor();
+  speakEye(`floor[${STATE.floor}]`);
+}
+
+/* ============================================================
+   CONSUMABLES USE
+   ============================================================ */
+let activeConsumable = null;
+
+function clickConsumable(idx){
+  if(idx >= STATE.consumables.length) return;
+  const id = STATE.consumables[idx];
+  const info = SHOP_POOL[id];
+
+  // Hungry Numbers upgrade: using consumable gives +1 mult for rest of floor
+  const triggerHungry = () => {
+    if(STATE.upgrades.includes('hungryNumbers')){
+      STATE.floorMultBonus += 1;
+    }
+  };
+
+  if(id === 'doubler'){
+    STATE.doublerActive = 2;
+    removeConsumable(idx);
+    flashWarning('NEXT × 2');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'quadrupler'){
+    STATE.doublerActive = 4;
+    removeConsumable(idx);
+    flashWarning('NEXT × 4');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'hunger'){
+    STATE.hungerActive = true;
+    removeConsumable(idx);
+    flashWarning('HUNGER ARMED');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'cascadeDrop'){
+    STATE.cascadeDropCharges = 3;
+    removeConsumable(idx);
+    flashWarning('CASCADE × 3');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'bloodPact'){
+    STATE.flickers = Math.max(0, STATE.flickers - 1);
+    STATE.bloodPactActive = true;
+    removeConsumable(idx);
+    flashWarning('PACT SEALED · ×2 MULT');
+    triggerHungry();
+    shake();
+    render();
+    return;
+  }
+  if(id === 'frenzy'){
+    STATE.frenzyCharges = 5;
+    removeConsumable(idx);
+    flashWarning('FRENZY × 5');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'multLeech'){
+    STATE.multLeechArmed = true;
+    removeConsumable(idx);
+    flashWarning('LEECH ARMED');
+    triggerHungry();
+    render();
+    return;
+  }
+  if(id === 'glimpse'){
+    const backup = STATE.pencils.map(row => row.map(s => new Set(s)));
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      if(!STATE.board[r][c].given && !STATE.board[r][c].placed){
+        STATE.pencils[r][c] = new Set([STATE.board[r][c].solution]);
+      }
+    }
+    render();
+    removeConsumable(idx);
+    triggerHungry();
+    setTimeout(() => {
+      STATE.pencils = backup;
+      render();
+    }, 3000);
+    return;
+  }
+  if(id === 'freeze'){
+    if(STATE.timerInterval){
+      stopTimer();
+      flashWarning('TIME FROZEN · 60s');
+      setTimeout(() => {
+        if(STATE.inRun && STATE.bossMode === 'hourglass') startTimer();
+      }, 60000);
+    }
+    removeConsumable(idx);
+    triggerHungry();
+    return;
+  }
+
+  // Cell-targeted: enter selection mode
+  activeConsumable = {id, idx};
+  flashWarning(`TAP CELL · ${info.name}`);
+  render();
+}
+
+function useConsumableOnCell(r, c){
+  if(!activeConsumable) return;
+  const cell = STATE.board[r][c];
+  const id = activeConsumable.id;
+
+  if(id === 'wildcard'){
+    if(cell.given || cell.placed || cell.locked) { flashWarning('INVALID TARGET'); return; }
+    cell.value = cell.solution;
+    cell.placed = true;
+    // Trigger scoring like a placement
+    const el = cellEl(r,c); if(el) popup(el, `+${cell.solution}`, '#fff');
+    STATE.score += cell.solution;
+    const comp = checkCompletions(r, c);
+    if(comp.row || comp.col || comp.box) flashCompletions(r, c, comp);
+    if(STATE.score >= STATE.quota) setTimeout(completeFloor, 600);
+  } else if(id === 'seer'){
+    if(cell.given || cell.placed) { flashWarning('INVALID TARGET'); return; }
+    STATE.pencils[r][c] = new Set([cell.solution]);
+  } else if(id === 'purge'){
+    if(!cell.placed && !cell.scar) { flashWarning('INVALID TARGET'); return; }
+    cell.value = 0;
+    cell.placed = false;
+    cell.scar = false;
+  }
+
+  removeConsumable(activeConsumable.idx);
+  activeConsumable = null;
+  // Hungry Numbers upgrade
+  if(STATE.upgrades.includes('hungryNumbers')){
+    STATE.floorMultBonus += 1;
+  }
+  render();
+  saveRun();
+}
+
+function removeConsumable(idx){ STATE.consumables.splice(idx, 1); }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  renderBoard();
+  renderHUD();
+  renderConsumables();
+  renderOuroboros();
+}
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  if(!STATE.board) return;
+  board.innerHTML = '';
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell = STATE.board[r][c];
+      const el = document.createElement('div');
+      el.className = 'cell';
+      el.dataset.r = r;
+      el.dataset.c = c;
+      if(cell.given) el.classList.add('given');
+      if(cell.placed) el.classList.add('placed');
+      if(cell.scar) el.classList.add('scar');
+      if(cell.locked) el.classList.add('locked');
+      if(cell.modifier) el.classList.add(cell.modifier);
+
+      if(STATE.selectedCell && STATE.selectedCell.r === r && STATE.selectedCell.c === c){
+        el.classList.add('selected');
+      } else if(STATE.selectedCell){
+        const sel = STATE.selectedCell;
+        if(sel.r === r || sel.c === c ||
+           (Math.floor(sel.r/3) === Math.floor(r/3) && Math.floor(sel.c/3) === Math.floor(c/3))){
+          el.classList.add('highlight');
+        }
+      }
+
+      if(STATE.demandDigit !== null){
+        // highlight cells that could hold the demanded digit
+      }
+
+      if(cell.value && !cell.scar) el.textContent = cell.value;
+
+      // Pencil marks
+      if(!cell.value && STATE.pencils && STATE.pencils[r][c].size > 0){
+        const pd = document.createElement('div');
+        pd.className = 'pencil';
+        for(let n=1;n<=9;n++){
+          const sp = document.createElement('span');
+          sp.textContent = STATE.pencils[r][c].has(n) ? n : '';
+          pd.appendChild(sp);
+        }
+        el.appendChild(pd);
+      }
+
+      el.onclick = () => clickCell(r, c);
+      board.appendChild(el);
+    }
+  }
+
+  // Adjust cell size based on wrap
+  const wrap = document.getElementById('boardWrap');
+  const available = Math.min(wrap.clientWidth - 16, wrap.clientHeight - 16);
+  const cellSize = Math.floor(available / 9);
+  document.documentElement.style.setProperty('--cell', `${cellSize}px`);
+}
+
+function renderHUD(){
+  document.getElementById('floorTxt').textContent = `FLOOR ${STATE.floor}/9`;
+  document.getElementById('coinsTxt').innerHTML = `◆ ${STATE.coins}`;
+  let fl = '';
+  for(let i=0;i<STATE.maxFlickers;i++){
+    fl += `<span class="flicker${i<STATE.flickers?'':' spent'}">✦</span>`;
+  }
+  document.getElementById('flickersTxt').innerHTML = fl;
+  // Only update score directly if not animating (animation handles display)
+  if(!STATE.scoreAnimFrame){
+    document.getElementById('scoreTxt').textContent = `${STATE.score} / ${STATE.quota}`;
+  }
+  const fill = document.getElementById('quotaFill');
+  const pct = Math.min(100, (STATE.score / STATE.quota) * 100);
+  fill.style.width = pct + '%';
+  fill.classList.toggle('danger', STATE.flickers === 0 && pct < 100);
+  fill.classList.toggle('cleared', STATE.score >= STATE.quota);
+
+  let mTxt = `×${STATE.baseMult}`;
+  if(STATE.doublerActive > 0) mTxt += ` (NEXT ×${STATE.doublerActive})`;
+  if(STATE.echoActive) mTxt += ' (ECHO)';
+  if(STATE.hungerActive) mTxt += ' (HUNGER)';
+  document.getElementById('multTxt').textContent = mTxt;
+
+  // Demand indicator
+  const demEl = document.getElementById('demandIndicator');
+  if(STATE.demandDigit !== null){
+    demEl.textContent = `DEMAND: ${STATE.demandDigit}`;
+  } else {
+    demEl.textContent = '';
+  }
+}
+
+function renderConsumables(){
+  const box = document.getElementById('consSlots');
+  box.innerHTML = '';
+  for(let i=0;i<STATE.consumableSlots;i++){
+    const id = STATE.consumables[i];
+    const slot = document.createElement('div');
+    slot.className = 'consSlot' + (id ? '' : ' empty') + (activeConsumable && activeConsumable.idx === i ? ' active' : '');
+    if(id){
+      const info = SHOP_POOL[id];
+      slot.textContent = info.icon || '?';
+      const tip = document.createElement('div');
+      tip.className = 'tip';
+      tip.textContent = info.name + ' — ' + info.desc;
+      slot.appendChild(tip);
+    }
+    slot.onclick = () => { if(id) clickConsumable(i); };
+    box.appendChild(slot);
+  }
+}
+
+function cellEl(r,c){
+  return document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+}
+
+function popup(el, text, color, cls){
+  const p = document.createElement('div');
+  p.className = 'popup' + (cls ? ' ' + cls : '');
+  p.textContent = text;
+  p.style.color = color || '#fff';
+  const rect = el.getBoundingClientRect();
+  const wrap = document.getElementById('boardWrap');
+  const wrect = wrap.getBoundingClientRect();
+  p.style.left = (rect.left - wrect.left + rect.width/2 - 30) + 'px';
+  p.style.top = (rect.top - wrect.top) + 'px';
+  wrap.appendChild(p);
+  setTimeout(() => p.remove(), cls === 'huge' ? 2000 : 1400);
+}
+
+/* ============================================================
+   JUICE FUNCTIONS
+   ============================================================ */
+function screenFlash(type){
+  const el = document.getElementById('flashOverlay');
+  el.className = '';
+  void el.offsetWidth;
+  if(type === 'red') el.classList.add('flashRed');
+  else if(type === 'gold') el.classList.add('flashGold');
+  else el.classList.add('flash');
+}
+
+function showScoreReveal(chips, mult, bonus, total, label){
+  const panel = document.getElementById('scoreReveal');
+  document.getElementById('revealChips').textContent = Math.floor(chips) + (bonus > 0 ? `+${Math.floor(bonus)}` : '');
+  document.getElementById('revealMult').textContent = '×' + mult;
+  document.getElementById('revealTotal').textContent = `+${total}`;
+  document.getElementById('revealCombo').textContent = label || '';
+  panel.classList.remove('show');
+  void panel.offsetWidth;
+  panel.classList.add('show');
+  setTimeout(() => panel.classList.remove('show'), 900);
+}
+
+function animateScoreCounter(from, to){
+  if(STATE.scoreAnimFrame) cancelAnimationFrame(STATE.scoreAnimFrame);
+  const start = performance.now();
+  const dur = Math.min(800, 200 + Math.abs(to - from) * 0.5);
+  const el = document.getElementById('scoreTxt');
+  function tick(t){
+    const p = Math.min(1, (t - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = Math.floor(from + (to - from) * eased);
+    STATE.displayedScore = val;
+    el.textContent = `${val} / ${STATE.quota}`;
+    if(p < 1) STATE.scoreAnimFrame = requestAnimationFrame(tick);
+    else STATE.scoreAnimFrame = null;
+  }
+  STATE.scoreAnimFrame = requestAnimationFrame(tick);
+}
+
+/* ============================================================
+   SCORE QUEUE (animated chip→mult→add sequence)
+   ============================================================ */
+let QUEUE_PROCESSING = false;
+
+function processScoreQueue(events, r, c){
+  if(!events || events.length === 0) return;
+  const queue = events.slice();
+  // Dramatic timing for combos, snappy for simple placements
+  const isBig = events.length >= 3;
+  const CHIP_IN = isBig ? 180 : 80;
+  const MULT_PULSE = isBig ? 260 : 120;
+  const ADD_DELAY = isBig ? 180 : 80;
+  const CHIP_OUT = isBig ? 180 : 100;
+
+  let runningScore = STATE.score;
+
+  function playOne(){
+    if(queue.length === 0){
+      QUEUE_PROCESSING = false;
+      // Completion flash + popups for big events
+      return;
+    }
+    const ev = queue.shift();
+
+    // Build chip element
+    const chip = document.createElement('div');
+    chip.className = 'scoreChip ' + ev.type;
+    chip.innerHTML = `
+      <span class="label">${ev.label}</span>
+      <span class="math">
+        <span class="chip-val">${ev.chips}</span>
+        <span class="op"> × </span>
+        <span class="mult-val">${ev.mult}</span>
+      </span>
+      <span class="total-val" style="visibility:hidden">+${ev.total}</span>
+    `;
+
+    const q = document.getElementById('scoreQueue');
+    q.appendChild(chip);
+
+    // Remove old chips if too many (keep last 4)
+    while(q.children.length > 5){ q.children[0].remove(); }
+
+    // Chip slides in
+    requestAnimationFrame(() => chip.classList.add('show'));
+
+    // Pulse the mult (simulating multiplication)
+    setTimeout(() => {
+      chip.classList.add('multiplying');
+      sfxPlace(Math.min(9, Math.max(1, Math.floor(ev.mult/2))));
+    }, CHIP_IN);
+
+    // Reveal total
+    setTimeout(() => {
+      const totalEl = chip.querySelector('.total-val');
+      if(totalEl) totalEl.style.visibility = 'visible';
+      // Add to actual score
+      const prev = runningScore;
+      runningScore += ev.total;
+      STATE.score = runningScore;
+      animateScoreCounter(prev, runningScore);
+      // Special FX per type
+      if(ev.type === 'triple'){ sfxTriple(); shake('heavy'); screenFlash('gold'); }
+      else if(ev.type === 'ouroboros-full'){ sfxTriple(); shake('heavy'); screenFlash('gold'); }
+      else if(ev.type === 'ouroboros'){ sfxComplete(); shake(); }
+      else if(ev.type !== 'placement'){ sfxComplete(); }
+      // Boss damage each event
+      if(STATE.bossMode && STATE.bossHp > 0 && !STATE.bossDefeated){
+        damageBoss(ev.total);
+      }
+    }, CHIP_IN + MULT_PULSE);
+
+    // Slide chip out + next
+    setTimeout(() => {
+      chip.classList.add('out');
+      setTimeout(() => chip.remove(), 300);
+      playOne();
+    }, CHIP_IN + MULT_PULSE + ADD_DELAY);
+  }
+
+  QUEUE_PROCESSING = true;
+  playOne();
+}
+
+/* ============================================================
+   OUROBOROS RENDERING
+   ============================================================ */
+function renderOuroboros(){
+  const svg = document.getElementById('ouroborosSvg');
+  if(!svg) return;
+  svg.innerHTML = '';
+  // Clear all linked cell tints
+  document.querySelectorAll('.cell.ouroLinked').forEach(el => el.classList.remove('ouroLinked'));
+  if(!STATE.ouroRows){
+    svg.classList.remove('show');
+    return;
+  }
+  svg.classList.add('show');
+
+  // Tint linked cells
+  const [r1, r2] = STATE.ouroRows;
+  for(let c=0;c<9;c++){
+    const e1 = cellEl(r1, c); if(e1) e1.classList.add('ouroLinked');
+    const e2 = cellEl(r2, c); if(e2) e2.classList.add('ouroLinked');
+  }
+
+  // Draw snake path connecting the two rows
+  // Use board geometry: cells are laid out in a 9x9 grid
+  const board = document.getElementById('board');
+  if(!board) return;
+  const wrapRect = document.getElementById('boardWrap').getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+  const cellSize = boardRect.width / 9;
+
+  // SVG viewBox uses wrap coordinates
+  svg.setAttribute('viewBox', `0 0 ${wrapRect.width} ${wrapRect.height}`);
+
+  // Board position relative to wrap
+  const bx = boardRect.left - wrapRect.left;
+  const by = boardRect.top - wrapRect.top;
+
+  // Snake coils outside the board: exits the right edge of row r1, loops down around, enters left edge of r2
+  // Points for a smooth coiling path
+  const y1 = by + r1 * cellSize + cellSize/2;
+  const y2 = by + r2 * cellSize + cellSize/2;
+  const rightEdge = bx + 9 * cellSize;
+  const leftEdge = bx;
+
+  // Right-side loop (exit r1 right, come around to r2 right then slide left to re-enter r2 left)
+  // We'll build a flowing path with multiple bezier curves
+  const pad = 12; // distance outside the board
+  const farRight = rightEdge + pad + 10;
+  const farLeft = leftEdge - pad - 10;
+
+  // Path: start at mid-right of row r1, curve down and right, loop back left below, enter left of row r2
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const d = [
+    `M ${rightEdge - 2} ${y1}`,
+    `Q ${farRight} ${y1}, ${farRight} ${(y1+y2)/2}`,
+    `Q ${farRight} ${y2}, ${rightEdge + pad} ${y2}`,
+    `L ${rightEdge - 2} ${y2}`,
+    // also render an extension from the LEFT side for visual symmetry / endless feel
+    `M ${leftEdge + 2} ${y1}`,
+    `Q ${farLeft} ${y1}, ${farLeft} ${(y1+y2)/2}`,
+    `Q ${farLeft} ${y2}, ${leftEdge - pad} ${y2}`,
+    `L ${leftEdge + 2} ${y2}`
+  ].join(' ');
+  path.setAttribute('d', d);
+  path.setAttribute('class', 'snakePath' + (STATE.ouroFullFired ? ' full' : ''));
+  svg.appendChild(path);
+}
+
+function showOuroBanner(){
+  const b = document.getElementById('ouroBanner');
+  if(!b) return;
+  b.innerHTML = 'OUROBOROS<span class="sub">rows ' + (STATE.ouroRows[0]+1) + ' + ' + (STATE.ouroRows[1]+1) + ' bound</span>';
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+}
+
+function updateStreakDisplay(big){
+  const box = document.getElementById('streakBox');
+  const num = document.getElementById('streakNum');
+  if(STATE.streak >= 3){
+    num.textContent = STATE.streak;
+    box.classList.add('show');
+    if(big){
+      box.classList.remove('big');
+      void box.offsetWidth;
+      box.classList.add('big');
+      setTimeout(() => box.classList.remove('big'), 400);
+    }
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+function animateFlickerLost(prevCount){
+  const txt = document.getElementById('flickersTxt');
+  const spans = txt.querySelectorAll('.flicker');
+  if(spans.length >= prevCount && prevCount > 0){
+    const target = spans[prevCount - 1];
+    if(target){
+      target.classList.add('losing');
+      setTimeout(() => target.classList.remove('losing'), 500);
+    }
+  }
+}
+
+function flashCoins(){
+  const el = document.getElementById('coinsTxt');
+  el.classList.remove('pulse');
+  void el.offsetWidth;
+  el.classList.add('pulse');
+  sfxCoin();
+  setTimeout(() => el.classList.remove('pulse'), 300);
+}
+
+function eyeViolentReact(){
+  const c = document.getElementById('eyeCanvas');
+  c.classList.remove('violent');
+  void c.offsetWidth;
+  c.classList.add('violent');
+  setTimeout(() => c.classList.remove('violent'), 500);
+}
+
+function showFloorBanner(text, subtext){
+  const b = document.getElementById('floorBanner');
+  b.innerHTML = text + (subtext ? `<span class="sub">${subtext}</span>` : '');
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 2000);
+}
+
+function shake(type){
+  if(!STATE.meta.settings.shake) return;
+  const g = document.getElementById('game');
+  g.classList.remove('shake','shake-heavy');
+  void g.offsetWidth;
+  g.classList.add(type === 'heavy' ? 'shake-heavy' : 'shake');
+}
+
+function flashWarning(msg){
+  speakEye('warn:' + msg);
+}
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+function clickCell(r, c){
+  if(activeConsumable){
+    useConsumableOnCell(r, c);
+    return;
+  }
+  STATE.selectedCell = {r, c};
+  render();
+}
+
+function clickNumber(n){
+  if(!STATE.selectedCell) return;
+  // Block placement while the score queue is still animating
+  if(QUEUE_PROCESSING && !STATE.pencilMode) return;
+  const {r, c} = STATE.selectedCell;
+  if(STATE.pencilMode){
+    const cell = STATE.board[r][c];
+    if(cell.given || cell.placed) return;
+    if(STATE.pencils[r][c].has(n)) STATE.pencils[r][c].delete(n);
+    else STATE.pencils[r][c].add(n);
+    render();
+    saveRun();
+  } else {
+    // Clear pencils for this cell, then place
+    STATE.pencils[r][c].clear();
+    placeNumber(r, c, n);
+    STATE.selectedCell = null;
+  }
+}
+
+function clearSelected(){
+  if(!STATE.selectedCell) return;
+  const {r, c} = STATE.selectedCell;
+  if(STATE.pencilMode){
+    STATE.pencils[r][c].clear();
+    render();
+  }
+}
+
+document.getElementById('pad').addEventListener('click', e => {
+  const btn = e.target.closest('.padBtn');
+  if(!btn) return;
+  if(btn.id === 'pencilToggle'){
+    STATE.pencilMode = !STATE.pencilMode;
+    btn.classList.toggle('pencilMode', STATE.pencilMode);
+    return;
+  }
+  const n = parseInt(btn.dataset.n);
+  if(n) clickNumber(n);
+});
+
+/* ============================================================
+   EYE ANIMATION (CANVAS)
+   ============================================================ */
+const eyeCanvas = document.getElementById('eyeCanvas');
+const eyeCtx = eyeCanvas.getContext('2d');
+eyeCtx.imageSmoothingEnabled = false;
+
+const EYE = {
+  blinkTimer: 0,
+  blinkDuration: 0,
+  isBlinking: false,
+  pupilX: 0.5,
+  pupilY: 0.5,
+  targetX: 0.5,
+  targetY: 0.5,
+  dilation: 1,
+  targetDilation: 1,
+  veinPhase: 0,
+  lookTimer: 0,
+  awake: true
+};
+
+function drawEye(){
+  const w = eyeCanvas.width, h = eyeCanvas.height;
+  eyeCtx.clearRect(0,0,w,h);
+
+  const boss = STATE.inRun && !!STATE.bossMode;
+  const finalBoss = STATE.bossMode === 'eye' && STATE.inRun;
+  const closed = !STATE.inRun;
+
+  // Smooth pupil
+  EYE.pupilX += (EYE.targetX - EYE.pupilX) * 0.15;
+  EYE.pupilY += (EYE.targetY - EYE.pupilY) * 0.15;
+  EYE.dilation += (EYE.targetDilation - EYE.dilation) * 0.1;
+
+  // Random look
+  EYE.lookTimer--;
+  if(EYE.lookTimer <= 0){
+    EYE.targetX = 0.3 + Math.random() * 0.4;
+    EYE.targetY = 0.4 + Math.random() * 0.2;
+    EYE.lookTimer = 60 + Math.floor(Math.random() * 180);
+  }
+
+  // Blink logic
+  if(!EYE.isBlinking){
+    EYE.blinkTimer--;
+    if(EYE.blinkTimer <= 0){
+      EYE.isBlinking = true;
+      EYE.blinkDuration = 8;
+    }
+  } else {
+    EYE.blinkDuration--;
+    if(EYE.blinkDuration <= 0){
+      EYE.isBlinking = false;
+      EYE.blinkTimer = 120 + Math.floor(Math.random() * 200);
+    }
+  }
+
+  // Dimensions
+  const centerX = w/2;
+  const centerY = h/2;
+  const eyeW = boss ? 80 : 60;
+  const eyeH = boss ? 40 : 28;
+  let lidOpen = 1;
+  if(EYE.isBlinking){
+    // 8 frame blink
+    const t = EYE.blinkDuration / 8;
+    lidOpen = Math.abs(t - 0.5) * 2; // quick close then open
+  }
+  if(closed) lidOpen = 0.15;
+
+  // Draw sclera (white base)
+  const scleraColor = boss ? '#fee' : '#fff';
+  const px = 2; // pixel size multiplier
+
+  // Draw eye shape as pixelated rectangle with rounded corners
+  drawPixelEye(eyeCtx, centerX, centerY, eyeW, eyeH * lidOpen, scleraColor);
+
+  if(lidOpen > 0.1 && !closed){
+    // Veins (final boss only)
+    if(finalBoss){
+      drawVeins(eyeCtx, centerX, centerY, eyeW, eyeH * lidOpen);
+    }
+
+    // Determine iris color per boss mode
+    let irisOuter = '#c00';
+    let irisInner = '#800';
+    if(STATE.bossMode === 'weeping'){
+      if(STATE.bossPhase === 2){
+        irisOuter = '#d0f';  // brighter purple phase 2
+        irisInner = '#608';
+      } else {
+        irisOuter = '#90c';  // purple
+        irisInner = '#406';
+      }
+    } else if(STATE.bossMode === 'hourglass'){
+      irisOuter = '#f80';    // orange urgency
+      irisInner = '#820';
+    } else if(STATE.bossMode === 'warden'){
+      irisOuter = '#048';    // cold steel blue
+      irisInner = '#024';
+    }
+
+    // Iris
+    const irisX = centerX + (EYE.pupilX - 0.5) * eyeW * 0.4;
+    const irisY = centerY + (EYE.pupilY - 0.5) * eyeH * 0.3;
+    const irisR = (boss || STATE.bossMode ? 14 : 10) * EYE.dilation;
+    eyeCtx.fillStyle = irisOuter;
+    fillPixelCircle(eyeCtx, irisX, irisY, irisR);
+
+    // Iris detail
+    eyeCtx.fillStyle = irisInner;
+    fillPixelCircle(eyeCtx, irisX, irisY, irisR - 2);
+
+    // Pupil (black)
+    eyeCtx.fillStyle = '#000';
+    fillPixelCircle(eyeCtx, irisX, irisY, irisR * 0.5);
+
+    // Highlight
+    eyeCtx.fillStyle = '#fff';
+    fillPixelRect(eyeCtx, irisX - irisR*0.4, irisY - irisR*0.4, 3, 3);
+
+    // Weeping eye: tear trail from bottom of iris
+    if(STATE.bossMode === 'weeping' && Math.random() < (STATE.bossPhase === 2 ? 0.08 : 0.02)){
+      eyeCtx.fillStyle = '#f00';
+      const tearX = Math.round(irisX);
+      const tearY = Math.round(irisY + irisR);
+      for(let i=0;i<4;i++){
+        eyeCtx.fillRect(tearX, tearY + i, 1, 1);
+      }
+    }
+  }
+
+  // Eyelashes / eyelid top
+  if(!closed){
+    eyeCtx.fillStyle = '#fff';
+    // Upper lid
+    const topY = centerY - (eyeH * lidOpen) / 2 - 1;
+    fillPixelRect(eyeCtx, centerX - eyeW/2, topY - 2, eyeW, 2);
+    // Lower lid
+    const botY = centerY + (eyeH * lidOpen) / 2;
+    fillPixelRect(eyeCtx, centerX - eyeW/2, botY, eyeW, 2);
+  }
+
+  requestAnimationFrame(drawEye);
+}
+
+function drawPixelEye(ctx, cx, cy, w, h, color){
+  ctx.fillStyle = color;
+  // Draw as overlapping rectangles for lens shape (lemon)
+  const steps = 6;
+  for(let i=0;i<steps;i++){
+    const t = i / steps;
+    const y = cy - h/2 + (h / steps) * i;
+    const curveW = w * Math.sin(Math.PI * (i + 0.5) / steps);
+    fillPixelRect(ctx, cx - curveW/2, y, curveW, h/steps + 1);
+  }
+}
+
+function fillPixelCircle(ctx, cx, cy, r){
+  cx = Math.round(cx); cy = Math.round(cy); r = Math.round(r);
+  for(let y=-r;y<=r;y++){
+    for(let x=-r;x<=r;x++){
+      if(x*x + y*y <= r*r){
+        ctx.fillRect(cx + x, cy + y, 1, 1);
+      }
+    }
+  }
+}
+
+function fillPixelRect(ctx, x, y, w, h){
+  ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+}
+
+function drawVeins(ctx, cx, cy, w, h){
+  ctx.fillStyle = '#c00';
+  // Deterministic veins based on eyeHP
+  const veinAmount = (100 - STATE.eyeHP) / 100;
+  const numVeins = Math.floor(veinAmount * 8) + 2;
+  for(let i=0;i<numVeins;i++){
+    const angle = (i / numVeins) * Math.PI * 2 + EYE.veinPhase * 0.01;
+    let px = cx + Math.cos(angle) * w * 0.3;
+    let py = cy + Math.sin(angle) * h * 0.3;
+    const len = 6 + (i * 2) % 8;
+    for(let j=0;j<len;j++){
+      ctx.fillRect(Math.round(px), Math.round(py), 1, 1);
+      px += Math.cos(angle) * 1.2 + (Math.random() - 0.5);
+      py += Math.sin(angle) * 1.2 + (Math.random() - 0.5);
+    }
+  }
+  EYE.veinPhase++;
+}
+
+// Pupil dilates on big scores
+function pulseEye(){
+  EYE.targetDilation = 1.5;
+  setTimeout(() => { EYE.targetDilation = 1; }, 400);
+}
+
+/* ============================================================
+   EYE SPEECH
+   ============================================================ */
+const SPEECH = {
+  floor: {
+    1: ['you are here.', 'you have begun.', 'first steps.'],
+    2: ['deeper.', 'continue.'],
+    3: ['the pattern shifts.', '▓▒ she weeps ▒▓', 'feel the shapes.'],
+    4: ['you learn.', 'good.'],
+    5: ['tick. tick. tick.', 'the hourglass watches.', 'hurry.'],
+    6: ['halfway.', 'no returning.'],
+    7: ['numbers. numbers. numbers.', 'you dream of them now.'],
+    8: ['prove yourself to the lock.', 'the warden knows.'],
+    9: ['we meet.', 'I have been patient.', 'you have fed me well.'],
+    done: ['well done.', 'more.', 'next.', 'keep going.']
+  },
+  pick: {
+    scar: ['mistake.', 'no.', 'hesitation.', '▓▒ wrong ▒▓'],
+    hurt: ['you bleed.', 'careless.', 'you lose.'],
+    triple: ['....good.', 'yes.', '▓▒ triple sight ▒▓', '*laughter*'],
+    combo: ['chain them.', 'more.', 'good hand.'],
+    demand: ['obey.']
+  },
+  eye: {
+    lock: ['locked.', 'denied.'],
+    scar: ['erased.', 'gone.'],
+    demand: ['only this.'],
+    drain: ['you weaken.'],
+    phase2: ['enough games.', 'show me what you are.', '▓▒ awaken ▒▓']
+  },
+  weep: {
+    sorrow: [
+      'i\'m sorry.',
+      'forgive me.',
+      'you don\'t deserve this.',
+      'i didn\'t want to.',
+      '...take this, please.',
+      'it was mine to give.',
+      'please keep going.',
+      '▓▒ weeping ▒▓'
+    ],
+    phase2: [
+      'no more pretending.',
+      'i cannot stop now.',
+      '▓▒ true sorrow ▒▓',
+      'the tears will not end.'
+    ]
+  },
+  boss: {
+    slain: [
+      'well fought.',
+      '...i am free.',
+      'thank you.',
+      '*fading*',
+      '▓▒ rest ▒▓'
+    ]
+  },
+  ouro: {
+    wake: [
+      'the serpent wakes.',
+      '▓▒ ouroboros ▒▓',
+      'rows bound. rows fed.',
+      'feed the endless one.'
+    ],
+    consumed: [
+      'ouroboros consumed.',
+      'the cycle feeds.',
+      '▓▒ eternal ▒▓',
+      'the serpent smiles.'
+    ]
+  }
+};
+
+let speechTimeout;
+function speakEye(key){
+  if(!STATE.meta.settings.speech) return;
+  const el = document.getElementById('eyeSpeech');
+
+  // Handle warning format
+  if(key.startsWith('warn:')){
+    const msg = key.slice(5);
+    el.innerHTML = `<span class="glitchText" data-text="${msg}">${msg}</span>`;
+    clearTimeout(speechTimeout);
+    speechTimeout = setTimeout(() => { el.innerHTML = ''; }, 1500);
+    return;
+  }
+
+  // Parse key like "floor[1]" or "pick[0]scar"
+  let pool = SPEECH;
+  let line;
+  try {
+    const match = key.match(/(\w+)(?:\[([^\]]+)\])?(\w+)?/);
+    if(match){
+      const [_, cat, idx, sub] = match;
+      if(cat === 'floor'){
+        pool = SPEECH.floor[idx] || SPEECH.floor[sub] || SPEECH.floor[1];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      } else if(cat === 'pick'){
+        pool = SPEECH.pick[sub];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      } else if(cat === 'eye'){
+        // For "eye[attack]lock" → sub is 'lock'
+        // For "eye[phase2]" → idx is 'phase2', sub is undefined
+        const key2 = sub || idx;
+        pool = SPEECH.eye[key2];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      } else if(cat === 'weep'){
+        pool = SPEECH.weep[idx] || SPEECH.weep[sub];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      } else if(cat === 'boss'){
+        pool = SPEECH.boss[idx] || SPEECH.boss[sub];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      } else if(cat === 'ouro'){
+        pool = SPEECH.ouro[idx] || SPEECH.ouro[sub];
+        if(Array.isArray(pool)) line = pool[Math.floor(Math.random() * pool.length)];
+      }
+    }
+  } catch(e){}
+  if(!line) return;
+
+  // Glitch render
+  if(STATE.meta.settings.glitch){
+    el.innerHTML = `<span class="glitchText" data-text="${line}">${line}</span>`;
+  } else {
+    el.textContent = line;
+  }
+
+  clearTimeout(speechTimeout);
+  speechTimeout = setTimeout(() => { el.innerHTML = ''; }, 2500);
+
+  pulseEye();
+  sfxSpeak();
+}
+
+/* ============================================================
+   MODALS & MENU
+   ============================================================ */
+function show(id){
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+
+function hideAll(){
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+}
+
+document.getElementById('btnNewRun').onclick = () => {
+  if(STATE.inRun && !confirm('Abandon current run and start fresh?')) return;
+  startNewRun();
+};
+
+document.getElementById('btnContinue').onclick = () => {
+  if(loadRun()){
+    hideAll();
+    render();
+    ensureAudio();
+    startMusic(STATE.bossMode === 'eye' ? 'boss' : 'floor');
+  } else {
+    alert('No saved run.');
+  }
+};
+
+document.getElementById('btnMeta').onclick = () => {
+  renderMeta();
+  show('metaModal');
+};
+
+document.getElementById('btnMetaBack').onclick = () => {
+  show('titleModal');
+  updateMetaStats();
+};
+
+let SETTINGS_RETURN_TO = 'titleModal';
+
+function openSettings(returnTo){
+  SETTINGS_RETURN_TO = returnTo || 'titleModal';
+  document.querySelectorAll('.toggle').forEach(t => {
+    const key = t.dataset.set;
+    t.classList.toggle('on', !!STATE.meta.settings[key]);
+  });
+  show('settingsModal');
+}
+
+document.getElementById('btnSettings').onclick = () => openSettings('titleModal');
+document.getElementById('btnPauseSettings').onclick = () => openSettings('pauseModal');
+
+document.getElementById('btnSettingsBack').onclick = () => {
+  show(SETTINGS_RETURN_TO);
+  applySettings();
+};
+
+document.getElementById('btnHow').onclick = () => show('howModal');
+document.getElementById('btnHowBack').onclick = () => show('titleModal');
+
+// Rewind system
+document.getElementById('btnRewind').onclick = () => {
+  const steps = parseInt(document.getElementById('rewindSteps').textContent);
+  doRewind(steps);
+};
+document.getElementById('btnRefuseRewind').onclick = () => {
+  document.getElementById('rewindModal').classList.remove('show');
+  gameOver('the path closed.');
+};
+
+document.getElementById('btnMenu' || 'menuBtn');
+document.getElementById('menuBtn').onclick = () => show('pauseModal');
+
+document.getElementById('btnResume').onclick = () => hideAll();
+document.getElementById('btnAbandon').onclick = () => {
+  if(confirm('Abandon this run? Progress will be lost.')){
+    STATE.inRun = false;
+    localStorage.removeItem(SAVE_KEY);
+    updateMetaStats();
+    show('titleModal');
+  }
+};
+
+document.getElementById('btnReroll').onclick = doReroll;
+document.getElementById('btnLeaveShop').onclick = leaveShop;
+
+document.getElementById('btnRestart').onclick = () => startNewRun();
+document.getElementById('btnToTitle').onclick = () => {
+  updateMetaStats();
+  show('titleModal');
+};
+
+document.getElementById('btnWinDone').onclick = () => {
+  updateMetaStats();
+  show('titleModal');
+};
+
+document.querySelectorAll('.toggle').forEach(t => {
+  t.onclick = () => {
+    const key = t.dataset.set;
+    STATE.meta.settings[key] = !STATE.meta.settings[key];
+    t.classList.toggle('on', STATE.meta.settings[key]);
+    saveMeta();
+    applySettings();
+  };
+});
+
+document.getElementById('btnWipe').onclick = () => {
+  if(confirm('WIPE ALL DATA? This cannot be undone.')){
+    localStorage.clear();
+    location.reload();
+  }
+};
+
+function applySettings(){
+  document.getElementById('crt').style.display = STATE.meta.settings.crt ? 'block' : 'none';
+
+  // Music: stop if disabled, restart if enabled and we're in a run
+  if(AUDIO.ctx){
+    if(!STATE.meta.settings.music){
+      if(AUDIO.musicPlaying) stopMusic();
+    } else {
+      if(!AUDIO.musicPlaying && STATE.inRun){
+        const mode = STATE.bossMode === 'eye' ? 'boss'
+                   : STATE.bossMode === 'weeping' ? 'weeping'
+                   : STATE.bossMode === 'hourglass' ? 'hourglass'
+                   : STATE.bossMode === 'warden' ? 'warden'
+                   : 'floor';
+        startMusic(mode);
+      }
+    }
+    // SFX: instantly mute/unmute by toggling gain
+    if(AUDIO.sfxGain){
+      AUDIO.sfxGain.gain.value = STATE.meta.settings.sfx ? 0.6 : 0;
+    }
+    if(AUDIO.musicGain){
+      AUDIO.musicGain.gain.value = STATE.meta.settings.music ? 0.35 : 0;
+    }
+  }
+}
+
+function updateMetaStats(){
+  document.getElementById('metaStats').innerHTML =
+    `◆ ${STATE.meta.wins} wins · best floor ${STATE.meta.bestFloor}`;
+  // Hide continue if no save
+  const hasRun = !!localStorage.getItem(SAVE_KEY);
+  document.getElementById('btnContinue').style.display = hasRun ? 'block' : 'none';
+}
+
+function renderMeta(){
+  const list = document.getElementById('metaList');
+  list.innerHTML = '';
+  const ids = Object.keys(PERMA_INFO);
+  ids.forEach(id => {
+    const info = PERMA_INFO[id];
+    const unlocked = STATE.meta.unlockedPermas.includes(id);
+    const active = STATE.meta.activePerma === id;
+    const el = document.createElement('button');
+    el.innerHTML = `
+      <div style="text-align:left">
+        <div style="font-size:13px">${unlocked ? '' : '🔒 '}${info.name}${active ? ' ✓' : ''}</div>
+        <div class="small" style="color:#aaa">${unlocked ? info.desc : 'Win a run to unlock.'}</div>
+      </div>`;
+    if(!unlocked) el.disabled = true;
+    if(active) el.style.borderColor = '#fc0';
+    el.onclick = () => {
+      STATE.meta.activePerma = active ? null : id;
+      saveMeta();
+      renderMeta();
+    };
+    list.appendChild(el);
+  });
+  // None option
+  const none = document.createElement('button');
+  none.innerHTML = `<div style="text-align:left"><div style="font-size:13px">NONE${!STATE.meta.activePerma?' ✓':''}</div><div class="small" style="color:#888">No permanent upgrade active.</div></div>`;
+  if(!STATE.meta.activePerma) none.style.borderColor = '#fc0';
+  none.onclick = () => { STATE.meta.activePerma = null; saveMeta(); renderMeta(); };
+  list.appendChild(none);
+}
+
+/* ============================================================
+   AUDIO — INSCRYPTION-INSPIRED 8-BIT OST
+   ============================================================ */
+const AUDIO = {
+  ctx: null,
+  master: null,
+  musicGain: null,
+  sfxGain: null,
+  started: false,
+  musicPlaying: false,
+  currentMode: 'menu', // menu | floor | boss
+  schedulerHandle: null,
+  nextNoteTime: 0,
+  step: 0,
+  // Composition state
+  bpm: 72, // slow, ritualistic
+  // Patterns we can swap based on mode/floor
+  patternPhase: 0
+};
+
+// Notes — D minor scale (Inscryption-y feel: dark, modal)
+// MIDI numbers
+const SCALE_DMINOR = [50, 53, 55, 57, 60, 62, 65, 67, 69, 72]; // D3, F3, G3, A3, C4, D4, F4, G4, A4, C5
+const SCALE_DPHRYG = [50, 51, 53, 55, 57, 58, 60, 62, 63, 65]; // D phrygian — even darker
+const BASS_DRONE = [38, 41]; // D2, F2
+
+function midiToFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+
+function initAudio(){
+  if(AUDIO.ctx) return;
+  try {
+    AUDIO.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    AUDIO.master = AUDIO.ctx.createGain();
+    AUDIO.master.gain.value = 0.5;
+    AUDIO.master.connect(AUDIO.ctx.destination);
+
+    AUDIO.musicGain = AUDIO.ctx.createGain();
+    AUDIO.musicGain.gain.value = 0.35;
+    AUDIO.musicGain.connect(AUDIO.master);
+
+    AUDIO.sfxGain = AUDIO.ctx.createGain();
+    AUDIO.sfxGain.gain.value = 0.6;
+    AUDIO.sfxGain.connect(AUDIO.master);
+  } catch(e){
+    console.warn('Audio failed to init', e);
+  }
+}
+
+function ensureAudio(){
+  if(!AUDIO.ctx) initAudio();
+  if(AUDIO.ctx && AUDIO.ctx.state === 'suspended'){
+    AUDIO.ctx.resume();
+  }
+}
+
+// --- SFX ---
+function playTone({freq, dur=0.1, type='square', vol=0.3, attack=0.005, release=0.05, dest=null}){
+  if(!AUDIO.ctx || !STATE.meta.settings.sfx) return;
+  const t = AUDIO.ctx.currentTime;
+  const osc = AUDIO.ctx.createOscillator();
+  const g = AUDIO.ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  // Ensure durations are sane
+  if(dur < attack + release) release = Math.max(0.001, dur - attack - 0.001);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + attack);
+  g.gain.setValueAtTime(vol, Math.max(t + attack, t + dur - release));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(g);
+  g.connect(dest || AUDIO.sfxGain);
+  osc.start(t);
+  osc.stop(t + dur + 0.02);
+}
+
+function playNoise({dur=0.1, vol=0.2, lowpass=2000, dest=null}){
+  if(!AUDIO.ctx || !STATE.meta.settings.sfx) return;
+  const t = AUDIO.ctx.currentTime;
+  const buf = AUDIO.ctx.createBuffer(1, AUDIO.ctx.sampleRate * dur, AUDIO.ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i] = Math.random() * 2 - 1;
+  const src = AUDIO.ctx.createBufferSource();
+  src.buffer = buf;
+  const filt = AUDIO.ctx.createBiquadFilter();
+  filt.type = 'lowpass';
+  filt.frequency.value = lowpass;
+  const g = AUDIO.ctx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(filt); filt.connect(g); g.connect(dest || AUDIO.sfxGain);
+  src.start(t);
+  src.stop(t + dur);
+}
+
+function sfxClick(){ playTone({freq: 600, dur: 0.04, type:'square', vol: 0.1}); }
+function sfxPlace(n){
+  // Pitch goes up with digit
+  const base = midiToFreq(50 + n * 2);
+  playTone({freq: base, dur: 0.08, type:'triangle', vol: 0.18});
+  playTone({freq: base * 2, dur: 0.05, type:'square', vol: 0.08});
+}
+function sfxComplete(){
+  // Ascending arpeggio
+  const notes = [60, 65, 67, 72];
+  notes.forEach((n, i) => {
+    setTimeout(() => playTone({freq: midiToFreq(n), dur: 0.12, type:'square', vol: 0.18}), i * 60);
+  });
+}
+function sfxTriple(){
+  // Big choral-ish hit
+  const notes = [38, 50, 53, 57, 62];
+  notes.forEach(n => playTone({freq: midiToFreq(n), dur: 0.6, type:'sawtooth', vol: 0.1, attack: 0.05, release: 0.3}));
+  setTimeout(() => playNoise({dur: 0.3, vol: 0.15, lowpass: 800}), 50);
+}
+function sfxMistake(){
+  playTone({freq: 180, dur: 0.15, type:'sawtooth', vol: 0.2});
+  playTone({freq: 90, dur: 0.2, type:'square', vol: 0.15});
+}
+function sfxHurt(){
+  // Visceral wet pulse
+  playTone({freq: 100, dur: 0.4, type:'sawtooth', vol: 0.3, attack: 0.01, release: 0.2});
+  playNoise({dur: 0.3, vol: 0.25, lowpass: 400});
+  setTimeout(() => playTone({freq: 60, dur: 0.3, type:'square', vol: 0.2}), 80);
+}
+function sfxBlink(){
+  playTone({freq: 200, dur: 0.06, type:'triangle', vol: 0.15});
+  playNoise({dur: 0.04, vol: 0.08, lowpass: 600});
+}
+function sfxSpeak(){
+  // Garbled glitch sound for eye speech
+  for(let i=0;i<3;i++){
+    setTimeout(() => {
+      playTone({freq: 200 + Math.random() * 600, dur: 0.04, type:'square', vol: 0.08});
+    }, i * 30);
+  }
+}
+function sfxCoin(){
+  playTone({freq: 880, dur: 0.05, type:'square', vol: 0.15});
+  setTimeout(() => playTone({freq: 1320, dur: 0.08, type:'square', vol: 0.15}), 50);
+}
+function sfxShop(){
+  playTone({freq: 220, dur: 0.3, type:'sawtooth', vol: 0.15, attack: 0.05, release: 0.2});
+  playTone({freq: 330, dur: 0.4, type:'triangle', vol: 0.1, attack: 0.05, release: 0.3});
+}
+function sfxBoss(){
+  // Heavy, distorted hit
+  playTone({freq: 50, dur: 1.5, type:'sawtooth', vol: 0.3, attack: 0.1, release: 1.0});
+  playTone({freq: 75, dur: 1.5, type:'square', vol: 0.2, attack: 0.1, release: 1.0});
+  playNoise({dur: 0.5, vol: 0.2, lowpass: 300});
+}
+function sfxWin(){
+  const notes = [62, 65, 69, 74, 77, 81];
+  notes.forEach((n, i) => {
+    setTimeout(() => playTone({freq: midiToFreq(n), dur: 0.4, type:'triangle', vol: 0.2}), i * 120);
+  });
+}
+
+// --- MUSIC SCHEDULER ---
+// Inscryption Cardplay vibe:
+// - Slow ostinato bass drone (D2 sustained, occasional F2)
+// - Sparse plucked melody on minor scale, irregular timing
+// - Soft tape-hiss style noise undertone
+// - Occasional dissonant stab (tritone) for unease
+// - 8-bit timbres, slightly out of tune
+
+function startMusic(mode){
+  if(!AUDIO.ctx) return;
+  if(!STATE.meta.settings.music) return;
+  AUDIO.currentMode = mode || 'floor';
+  if(AUDIO.musicPlaying) return;
+  AUDIO.musicPlaying = true;
+  AUDIO.step = 0;
+  AUDIO.nextNoteTime = AUDIO.ctx.currentTime + 0.1;
+  scheduleMusic();
+}
+
+function stopMusic(){
+  AUDIO.musicPlaying = false;
+  if(AUDIO.schedulerHandle){
+    clearTimeout(AUDIO.schedulerHandle);
+    AUDIO.schedulerHandle = null;
+  }
+  // Fade out if context exists
+  if(AUDIO.musicGain){
+    const t = AUDIO.ctx.currentTime;
+    AUDIO.musicGain.gain.cancelScheduledValues(t);
+    AUDIO.musicGain.gain.setValueAtTime(AUDIO.musicGain.gain.value, t);
+    AUDIO.musicGain.gain.linearRampToValueAtTime(0, t + 0.5);
+    setTimeout(() => {
+      if(AUDIO.musicGain) AUDIO.musicGain.gain.value = 0.35;
+    }, 600);
+  }
+}
+
+function scheduleMusic(){
+  if(!AUDIO.musicPlaying) return;
+  const lookahead = 0.1; // schedule 100ms ahead
+  const now = AUDIO.ctx.currentTime;
+  // If we fell behind (tab backgrounded etc), catch up to present
+  if(AUDIO.nextNoteTime < now){
+    AUDIO.nextNoteTime = now + 0.05;
+  }
+  while(AUDIO.nextNoteTime < now + lookahead){
+    playMusicStep(AUDIO.step, AUDIO.nextNoteTime);
+    const beatLen = 60 / AUDIO.bpm / 2; // 8th notes
+    AUDIO.nextNoteTime += beatLen;
+    AUDIO.step++;
+  }
+  AUDIO.schedulerHandle = setTimeout(scheduleMusic, 25);
+}
+
+function playMusicStep(step, time){
+  const mode = AUDIO.currentMode;
+  const bar = Math.floor(step / 16);
+  const beat = step % 16;
+
+  // Scale: final boss uses Phrygian, weeping mixes Lydian counter-melody,
+  // others keep natural minor
+  const scale = (mode === 'boss') ? SCALE_DPHRYG : SCALE_DMINOR;
+
+  // --- SHARED BASS DRONE (same for all modes, volume varies) ---
+  if(beat === 0){
+    const bassNote = BASS_DRONE[bar % 2];
+    const bossBass = (mode !== 'floor' && mode !== 'menu');
+    playMusicNote({
+      freq: midiToFreq(bassNote),
+      time: time,
+      dur: 8 * (60 / AUDIO.bpm / 2),
+      type: 'sawtooth',
+      vol: bossBass ? 0.18 : 0.12,
+      attack: 0.5,
+      release: 1.0,
+      lowpass: 400
+    });
+    playMusicNote({
+      freq: midiToFreq(bassNote - 12),
+      time: time,
+      dur: 8 * (60 / AUDIO.bpm / 2),
+      type: 'square',
+      vol: bossBass ? 0.1 : 0.06,
+      attack: 0.5,
+      release: 1.0,
+      lowpass: 200
+    });
+  }
+
+  // --- PERCUSSION (varies by mode) ---
+  if(beat === 0 || beat === 8){
+    playMusicNoise({time, dur: 0.04, vol: 0.08, lowpass: 1500});
+  }
+  if(beat === 0 && bar % 2 === 1){
+    playMusicNoise({time, dur: 0.1, vol: 0.12, lowpass: 200});
+  }
+
+  // HOURGLASS: relentless 16th-note ticks
+  if(mode === 'hourglass'){
+    if(beat % 2 === 0){
+      playMusicNoise({time, dur: 0.02, vol: 0.05, lowpass: 3000});
+    }
+  }
+
+  // WARDEN: heavy ritualistic thumps on every 4th beat
+  if(mode === 'warden'){
+    if(beat % 4 === 0){
+      playMusicNoise({time, dur: 0.15, vol: 0.18, lowpass: 150});
+    }
+  }
+
+  // --- MELODY ---
+  const melodyPattern = getMelodyPattern(bar, mode);
+  if(melodyPattern[beat] !== null && melodyPattern[beat] !== undefined){
+    const noteIdx = melodyPattern[beat];
+    const noteMidi = scale[noteIdx];
+    playMusicNote({
+      freq: midiToFreq(noteMidi),
+      time: time,
+      dur: 0.3,
+      type: 'triangle',
+      vol: 0.13,
+      attack: 0.005,
+      release: 0.15,
+      lowpass: 3000
+    });
+    playMusicNote({
+      freq: midiToFreq(noteMidi) * 1.005,
+      time: time + 0.02,
+      dur: 0.25,
+      type: 'square',
+      vol: 0.05,
+      attack: 0.005,
+      release: 0.15,
+      lowpass: 2000
+    });
+  }
+
+  // --- WEEPING: mournful Lydian counter-melody ---
+  if(mode === 'weeping'){
+    // F Lydian-ish floaty notes - uses offset scale
+    const weepScale = [53, 57, 60, 62, 65, 69, 72]; // F3, A3, C4, D4, F4, A4, C5
+    const weepPattern = WEEPING_COUNTER[bar % WEEPING_COUNTER.length];
+    if(weepPattern[beat] !== null && weepPattern[beat] !== undefined){
+      const n = weepScale[weepPattern[beat]];
+      playMusicNote({
+        freq: midiToFreq(n),
+        time: time,
+        dur: 0.8,
+        type: 'sine',
+        vol: 0.08,
+        attack: 0.1,
+        release: 0.5,
+        lowpass: 2000
+      });
+    }
+    // Slow arpeggiated descent every 8 bars
+    if(bar % 8 === 7 && beat < 8 && beat % 2 === 0){
+      const descScale = [72, 69, 65, 62];
+      const n = descScale[beat / 2] || 60;
+      playMusicNote({
+        freq: midiToFreq(n),
+        time: time,
+        dur: 0.4,
+        type: 'sine',
+        vol: 0.07,
+        attack: 0.05,
+        release: 0.3,
+        lowpass: 2500
+      });
+    }
+  }
+
+  // --- DISSONANT STABS (final boss only) ---
+  if(mode === 'boss' && beat === 6 && bar % 4 === 3){
+    playMusicNote({
+      freq: midiToFreq(50),
+      time: time,
+      dur: 0.3,
+      type: 'sawtooth',
+      vol: 0.15,
+      attack: 0.005,
+      release: 0.2,
+      lowpass: 800
+    });
+    playMusicNote({
+      freq: midiToFreq(56),
+      time: time,
+      dur: 0.3,
+      type: 'sawtooth',
+      vol: 0.12,
+      attack: 0.005,
+      release: 0.2,
+      lowpass: 800
+    });
+  }
+
+  // --- TAPE HISS ---
+  if(beat === 0){
+    playMusicNoise({time, dur: 4 * (60 / AUDIO.bpm / 2), vol: 0.025, lowpass: 800});
+  }
+}
+
+// Weeping Eye counter-melody (F Lydian)
+const WEEPING_COUNTER = [
+  [null, null, 2, null, null, null, null, null, 3, null, null, null, null, null, null, null],
+  [null, null, null, null, 4, null, null, null, null, null, 2, null, null, null, null, null],
+  [1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  [null, null, null, 3, null, null, 5, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, 2, null, null, null, null, null, null, null, null],
+  [4, null, null, 3, null, null, 2, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  [2, null, null, 1, null, null, 0, null, null, null, null, null, null, null, null, null]
+];
+
+// Pre-defined melody patterns. null = rest.
+// 16 8th-note slots per bar.
+const MELODY_BARS = [
+  // Bar 0: sparse, hovering
+  [0, null, null, null, 2, null, null, 1, null, null, null, null, 0, null, null, null],
+  // Bar 1: descending sigh
+  [null, null, 4, null, null, 2, null, null, 1, null, 0, null, null, null, null, null],
+  // Bar 2: held single
+  [2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  // Bar 3: little gesture up
+  [null, null, null, null, 0, null, 2, null, 4, null, null, null, null, null, null, null],
+  // Bar 4: silence with one note
+  [null, null, null, null, null, null, null, null, null, null, null, null, 1, null, null, null],
+  // Bar 5: question phrase
+  [4, null, null, 2, null, null, 5, null, null, null, null, null, null, null, null, null],
+  // Bar 6: rest
+  [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  // Bar 7: longer melodic line
+  [0, null, 1, null, 2, null, 4, null, 2, null, 1, null, 0, null, null, null]
+];
+
+const MELODY_BARS_BOSS = [
+  // Bar 0: heavy, low
+  [0, null, null, 0, null, null, null, 1, null, null, 0, null, null, null, null, null],
+  // Bar 1: tense climb
+  [null, 2, null, 3, null, 4, null, 5, null, null, null, null, null, null, null, null],
+  // Bar 2: stab
+  [4, null, null, null, 4, null, null, null, 4, null, null, null, 4, null, null, null],
+  // Bar 3: descending
+  [null, 5, null, 4, null, 3, null, 2, null, 1, null, 0, null, null, null, null],
+  // Bar 4: ritualistic pulse
+  [0, 0, null, null, 1, 1, null, null, 0, 0, null, null, 1, 1, null, null],
+  // Bar 5: silence with stab
+  [null, null, null, null, null, null, null, 5, null, null, null, null, null, null, null, null],
+  // Bar 6: low ominous
+  [0, null, null, null, null, null, 0, null, null, null, null, null, 0, null, null, null],
+  // Bar 7: chaos
+  [null, 4, null, 2, null, 5, null, 1, null, 4, null, 2, null, 5, null, null]
+];
+
+function getMelodyPattern(bar, mode){
+  if(mode === 'boss') return MELODY_BARS_BOSS[bar % MELODY_BARS_BOSS.length];
+  if(mode === 'warden') return MELODY_BARS_BOSS[bar % MELODY_BARS_BOSS.length]; // also dark
+  if(mode === 'hourglass'){
+    // tense rising pattern - reuse bass bars for clicky tension
+    return MELODY_BARS_BOSS[bar % MELODY_BARS_BOSS.length];
+  }
+  return MELODY_BARS[bar % MELODY_BARS.length];
+}
+
+function playMusicNote({freq, time, dur, type='triangle', vol=0.1, attack=0.01, release=0.05, lowpass=null}){
+  if(!AUDIO.ctx || !AUDIO.musicGain) return;
+  // Never schedule in the past
+  time = Math.max(time, AUDIO.ctx.currentTime + 0.001);
+  const osc = AUDIO.ctx.createOscillator();
+  const g = AUDIO.ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, time);
+  g.gain.linearRampToValueAtTime(vol, time + attack);
+  g.gain.setValueAtTime(vol, Math.max(time + attack, time + dur - release));
+  g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+  let last = osc;
+  if(lowpass){
+    const filt = AUDIO.ctx.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.value = lowpass;
+    osc.connect(filt);
+    last = filt;
+  }
+  last.connect(g);
+  g.connect(AUDIO.musicGain);
+  osc.start(time);
+  osc.stop(time + dur + 0.02);
+}
+
+function playMusicNoise({time, dur, vol=0.05, lowpass=1000}){
+  if(!AUDIO.ctx || !AUDIO.musicGain) return;
+  time = Math.max(time, AUDIO.ctx.currentTime + 0.001);
+  const buf = AUDIO.ctx.createBuffer(1, AUDIO.ctx.sampleRate * dur, AUDIO.ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i] = Math.random() * 2 - 1;
+  const src = AUDIO.ctx.createBufferSource();
+  src.buffer = buf;
+  const filt = AUDIO.ctx.createBiquadFilter();
+  filt.type = 'lowpass';
+  filt.frequency.value = lowpass;
+  const g = AUDIO.ctx.createGain();
+  g.gain.setValueAtTime(0, time);
+  g.gain.linearRampToValueAtTime(vol, time + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+  src.connect(filt); filt.connect(g); g.connect(AUDIO.musicGain);
+  src.start(time);
+  src.stop(time + dur);
+}
+
+function setMusicMode(mode){
+  if(AUDIO.currentMode === mode) return;
+  AUDIO.currentMode = mode;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  loadMeta();
+  updateMetaStats();
+  applySettings();
+  drawEye();
+}
+
+boot();
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if(STATE.inRun){
+    render();
+    renderOuroboros();
+  }
+});
+
+// Prevent pinch zoom
+document.addEventListener('gesturestart', e => e.preventDefault());
+
+</script>
+</body>
+</html>
