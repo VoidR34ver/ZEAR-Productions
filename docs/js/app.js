@@ -6,16 +6,17 @@
   // While empty the form checks input but sends nothing anywhere.
   const FEEDBACK_ENDPOINT = "";
 
-  // TODO(owner): the real lamp colour of each building, in the order of the list on the page.
-  // These are stand-ins so the dots aren't all the same.
-  const LAMPS = ["#e8b45a", "#d98a3d", "#f0c87a", "#c45a3a", "#e0a05a", "#9fc27a", "#7a8fd0", "#d0703a",
-                 "#e8c890", "#e06a4a", "#b85a3a", "#f0b060", "#a0b0c0", "#e8d8a0", "#d8a070"];
+  // Lamp colour of each building, in the order of the list on the page (from the game, 2026-10-05).
+  const LAMPS = ["#FFDBA8", "#FF994D", "#FFAD61", "#FFD69E", "#F2BD80", "#9EB8FA", "#B8E6BD", "#FFC780",
+                 "#FF7033", "#FFDBA8", "#FF853D", "#FFC26B", "#FFB370", "#FFDBAD", "#FFEBC7"];
 
   // TODO(owner): names for Hadal depth zones 2 to 4, if you want them shown.
   const ZONE_NAMES = { 2: null, 3: null, 4: null };
 
-  // TODO(owner): which wing each One House gallery shot shows.
-  const WING_NAMES = { "O-03": null, "O-04": null, "O-05": null, "O-06": null, "O-07": null, "O-08": null };
+  // Which wing each One House gallery shot shows.
+  const WING_NAMES = { "O-03": "Great hall · Gothic", "O-04": "Old chapel · Romanesque", "O-05": "Greenhouse · moonlit glasshouse",
+                       "O-06": "West gallery · burial galleries in the rock", "O-07": "Cloister ward · the cloister walk",
+                       "O-08": "Guest wing · 1920s lounge" };
 
   const TABS = ["zear", "hadal", "ohafh"];
   const THEME_BG = { zear: "#f1ebe0", hadal: "#031014", ohafh: "#1d0c09" };
@@ -31,7 +32,7 @@
   const softRefresh = () => { clearTimeout(refreshTimer); refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150); };
 
   /* ------------------------------------------------------------------ screenshot slots */
-  const EXTS = [".webp", ".jpg", ".png"];
+  const EXTS = [".jpg", ".webp", ".png"];
   function tryLoad(base, done, fail, i = 0) {
     if (i >= EXTS.length) return fail();
     const img = new Image();
@@ -353,18 +354,21 @@
 
   function initOhafh(root) {
     const srcEl = $(".crush-src", root);
-    const crush = psxCrusher($(".crush", root), srcEl.naturalWidth ? srcEl : null);
+    const crush = psxCrusher($(".crush", root), srcEl);
     const state = { p: 0 };
     crush.render(0);
     const onResize = () => { crush.size(); crush.render(state.p); };
     window.addEventListener("resize", onResize);
+    const fin = $(".crush-final", root);
+    tryLoad(fin.dataset.src, img => { fin.style.backgroundImage = `url("${img.src}")`; }, () => {});
     if (!srcEl.naturalWidth && srcEl.dataset.src) {
-      tryLoad(srcEl.dataset.src, img => { srcEl.src = img.src; srcEl.onload = onResize; }, () => {});
+      tryLoad(srcEl.dataset.src, img => { srcEl.onload = onResize; srcEl.src = img.src; }, () => {});
     }
 
     gsap.timeline({ scrollTrigger: { trigger: $(".o-crush", root), pin: true, scrub: 1, end: "+=260%" } })
       .to(state, { p: 1, ease: "power1.in", duration: 1, onUpdate: () => crush.render(state.p) }, 0)
       .to($(".crush", root), { opacity: 0.45, scale: 1.08, duration: 1 }, 0)
+      .fromTo($(".crush-final", root), { opacity: 0, scale: 1.08 }, { opacity: 0.5, scale: 1.08, duration: 0.25 }, 0.8)
       .to($(".o-crush .scroll-cue", root), { opacity: 0, duration: 0.1 }, 0)
       .fromTo($(".o-place", root), { opacity: 0, letterSpacing: "1em" }, { opacity: 1, letterSpacing: "0.2em", duration: 0.25 }, 0.2)
       .fromTo($(".o-title", root), { opacity: 0, scale: 1.3, filter: "blur(10px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.3, ease: "power3.out" }, 0.3)
@@ -401,7 +405,9 @@
   /* ------------------------------------------------------------------ static fallbacks (reduced motion) */
   function staticExtras(name, root) {
     if (name === "ohafh") {
-      const c = psxCrusher($(".crush", root), null); c.render(0.6);
+      const src = $(".crush-src", root), c = psxCrusher($(".crush", root), src);
+      c.render(0.6);
+      tryLoad(src.dataset.src, img => { src.onload = () => { c.size(); c.render(0.6); }; src.src = img.src; }, () => {});
     }
   }
 

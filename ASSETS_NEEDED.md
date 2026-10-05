@@ -1,5 +1,17 @@
 # Screenshots and assets for the website
 
+## Status (2026-10-05)
+
+**Received and on the site:** O-01, O-02, O-03 to O-08, O-11 (the floor-plan version), Z-02, and the lamp colours.
+
+**Still needed:**
+- **Studio:** Z-01.
+- **Hadal:** everything, starting with H-01. That's H-01, H-03 to H-05, H-09 to H-15, and the names of zones 2 to 4.
+- **One House:** O-09 (shootable lock) and O-10 (zombie in the flashlight). Both need to be captured in play.
+- **Text:** your studio line, and a logo if you have one.
+- **Optional:** the video loops.
+
+
 Every grey box on the preview site shows a code such as `H-01`. That box is waiting for the matching shot below.
 
 ## How to capture
