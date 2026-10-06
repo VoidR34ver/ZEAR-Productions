@@ -228,7 +228,8 @@ em { font-style: normal; }
 .h-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); gap: 64px 40px; max-width: 1240px; margin: 0 auto; padding: 22vh clamp(16px,3vw,40px); }
 .stat:nth-child(2) { margin-top: 8vh; }
 .stat:nth-child(3) { margin-top: 16vh; }
-.stat-n { display: block; font-family: var(--arch); font-weight: 800; font-stretch: 62%; font-size: clamp(64px,8vw,128px); line-height: 0.86; color: var(--cyan); }
+/* sized so the longest word ("Everything") stays inside its column at every width */
+.stat-n { display: block; font-family: var(--arch); font-weight: 800; font-stretch: 62%; font-size: clamp(44px,5.2vw,68px); line-height: 0.9; color: var(--cyan); }
 .stat-l { display: block; margin-top: 12px; font: 14px var(--mono); }
 .stat .stat-l { max-width: 30ch; line-height: 1.5; }
 .scale { grid-column: 1 / -1; margin-top: 8vh; }
