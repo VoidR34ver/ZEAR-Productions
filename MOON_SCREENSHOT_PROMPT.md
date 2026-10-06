@@ -49,5 +49,5 @@ Also copy `audio/music/Memory Moon.ogg` into the bundle.
    - anything that didn't work, or that needed a workaround
    - any shot you couldn't take, and why
 2. Zip all the PNGs, `Memory Moon.ogg` and `NOTES.md` into `moon-assets.zip`.
-3. In a clone of `github.com/VoidR34ver/ZEAR-Productions`, create the branch **`moon`** from `main`. Add `assets/moon-assets.zip` and also `assets/NOTES.md`, commit as "Once Upon a Moon website screenshots", and push only that branch.
+3. In a clone of `github.com/VoidR34ver/ZEAR-Productions`, check out the existing branch **`moon`**. It already holds the design files in `once-upon-a-moon/`, so leave those alone. Add `assets/moon-assets.zip` and also `assets/NOTES.md`, commit as "Once Upon a Moon website screenshots", and push only that branch.
 4. Tell me what you captured and anything you skipped.
