@@ -5,7 +5,7 @@
   // Address of the Cloudflare Worker (see ../worker), without a trailing slash,
   // e.g. "https://api.zearstudios.example". While it's empty the feedback form sends
   // nothing and the download button falls back to its plain link.
-  const API_BASE = "";
+  const API_BASE = "https://zear-api.zearstudios.workers.dev";
   // Cloudflare Turnstile site key. Empty = no Turnstile, and nothing is loaded from Cloudflare.
   const TURNSTILE_SITEKEY = "";
 
