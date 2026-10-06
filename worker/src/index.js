@@ -29,7 +29,8 @@ const GAMES = {
 };
 
 const PLATFORMS = [
-  { id: "windows", label: "Windows", match: /-(win|windows)(?![a-z])/i },
+  { id: "windows", label: "Windows", match: /-(win|windows)(?!-lowspec)(?![a-z])/i },
+  { id: "windowslow", label: "Windows (low-spec)", match: /-(win|windows)-lowspec(?![a-z])/i },
   { id: "macos", label: "macOS", match: /-(mac|macos)(?![a-z])/i },
   { id: "linux", label: "Linux", match: /-linux(?![a-z])/i }
 ];
