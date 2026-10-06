@@ -1,0 +1,25 @@
+# Only needed if you deploy with `npx wrangler deploy` from this folder.
+# Pasting src/index.js into the Cloudflare dashboard editor works too; set the
+# variables below under the Worker's Settings there instead.
+name = "zear-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+GITHUB_OWNER = "VoidR34ver"
+FEEDBACK_REPO = "zear-feedback"
+BUILDS_REPO = "ZEAR-Productions"
+ALLOWED_ORIGINS = "https://voidr34ver.github.io,https://zearstudios.com,https://www.zearstudios.com"
+
+# Secrets are never written here. Set them with:
+#   npx wrangler secret put GITHUB_TOKEN
+#   npx wrangler secret put TURNSTILE_SECRET   (optional)
+
+# 5 feedback posts a minute per address.
+[[ratelimits]]
+name = "FEEDBACK_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
