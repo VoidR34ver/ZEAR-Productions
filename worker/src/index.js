@@ -24,6 +24,7 @@ const GAMES = {
   "One House Away From Home": "ohafh",
   "Give Me Your Yoghurt": "gmyy",
   "Ouroboros: Oculus": "ouro",
+  "Once Upon a Moon": "moon",
   "About me": "about",
   "Just the website": "website"
 };

@@ -9,8 +9,9 @@
   // Cloudflare Turnstile site key. Empty = no Turnstile, and nothing is loaded from Cloudflare.
   const TURNSTILE_SITEKEY = "";
 
-  const TABS = ["zear", "hadal", "ohafh", "gmyy", "ouro", "about"];
+  const TABS = ["zear", "hadal", "ohafh", "gmyy", "ouro", "moon", "about"];
   // Colour of the wipe when switching to a tab. Foil for Yoghurt, ochre for About.
+  // Moon has its own dither dissolve instead (ditherWipe).
   const WIPE = {
     zear: "#f7f7f5", hadal: "#000000", ohafh: "#1e100a", ouro: "#000000", about: "#D7A948",
     gmyy: "repeating-linear-gradient(0deg,rgba(255,255,255,.35) 0 1px,rgba(0,0,0,0) 1px 3px),linear-gradient(135deg,#d9dbdf,#f4f5f7 35%,#bfc3c9 60%,#e8e9ec)"
@@ -564,6 +565,204 @@
     };
   };
 
+  /* ------------------------------------------------------------------ once upon a moon */
+  const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  // night, deep blue, dusk purple, moonlight
+  const MPAL = [[10, 13, 31], [30, 42, 92], [107, 94, 168], [201, 212, 240]];
+  const hash2 = (x, y) => { let n = (Math.imul(x, 374761393) + Math.imul(y, 668265263)) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; };
+
+  // The screen dissolves to night through an ordered-dither pattern, then back out.
+  function ditherWipe(mid, done) {
+    const S = 12, w = Math.ceil(innerWidth / S), h = Math.ceil(innerHeight / S);
+    const c = document.createElement("canvas"); c.width = w; c.height = h; c.className = "dither-wipe";
+    document.body.appendChild(c);
+    const g = c.getContext("2d"), im = g.createImageData(w, h), d = im.data;
+    const draw = p => {
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4, th = ((BAYER4[(y & 3) * 4 + (x & 3)] + 0.5) / 16) * 0.7 + (y / h) * 0.3;
+        d[i] = 10; d[i + 1] = 13; d[i + 2] = 31; d[i + 3] = th < p ? 255 : 0;
+      }
+      g.putImageData(im, 0, 0);
+    };
+    const st = { p: 0 };
+    gsap.to(st, { p: 1.01, duration: 0.6, ease: "steps(18)", onUpdate: () => draw(st.p), onComplete: () => {
+      mid();
+      gsap.to(st, { p: 0, duration: 0.6, delay: 0.05, ease: "steps(18)", onUpdate: () => draw(st.p), onComplete: () => { c.remove(); done(); } });
+    } });
+  }
+
+  // A faint Bayer texture over the tab's night background.
+  let bayerTile = "";
+  function ditherFill(sec) {
+    if (!bayerTile) {
+      const c = document.createElement("canvas"); c.width = c.height = 4; const g = c.getContext("2d");
+      BAYER4.forEach((v, i) => { g.fillStyle = "rgba(201,212,240," + (v / 15 * 0.08).toFixed(3) + ")"; g.fillRect(i % 4, i >> 2, 1, 1); });
+      bayerTile = c.toDataURL();
+    }
+    sec.style.backgroundImage = "url(" + bayerTile + ")"; sec.style.backgroundSize = "8px 8px"; sec.style.imageRendering = "pixelated";
+    return () => { sec.style.backgroundImage = ""; sec.style.backgroundSize = ""; sec.style.imageRendering = ""; };
+  }
+
+  // Looking up through the moon hole; p 0 = cavern floor, 1 = risen into the night. Quarter-res, 4-colour Bayer.
+  function skyFrame(cv, p, t) {
+    const w = cv.width, h = cv.height; if (!w || !h) return;
+    const g = cv.getContext("2d"), im = g.createImageData(w, h), D = im.data, m = Math.min(w, h);
+    const R = 0.3 + p * p * 1.9, mr = 0.05 + p * 0.1, mx = 0.03 + p * 0.2, my = -0.05 - p * 0.17;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const u = (x - w / 2) / m, v = (y - h * 0.45) / m, d = Math.hypot(u, v), a = Math.atan2(v, u);
+      const rag = R * (1 + 0.07 * Math.sin(a * 5 + 1.3) + 0.05 * Math.sin(a * 11 + 0.4) + 0.03 * Math.sin(a * 23 + 2));
+      let val;
+      if (d > rag) {
+        val = 0.07 + 0.34 * Math.exp(-(d - rag) * 10) + 0.05 * Math.sin(x * 0.37 + y * 0.11) * Math.sin(y * 0.23 - x * 0.05);
+      } else {
+        const md = Math.hypot(u - mx, v - my);
+        val = 0.1 + 0.22 * Math.exp(-md * 3.2) + (1 - p) * 0.22 * Math.exp(-(rag - d) * 7) * (0.6 + 0.4 * Math.sin(u * 14 + v * 6 + t * 0.7));
+        const hs = hash2(x, y); if (hs > 0.997) val = 0.75 + 0.3 * Math.sin(t * 1.7 + hs * 400);
+        if (md < mr) val = Math.hypot(u - mx + mr * 0.45, v - my + mr * 0.2) > mr * 0.82 ? 1.1 : 0.32;
+        else if (md < mr * 1.5) val += 0.12;
+      }
+      const c = MPAL[Math.max(0, Math.min(3, Math.floor(val * 3 + (BAYER4[(y & 3) * 4 + (x & 3)] + 0.5) / 16)))], i = (y * w + x) * 4;
+      D[i] = c[0]; D[i + 1] = c[1]; D[i + 2] = c[2]; D[i + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+  }
+  function moonSky(cv, getP) {
+    let alive = true, last = 0, lp = -1, raf = 0;
+    const size = () => { cv.width = Math.max(1, Math.ceil(cv.clientWidth / 4)); cv.height = Math.max(1, Math.ceil(cv.clientHeight / 4)); lp = -1; };
+    const loop = now => {
+      if (!alive) return; raf = requestAnimationFrame(loop);
+      const p = getP(); if (p === lp && now - last < 125) return;
+      const r = cv.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+      last = now; lp = p; skyFrame(cv, p, now / 1000);
+    };
+    size(); window.addEventListener("resize", size); raf = requestAnimationFrame(loop);
+    return () => { alive = false; cancelAnimationFrame(raf); window.removeEventListener("resize", size); };
+  }
+
+  // M-15 drawn full, M-15b (pixel filter off) clipped on the far side of the divider.
+  // Side by side on a wide screen, top and bottom under 640px.
+  function moonSplit(cv, labR) {
+    const a = new Image(), b = new Image(); let W = 0, H = 0, vert = false, f = 1;
+    a.src = cv.dataset.a; b.src = cv.dataset.b;
+    const cover = img => { const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * sc, h = img.naturalHeight * sc; return [(W - w) / 2, (H - h) / 2, w, h]; };
+    const draw = nf => {
+      f = nf; if (!W || !H) return;
+      const g = cv.getContext("2d"); g.fillStyle = "#0A0D1F"; g.fillRect(0, 0, W, H);
+      g.imageSmoothingEnabled = false; if (a.complete && a.naturalWidth) g.drawImage(a, ...cover(a));
+      g.save(); g.beginPath(); vert ? g.rect(0, H * f, W, H) : g.rect(W * f, 0, W, H); g.clip();
+      g.imageSmoothingEnabled = true; if (b.complete && b.naturalWidth) g.drawImage(b, ...cover(b)); g.restore();
+      const px = Math.max(1, Math.round(window.devicePixelRatio || 1)); g.fillStyle = "#C9D4F0";
+      vert ? g.fillRect(0, Math.round(H * f), W, px) : g.fillRect(Math.round(W * f), 0, px, H);
+    };
+    const build = () => {
+      const d = window.devicePixelRatio || 1; W = cv.width = Math.round(cv.clientWidth * d); H = cv.height = Math.round(cv.clientHeight * d); vert = cv.clientWidth < 640;
+      labR.style.left = vert ? "16px" : "calc(50% + 16px)"; labR.style.top = vert ? "calc(50% + 16px)" : "72px";
+      draw(f);
+    };
+    a.onload = b.onload = () => draw(f);
+    build(); window.addEventListener("resize", build);
+    return { draw, stop: () => { window.removeEventListener("resize", build); labR.style.left = labR.style.top = ""; } };
+  }
+
+  // Soundtrack player. Nothing loads or plays until a track is clicked.
+  // The orb is a dithered full moon that swells with the track's loudness.
+  function moonPlayer(sec) {
+    const btns = $$(".m-play", sec), tm = $(".m-time", sec), bar = $(".m-prog", sec), cv = $(".m-orb", sec);
+    let audio = null, cur = null, ac = null, an = null, buf = null, amp = 0, alive = true, raf = 0, last = 0, ext = ".ogg";
+    const fmt = x => isFinite(x) ? Math.floor(x / 60) + ":" + String(Math.floor(x % 60)).padStart(2, "0") : "0:00";
+    const mark = () => btns.forEach(b => { const on = b === cur && !!audio && !audio.paused; b.setAttribute("aria-pressed", on ? "true" : "false"); $(".m-pl", b).textContent = on ? "Pause" : "Play"; });
+    const handlers = btns.map(b => {
+      const h = () => {
+        if (!audio) {
+          audio = new Audio();
+          // older Safari can't play Ogg Vorbis; it gets the MP3 copy
+          if (!audio.canPlayType('audio/ogg; codecs="vorbis"')) ext = ".mp3";
+          audio.addEventListener("timeupdate", () => { tm.textContent = fmt(audio.currentTime) + " / " + fmt(audio.duration); bar.style.width = (audio.duration ? audio.currentTime / audio.duration * 100 : 0) + "%"; });
+          ["play", "pause", "ended"].forEach(ev => audio.addEventListener(ev, mark));
+          try { ac = new (window.AudioContext || window.webkitAudioContext)(); const src = ac.createMediaElementSource(audio); an = ac.createAnalyser(); an.fftSize = 512; buf = new Uint8Array(an.fftSize); src.connect(an); an.connect(ac.destination); } catch (_) { an = null; }
+        }
+        if (cur !== b) { cur = b; audio.src = b.dataset.src + ext; tm.textContent = "0:00"; bar.style.width = "0"; }
+        else if (!audio.paused) { audio.pause(); return; }
+        if (ac) ac.resume();
+        audio.play().catch(() => mark());
+      };
+      b.addEventListener("click", h); return h;
+    });
+    cv.width = cv.height = 72;
+    const g = cv.getContext("2d"), im = g.createImageData(72, 72), D = im.data;
+    const paint = (t, r) => {
+      for (let y = 0; y < 72; y++) for (let x = 0; x < 72; x++) {
+        const d = Math.hypot(x - 35.5, y - 35.5);
+        const val = d < r ? 1.05 - (d / r) * 0.28 - (Math.sin(x * 0.55 + 1) * Math.sin(y * 0.45) > 0.55 ? 0.22 : 0) : (0.5 + amp * 0.3) * Math.exp(-(d - r) / (4 + amp * 10));
+        const c = MPAL[Math.max(0, Math.min(3, Math.floor(val * 3 + (BAYER4[(y & 3) * 4 + (x & 3)] + 0.5) / 16)))], i = (y * 72 + x) * 4;
+        D[i] = c[0]; D[i + 1] = c[1]; D[i + 2] = c[2]; D[i + 3] = 255;
+      }
+      g.putImageData(im, 0, 0);
+    };
+    const frame = now => {
+      if (!alive) return; raf = requestAnimationFrame(frame);
+      if (now - last < 66) return; last = now;
+      let target = 0;
+      if (an && audio && !audio.paused) { an.getByteTimeDomainData(buf); let sum = 0; for (let i = 0; i < buf.length; i++) { const q = (buf[i] - 128) / 128; sum += q * q; } target = Math.min(1, Math.sqrt(sum / buf.length) * 4); }
+      amp += (target - amp) * 0.35;
+      paint(now / 1000, 19 + Math.sin(now / 1000 * 1.1) * 0.8 + amp * 9);
+    };
+    // under reduced motion the orb is drawn once and stays still
+    if (REDUCED) paint(0, 19); else raf = requestAnimationFrame(frame);
+    return () => { alive = false; cancelAnimationFrame(raf); btns.forEach((b, i) => b.removeEventListener("click", handlers[i])); if (audio) audio.pause(); if (ac) ac.close(); cur = null; mark(); tm.textContent = "0:00"; bar.style.width = "0"; };
+  }
+
+  init.moon = (sec, still) => {
+    const s = c => $(c, sec);
+    const undither = ditherFill(sec), sky = s(".m-sky"), sp = moonSplit(s(".m-split"), s(".m-lr")), stopPlayer = moonPlayer(sec);
+    if (still) {
+      sky.width = Math.ceil(sky.clientWidth / 4) || 1; sky.height = Math.ceil(sky.clientHeight / 4) || 1; skyFrame(sky, 1, 0);
+      sp.draw(0.5);
+      return () => { undither(); sp.stop(); stopPlayer(); };
+    }
+
+    // 1. the sky rises through the hole, then the title arrives as crisp text
+    const hs = { p: 0 }, stopSky = moonSky(sky, () => hs.p);
+    gsap.timeline({ scrollTrigger: { trigger: s(".m-hero"), pin: true, scrub: 1, end: "+=260%" } })
+      .to(hs, { p: 1, ease: "power1.inOut", duration: 1 }, 0)
+      .to(s(".cue"), { opacity: 0, duration: 0.08 }, 0)
+      .fromTo(s(".m-title"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.25 }, 0.62);
+    cue(sec);
+
+    // 2. dream lines, one at a time
+    const ds = $$(".m-dream-lines p", sec), dt = gsap.timeline({ scrollTrigger: { trigger: s(".m-dream"), pin: true, scrub: 1, end: "+=220%" } });
+    ds.forEach((d, i) => { dt.fromTo(d, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3 }, i); if (i < ds.length - 1) dt.to(d, { opacity: 0, y: -24, duration: 0.3 }, i + 0.7); });
+
+    // 3. the valley drifts behind three cards
+    const cards = $$(".m-card", sec), ht = gsap.timeline({ scrollTrigger: { trigger: s(".m-hollow"), pin: true, scrub: 1, end: "+=300%" } })
+      .fromTo(s(".m-wide"), { scale: 1.12, xPercent: 3 }, { scale: 1, xPercent: -3, ease: "none", duration: 3.2 }, 0);
+    cards.forEach((c, i) => { ht.fromTo(c, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, 0.2 + i); if (i < cards.length - 1) ht.to(c, { opacity: 0, y: -30, duration: 0.3 }, 0.95 + i); });
+
+    // 4. the tunnels light up in turn
+    const COL = ["#8F6BD8", "#7FA3F0", "#C8475A", "#C9D4F0", "#C9D4F0"], tun = $$(".m-tun", sec), way = $$(".m-way", sec);
+    const wt = gsap.timeline({ scrollTrigger: { trigger: s(".m-ways"), pin: true, scrub: 1, end: "+=280%" } });
+    tun.forEach((t, i) => wt.to(t, { stroke: COL[i], duration: 0.35 }, i * 0.5).to(way[i], { opacity: 1, duration: 0.3 }, i * 0.5));
+    wt.to({}, { duration: 0.4 });
+
+    // 5. the divider slides in from the far edge to the middle
+    const sv = { f: 1 };
+    gsap.timeline({ scrollTrigger: { trigger: s(".m-real"), pin: true, scrub: 1, end: "+=200%" } })
+      .fromTo(sv, { f: 1 }, { f: 0.5, duration: 1, ease: "power2.inOut", onUpdate: () => sp.draw(sv.f) }, 0)
+      .fromTo(s(".m-lr"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0.6)
+      .fromTo(s(".m-except"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, 1.05)
+      .to({}, { duration: 0.3 });
+
+    // 6. flipbook: hard cuts between the five frames, no fades
+    const fr = $$(".m-frame", sec), stp = $$(".m-step", sec);
+    gsap.set(fr[0], { opacity: 1 }); gsap.set(stp[0], { opacity: 1 });
+    const bt = gsap.timeline({ scrollTrigger: { trigger: s(".m-sword"), pin: true, scrub: 0.4, end: "+=300%" } });
+    for (let i = 1; i < fr.length; i++) bt.set(fr[i - 1], { opacity: 0 }, i).set(fr[i], { opacity: 1 }, i).set(stp[i - 1], { opacity: 0.35 }, i).set(stp[i], { opacity: 1 }, i);
+    bt.to({}, { duration: 0.6 });
+
+    rise(sec, 40);
+    return () => { stopSky(); sp.stop(); stopPlayer(); undither(); };
+  };
+
   /* ------------------------------------------------------------------ about */
   // A dry-brush stroke: many thin bristle lines along a path, each starting late, lifting early and skipping.
   function bristles(ctx, pts, width, color) {
@@ -652,7 +851,7 @@
         b.x += b.vx * dt * sp; b.y += b.vy * dt * sp;
         if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx); } if (b.x > SW - w) { b.x = Math.max(0, SW - w); b.vx = -Math.abs(b.vx); }
         if (b.y < 60) { b.y = 60; b.vy = Math.abs(b.vy); } if (b.y > SH - h) { b.y = Math.max(60, SH - h); b.vy = -Math.abs(b.vy); }
-        const tx = Math.min(64, SW * 0.04), ty = SH * 0.26 + i * SH * 0.2;
+        const tx = Math.min(64, SW * 0.04), ty = SH * 0.2 + i * SH * 0.15;
         b.el.style.transform = "translate(" + (b.x + (tx - b.x) * L).toFixed(1) + "px," + (b.y + (ty - b.y) * L).toFixed(1) + "px)";
       });
       const so = Math.max(0, Math.min(1, (prog - 0.8) / 0.15));
@@ -687,6 +886,7 @@
   }
 
   function mount(name) {
+    gsap.registerPlugin(ScrollTrigger);
     teardown();
     const sec = $(`.tab[data-tab="${name}"]`);
     $$(".tab").forEach(t => { t.hidden = t !== sec; });
@@ -709,6 +909,8 @@
     if (name === current) return;
     if (!animate || REDUCED || current === null) { mount(name); return; }
     busy = true;
+    const done = () => { busy = false; if (queued) { const q = queued; queued = null; go(q); } };
+    if (name === "moon") { ditherWipe(() => mount(name), done); return; }
     wipe.style.background = WIPE[name];
     const set = (clip, t) => { wipe.style.transition = t ? `clip-path ${t}` : "none"; wipe.style.clipPath = clip; };
     set("inset(100% 0% 0% 0%)");
@@ -718,7 +920,7 @@
       mount(name);
       void wipe.offsetWidth;
       set("inset(0% 0% 100% 0%)", ".6s cubic-bezier(.16,1,.3,1)");
-      setTimeout(() => { busy = false; if (queued) { const q = queued; queued = null; go(q); } }, 620);
+      setTimeout(done, 620);
     }, 520);
   }
 
