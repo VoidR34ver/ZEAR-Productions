@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZEAR Studios</title>
+<meta name="description" content="Playtest builds from ZEAR Studios: Hadal, One House Away From Home, Give Me Your Yoghurt and Ouroboros: Oculus.">
+<link rel="preload" href="fonts/archivo-latin-wdth-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-tab="zear">
+
+<!-- ================= BAR ================= -->
+<header class="bar">
+  <a class="mark" href="#zear" data-goto="zear">ZEAR</a>
+  <nav aria-label="Sections">
+    <a href="#zear" data-goto="zear" data-link="zear">Studio</a>
+    <div class="games">
+      <button type="button" data-link="games" aria-haspopup="true" aria-expanded="false" aria-controls="games-menu">Games<span class="caret" aria-hidden="true">▼</span></button>
+      <div class="menu" id="games-menu">
+        <a href="#hadal" data-goto="hadal" data-item="hadal">
+          <span class="m-hadal">Hadal</span>
+          <span class="m-sub">Supergenetics.</span>
+        </a>
+        <a href="#ohafh" data-goto="ohafh" data-item="ohafh">
+          <span class="m-ohafh">One House Away From Home</span>
+          <span class="m-sub">What even is a home?</span>
+        </a>
+        <a href="#gmyy" data-goto="gmyy" data-item="gmyy">
+          <span class="m-gmyy">Give Me Your Yoghurt</span>
+          <span class="m-sub">Little Oak's Creek. Not done yet.</span>
+        </a>
+        <a href="#ouro" data-goto="ouro" data-item="ouro">
+          <span class="m-ouro">OUROBOROS<span class="red"> : OCULUS</span></span>
+          <span class="m-sub">Plays in your browser.</span>
+        </a>
+      </div>
+    </div>
+    <a href="#about" data-goto="about" data-link="about">About</a>
+    <span class="ind" aria-hidden="true"></span>
+  </nav>
+</header>
+<div class="wipe" aria-hidden="true"></div>
+
+<main>
+
+<!-- ======================================================================
+     STUDIO
+     ====================================================================== -->
+<section class="tab" data-tab="zear">
+
+  <!-- 1. giant word flies apart -->
+  <div class="scene z-hero">
+    <h1 class="z-word" aria-label="ZEAR"><span>Z</span><span>E</span><span>A</span><span>R</span></h1>
+    <p class="z-sub">Studios</p>
+    <p class="z-line" data-static><span>Maybe a bit <em>too zealous</em> in my ideas.</span></p>
+    <div class="cue">scroll<div class="cue-line"></div></div>
+  </div>
+
+  <h2 class="z-works">Current works</h2>
+
+  <!-- 2. the four doors -->
+  <div class="z-doors">
+    <a class="door door-h" href="#hadal" data-goto="hadal">
+      <img class="door-img" src="assets/zear/Z-01.jpg" alt="An evolved hunter cruising over the coral reef">
+      <span class="code">Z-01</span>
+      <div class="dt">
+        <span class="dt-name">Hadal</span>
+        <span class="dt-sub">Supergenetics.<span class="arrow">→</span></span>
+      </div>
+    </a>
+    <a class="door door-o" href="#ohafh" data-goto="ohafh">
+      <img class="door-img" src="assets/zear/Z-02.jpg" alt="The core hall, three storeys of galleries">
+      <span class="code">Z-02</span>
+      <div class="dt">
+        <span class="dt-name">One House Away From Home</span>
+        <span class="dt-sub">What even is a home?<span class="arrow">→</span></span>
+      </div>
+    </a>
+    <a class="door door-y" href="#gmyy" data-goto="gmyy">
+      <img class="door-img" src="assets/zear/Z-03.webp" alt="An execute in the church: a thug hangs glowing in the aisle">
+      <span class="code">Z-03</span>
+      <div class="dt">
+        <span class="dt-name">Give Me Your Yoghurt</span>
+        <span class="dt-sub">Little Oak's Creek.<span class="arrow">→</span></span>
+      </div>
+    </a>
+    <a class="door door-u" href="#ouro" data-goto="ouro">
+      <img class="door-img" src="assets/zear/Z-04.webp" alt="Ouroboros: Oculus, floor 1 with the Eye watching">
+      <div class="door-crt" aria-hidden="true"></div>
+      <span class="code">● REC · Z-04</span>
+      <div class="dt">
+        <span class="dt-name">OUROBOROS <span class="red">: OCULUS</span></span>
+        <span class="dt-sub">Numbers, numbers, NUMBERS!<span class="arrow">→</span></span>
+      </div>
+    </a>
+  </div>
+
+  <!-- 3. sideways statements -->
+  <div class="hs z-says">
+    <div class="track">
+      <div class="panel"><span data-skew>Just me.</span></div>
+      <div class="panel"><span data-skew>My games.</span></div>
+      <div class="panel"><span data-skew>Playtest builds, <em>for me.</em></span></div>
+      <div class="panel"><span data-skew>The player's opinion is the one that matters.</span></div>
+    </div>
+  </div>
+
+  <!-- 4. how you can help -->
+  <div class="z-help">
+    <div class="z-help-head">
+      <h2 data-rise>How you can help</h2>
+      <img class="fist" src="assets/zear/fist.webp" width="410" height="410" alt="A fist pointing straight at you">
+    </div>
+    <div class="z-help-list">
+      <div class="help" data-rise>
+        <span class="help-n">01</span>
+        <div><span class="help-t">Tell me what you think.</span><span class="help-d">Any feedback on the games always helps. The form below is anonymous.</span></div>
+      </div>
+      <div class="help" data-rise>
+        <span class="help-n">02</span>
+        <div><span class="help-t">Tell a friend.</span><span class="help-d">Word of mouth spreads the fastest.</span></div>
+      </div>
+      <div class="help" data-rise>
+        <span class="help-n">03</span>
+        <div><span class="help-t">Make things with me.</span><span class="help-d">If you're an artist, 3D modeller, musician or voice actor, feel free to reach out. I sadly can't pay right now, it's not in the budget.</span></div>
+      </div>
+      <div class="help-contact" data-rise>
+        <span>Discord · @i_can_do_anything</span>
+        <!-- address is put together in app.js so scrapers don't find it in the markup -->
+        <a data-mail="zearstudios|gmail.com" href="#zear">zearstudios (at) gmail.com</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-slot" data-game=""></div>
+</section>
+
+<!-- ======================================================================
+     HADAL
+     ====================================================================== -->
+<section class="tab" data-tab="hadal" hidden>
+
+  <!-- 1. the dive -->
+  <div class="scene h-dive">
+    <canvas class="snow" aria-hidden="true"></canvas>
+    <div class="depth" aria-hidden="true">
+      <span class="depth-row"><span class="d-val">0</span><span class="d-unit">m</span></span>
+      <span class="d-zone">surface</span>
+    </div>
+    <h1 class="h-title">Hadal</h1>
+    <div class="h-lines">
+      <p class="l1" data-static>You are a lab animal.</p>
+      <p class="l2" data-static>With a <em>hypergene.</em></p>
+    </div>
+    <div class="cue">dive<div class="cue-line"></div></div>
+  </div>
+
+  <!-- 2. iris reveal -->
+  <div class="scene h-iris">
+    <div class="iris">
+      <img class="iris-img" loading="lazy" src="assets/hadal/H-01.jpg" alt="An evolved hunter with a glowing lure just under the surface, seen from below">
+    </div>
+    <h2 class="iris-text">The world is alive too,<br><em>you know.</em></h2>
+  </div>
+
+  <!-- 3. mutation steps -->
+  <div class="scene h-evolve">
+    <div class="evo-copy">
+      <span class="evo-label">Mutation</span>
+      <div class="steps">
+        <p class="s1" data-static>Start small.</p>
+        <p class="s2" data-static>Level up.</p>
+        <p class="s3" data-static>Keep going.</p>
+        <p class="s4" data-static>The sky... well, the <span class="red">floor</span> is the limit.</p>
+      </div>
+      <div class="bar-rail"><i class="evo-fill"></i></div>
+    </div>
+    <div class="evo-stage">
+      <img class="e1" loading="lazy" src="assets/hadal/H-03.jpg" alt="The starting hunter, 1.1 m">
+      <img class="e2" loading="lazy" src="assets/hadal/H-04.jpg" alt="The same hunter after two mutations: sail fin and fangs">
+      <img class="e3" loading="lazy" src="assets/hadal/H-05.jpg" alt="The same hunter after fifteen mutations">
+      <span class="code">H-03 / 04 / 05</span>
+    </div>
+  </div>
+
+  <!-- 4. stats and size bar -->
+  <div class="h-stats">
+    <div class="stat" data-rise><span class="stat-n" data-count="98">98</span><span class="stat-l">starter species</span></div>
+    <div class="stat" data-rise><span class="stat-n" data-count="5">5</span><span class="stat-l">depth zones</span></div>
+    <div class="stat" data-rise><span class="stat-n" data-count="3">3</span><span class="stat-l">mutations offered per level</span></div>
+    <div class="scale">
+      <div class="scale-end"><span>7 cm</span><span class="stat-l">smallest reef fish</span></div>
+      <div class="bar-rail"><i class="scale-fill"></i></div>
+      <div class="scale-end right"><span>a few hundred m</span><span class="stat-l">biggest predator</span></div>
+      <p class="idgaf">It's cool, idgaf.</p>
+      <figure class="shot wide" data-clip>
+        <img loading="lazy" src="assets/hadal/H-16.webp" alt="A giant red-and-black centipede creature coiled around a rock spire in the dark, lit by blue glow">
+        <span class="code">H-16</span>
+      </figure>
+    </div>
+  </div>
+
+  <!-- 5. zone gallery -->
+  <div class="hs h-zones">
+    <div class="track">
+      <div class="panel"><span class="hs-title" data-skew>Five zones down.</span><span class="hs-note">Reef shelf to hadal trench.</span></div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/hadal/H-09.jpg" alt="Coral reef at 22 m">
+        <div class="cap"><span class="cap-n">01</span><span>Sunlight zone</span><span class="dim">22 m</span><span class="cap-code">H-09</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/hadal/H-10.jpg" alt="Sea fans on a seamount at 590 m">
+        <div class="cap"><span class="cap-n">02</span><span>Twilight zone</span><span class="dim">590 m</span><span class="cap-code">H-10</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/hadal/H-11.jpg" alt="Cold-water coral mounds at 1,560 m">
+        <div class="cap"><span class="cap-n">03</span><span>Midnight zone</span><span class="dim">1,560 m</span><span class="cap-code">H-11</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/hadal/H-12.jpg" alt="A whale-fall graveyard at 4,990 m">
+        <div class="cap"><span class="cap-n">04</span><span>Abyssal zone</span><span class="dim">4,990 m</span><span class="cap-code">H-12</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/hadal/H-13.jpg" alt="Black smokers on the trench floor at 10,780 m">
+        <div class="cap"><span class="cap-n">05</span><span>Hadal zone</span><span class="dim">10,780 m</span><span class="cap-code">H-13</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. parallax pair -->
+  <div class="h-pair">
+    <div class="pair-a">
+      <figure class="shot" data-clip><img loading="lazy" src="assets/hadal/H-14.jpg" alt="A 55 m Gigantodon lunging, jaws open, while the player dodges"><span class="code">H-14</span></figure>
+      <p><b>Yes, I know, even more soulslike combat.</b></p>
+    </div>
+    <div class="pair-b">
+      <figure class="shot tall" data-clip><img loading="lazy" src="assets/hadal/H-15.jpg" alt="The player leaping out of a rough sea"><span class="code">H-15</span></figure>
+      <p><b>Storms are alive too, you know.</b> And so are the currents.</p>
+    </div>
+  </div>
+
+  <!-- 7. access -->
+  <div class="get">
+    <p class="get-note" data-rise>Windows · macOS · Linux · playtest build</p>
+    <a class="get-btn" data-request href="#hadal">Request access</a>
+    <p class="get-how" data-rise>Builds are invite-only for now. Ask in the form below.</p>
+  </div>
+
+  <div class="feedback-slot" data-game="Hadal"></div>
+</section>
+
+<!-- ======================================================================
+     ONE HOUSE AWAY FROM HOME
+     ====================================================================== -->
+<section class="tab" data-tab="ohafh" hidden>
+  <div class="wall" aria-hidden="true"></div>
+
+  <!-- 1. pixel crush -->
+  <div class="scene o-crush">
+    <canvas class="crush" data-src="assets/ohafh/O-02.jpg" aria-hidden="true"></canvas>
+    <div class="crush-final" aria-hidden="true"></div>
+    <div class="o-head">
+      <p class="o-place" data-static>Graubünden, 1998</p>
+      <h1 class="o-title" data-static>One House<br>Away From Home</h1>
+      <p class="o-line" data-static>No need for high resolutions.</p>
+    </div>
+    <div class="cue">enter<div class="cue-line"></div></div>
+  </div>
+
+  <!-- 2. the castle -->
+  <div class="o-castle">
+    <div>
+      <div class="o-stat" data-rise><span class="o-stat-n" data-count="15">15</span><span class="o-stat-l">buildings</span></div>
+      <div class="o-stat" data-rise><span class="o-stat-n" data-count="228">228</span><span class="o-stat-l">rooms, all reachable</span></div>
+      <p class="o-re8" data-rise>RE8, but it's all Dimitrescu.</p>
+    </div>
+    <figure class="o-mountain">
+      <div class="o-moon" aria-hidden="true"></div>
+      <img loading="lazy" src="assets/ohafh/O-12.webp" width="1920" height="1080" alt="The castle on its mountain at night, windows lit, forest below">
+      <figcaption>Graubünden, from the valley.</figcaption>
+    </figure>
+  </div>
+
+  <!-- 3. ammo -->
+  <div class="scene o-ammo">
+    <div class="rounds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ammo-lines">
+      <p class="a1" data-static>Survive now?</p>
+      <p class="a2" data-static>Or progress later?</p>
+    </div>
+  </div>
+
+  <!-- 4. gallery -->
+  <div class="hs o-gallery">
+    <div class="track">
+      <div class="panel"><span class="hs-title" data-skew>Travel through<br>history.</span></div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/ohafh/O-03.jpg" alt="The great hall, Gothic">
+        <div class="cap"><span>Great hall</span><span>Gothic</span><span class="cap-code">O-03</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/ohafh/O-04.jpg" alt="The old chapel, Romanesque">
+        <div class="cap"><span>Old chapel</span><span>Romanesque</span><span class="cap-code">O-04</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/ohafh/O-06.jpg" alt="Burial galleries cut into the rock">
+        <div class="cap"><span>West gallery</span><span>burial galleries in the rock</span><span class="cap-code">O-06</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/ohafh/O-07.jpg" alt="The cloister walk at night">
+        <div class="cap"><span>Cloister ward</span><span>the cloister walk</span><span class="cap-code">O-07</span></div>
+      </div>
+      <div class="panel">
+        <img data-skew loading="lazy" src="assets/ohafh/O-08.jpg" alt="The 1920s guest wing lounge">
+        <div class="cap"><span>Guest wing</span><span>1920s lounge</span><span class="cap-code">O-08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. two features -->
+  <div class="o-features">
+    <div>
+      <figure class="shot portrait o-nozombie" data-clip><span>I haven't coded zombies yet :/</span></figure>
+      <p data-rise>Zombies hear you, every noise has a type, and they react to it.</p>
+    </div>
+    <div>
+      <figure class="shot portrait" data-clip><img loading="lazy" src="assets/ohafh/O-11.jpg" alt="The map screen: floor plan of the guest wing"><span class="code">O-11</span></figure>
+      <p data-rise>A proper map, Resident Evil style.</p>
+    </div>
+  </div>
+
+  <div class="o-status">
+    <p data-rise>It's early, the HUD is a placeholder, there's no terrain around the castle yet, some doors go nowhere, and there isn't much enemy or story content.</p>
+  </div>
+
+  <!-- 6. download -->
+  <div class="get" data-builds="ohafh">
+    <p class="get-note" data-rise>Linux · Windows (low-spec) · playtest build</p>
+    <a class="get-btn" href="https://github.com/VoidR34ver/ZEAR-Productions/releases/tag/ohafh-latest">Download</a>
+    <div class="picker" hidden></div>
+    <p class="get-how" data-rise>Pick the zip for your system, unzip it, run it.</p>
+  </div>
+
+  <div class="feedback-slot" data-game="One House Away From Home"></div>
+</section>
+
+<!-- ======================================================================
+     GIVE ME YOUR YOGHURT
+     ====================================================================== -->
+<section class="tab" data-tab="gmyy" hidden>
+
+  <!-- 1. foil lid peels -->
+  <div class="scene y-lid">
+    <img loading="lazy" src="assets/gmyy/Y-01.webp" alt="Main Street, Little Oak's Creek, at the hazy end of the afternoon, finger gun out">
+    <canvas class="foil" aria-hidden="true"></canvas>
+    <h1 class="sr-only">Give Me Your Yoghurt</h1>
+    <p class="y-hero-line y-shout" data-static>A finger gun.<br>A town. A lot of yoghurt.</p>
+  </div>
+
+  <!-- 2. the O is a porthole -->
+  <div class="scene y-hook">
+    <div class="y-stack" role="img" aria-label="Give me your yoghurt">
+      <span>Give</span>
+      <span>me</span>
+      <span>your</span>
+      <span>Y<span class="y-o"></span>GHURT</span>
+    </div>
+    <div class="y-hook-full" role="img" aria-label="A thug goes off as yoghurt"></div>
+    <p class="y-hook-line y-shout" data-static>Yes, they go off as yoghurt.</p>
+  </div>
+
+  <!-- 3. spoon steps -->
+  <div class="scene y-spoon">
+    <div class="y-how">
+      <div class="y-cup" aria-hidden="true">
+        <div class="y-cup-lid"></div>
+        <div class="y-cup-body">
+          <div class="y-cup-in"><div class="y-fill"></div></div>
+          <div class="y-cup-label">YOGHURT · 150 G</div>
+        </div>
+      </div>
+      <div>
+        <span class="doto">DIRECTIONS FOR USE</span>
+        <div class="y-steps">
+          <div class="ys1" data-static><p class="y-step-t">Shoot.</p><p class="y-step-d">Yoghurt shots, straight from your finger.</p></div>
+          <div class="ys2" data-static><p class="y-step-t">Execute.</p><p class="y-step-d">Fill the epic bar, then lift one into the sky.</p></div>
+          <div class="ys3" data-static><p class="y-step-t">Burst.</p><p class="y-step-d">He goes off as yoghurt. Your bar refills.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="y-stage">
+      <img class="y1" loading="lazy" src="assets/gmyy/Y-03.webp" alt="A yoghurt shot leaves your finger at three thugs on the front lawn">
+      <img class="y2" loading="lazy" src="assets/gmyy/Y-04.webp" alt="With the epic bar full, a thug is lifted white-hot into the sky">
+      <img class="y3" loading="lazy" src="assets/gmyy/Y-05.webp" alt="He goes off as yoghurt">
+      <span class="code">Y-03 / 04 / 05</span>
+    </div>
+  </div>
+
+  <!-- 4. nutrition label -->
+  <div class="y-nutrition">
+    <div class="y-label" data-rise>
+      <h2>Nutrition information</h2>
+      <p class="y-per">Per town, so far</p>
+      <div class="y-rule thick"></div>
+      <div class="y-row"><span>Tasks a day</span><span data-count="25">25</span></div>
+      <div class="y-row"><span>Tasks in the pool</span><span data-count="168">168</span></div>
+      <div class="y-row"><span>Townsfolk</span><span data-count="18">18</span></div>
+      <div class="y-row"><span>Enemies, in 4 gangs</span><span data-count="17">17</span></div>
+      <div class="y-row"><span>Buildings to enter</span><span data-count="19">19</span></div>
+      <div class="y-row"><span>Doors</span><span data-count="32">32</span></div>
+      <div class="y-row"><span>Ranks, F to Y</span><span data-count="7">7</span></div>
+      <div class="y-rule"></div>
+      <p class="y-contains">Contains: milk.</p>
+    </div>
+  </div>
+
+  <!-- 5. the chilled aisle -->
+  <div class="hs y-aisle">
+    <div class="y-aisle-sign" aria-hidden="true">CHILLED · KEEP BELOW 5°C · DAIRY</div>
+    <div class="y-aisle-glow" aria-hidden="true"></div>
+    <div class="track">
+      <div class="panel y-aisle-head"><span class="hs-title" data-skew>Little Oak's<br>Creek.</span><span class="doto">AISLE 3 · CHILLED</span></div>
+
+      <div class="panel fridge">
+        <div class="fridge-top"><span>The diner</span></div>
+        <div class="fridge-glass" data-skew>
+          <div class="fridge-lamp" aria-hidden="true"></div>
+          <div class="fridge-rack" aria-hidden="true"></div>
+          <div class="fridge-item"><div>
+            <img loading="lazy" src="assets/gmyy/Y-06.webp" alt="The diner: checker floor, chrome counter, red stools">
+            <div class="fridge-band"><span>GIVE ME YOUR YOGHURT</span><span>Y-06</span></div>
+          </div></div>
+          <div class="fridge-shelf" aria-hidden="true"></div>
+          <div class="fridge-price"><span>The diner</span><span>0.00</span></div>
+          <div class="fridge-shine" aria-hidden="true"></div>
+          <div class="fridge-frost" aria-hidden="true"></div>
+          <div class="fridge-handle" aria-hidden="true"></div>
+        </div>
+        <div class="fridge-foot"><span class="fridge-temp">3°C</span><span>AISLE 3 · DOOR 1</span></div>
+      </div>
+
+      <div class="panel fridge">
+        <div class="fridge-top"><span>The stone church</span></div>
+        <div class="fridge-glass" data-skew>
+          <div class="fridge-lamp" aria-hidden="true"></div>
+          <div class="fridge-rack" aria-hidden="true"></div>
+          <div class="fridge-item"><div>
+            <img loading="lazy" src="assets/gmyy/Y-07.webp" alt="The stone church on Main Street, grocery behind it">
+            <div class="fridge-band"><span>GIVE ME YOUR YOGHURT</span><span>Y-07</span></div>
+          </div></div>
+          <div class="fridge-shelf" aria-hidden="true"></div>
+          <div class="fridge-price"><span>The stone church</span><span>0.00</span></div>
+          <div class="fridge-shine" aria-hidden="true"></div>
+          <div class="fridge-frost" aria-hidden="true"></div>
+          <div class="fridge-handle" aria-hidden="true"></div>
+        </div>
+        <div class="fridge-foot"><span class="fridge-temp">3°C</span><span>AISLE 3 · DOOR 2</span></div>
+      </div>
+
+      <div class="panel fridge">
+        <div class="fridge-top"><span>The witch's cottage</span></div>
+        <div class="fridge-glass" data-skew>
+          <div class="fridge-lamp" aria-hidden="true"></div>
+          <div class="fridge-rack" aria-hidden="true"></div>
+          <div class="fridge-item"><div>
+            <img loading="lazy" src="assets/gmyy/Y-08.webp" alt="The witch's cottage in the woods, cauldron bubbling">
+            <div class="fridge-band"><span>GIVE ME YOUR YOGHURT</span><span>Y-08</span></div>
+          </div></div>
+          <div class="fridge-shelf" aria-hidden="true"></div>
+          <div class="fridge-price"><span>The witch's cottage</span><span>0.00</span></div>
+          <div class="fridge-shine" aria-hidden="true"></div>
+          <div class="fridge-frost" aria-hidden="true"></div>
+          <div class="fridge-handle" aria-hidden="true"></div>
+        </div>
+        <div class="fridge-foot"><span class="fridge-temp">3°C</span><span>AISLE 3 · DOOR 3</span></div>
+      </div>
+
+      <div class="panel fridge">
+        <div class="fridge-top"><span>Dairy aisle</span></div>
+        <div class="fridge-glass" data-skew>
+          <div class="fridge-lamp" aria-hidden="true"></div>
+          <div class="fridge-rack" aria-hidden="true"></div>
+          <div class="fridge-item"><div>
+            <img loading="lazy" src="assets/gmyy/Y-09.webp" alt="The grocery store's dairy aisle">
+            <div class="fridge-band"><span>GIVE ME YOUR YOGHURT</span><span>Y-09</span></div>
+          </div></div>
+          <div class="fridge-shelf" aria-hidden="true"></div>
+          <div class="fridge-price"><span>Dairy aisle</span><span>0.00</span></div>
+          <div class="fridge-shine" aria-hidden="true"></div>
+          <div class="fridge-frost" aria-hidden="true"></div>
+          <div class="fridge-handle" aria-hidden="true"></div>
+        </div>
+        <div class="fridge-foot"><span class="fridge-temp">3°C</span><span>AISLE 3 · DOOR 4</span></div>
+      </div>
+
+      <div class="panel fridge">
+        <div class="fridge-top"><span>The stone circle</span></div>
+        <div class="fridge-glass" data-skew>
+          <div class="fridge-lamp" aria-hidden="true"></div>
+          <div class="fridge-rack" aria-hidden="true"></div>
+          <div class="fridge-item"><div>
+            <img loading="lazy" src="assets/gmyy/Y-10.webp" alt="The stone circle with the sun through the trilithon">
+            <div class="fridge-band"><span>GIVE ME YOUR YOGHURT</span><span>Y-10</span></div>
+          </div></div>
+          <div class="fridge-shelf" aria-hidden="true"></div>
+          <div class="fridge-price"><span>The stone circle</span><span>0.00</span></div>
+          <div class="fridge-shine" aria-hidden="true"></div>
+          <div class="fridge-frost" aria-hidden="true"></div>
+          <div class="fridge-handle" aria-hidden="true"></div>
+        </div>
+        <div class="fridge-foot"><span class="fridge-temp">3°C</span><span>AISLE 3 · DOOR 5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. stickers -->
+  <div class="y-stickers">
+    <div class="sticker">
+      <img loading="lazy" src="assets/gmyy/UI-02.webp" alt="The Tab clipboard with the day's 25 tasks">
+      <div class="burst">25 jobs a day. Pin one.</div>
+    </div>
+    <div class="sticker">
+      <img loading="lazy" src="assets/gmyy/UI-03.webp" alt="The end-of-day rank screen">
+      <div class="burst">Then bed. Then a rank.</div>
+    </div>
+  </div>
+
+  <div class="y-status">
+    <p class="doto" data-rise>BEST BEFORE: NOT YET BUILT · PLAYTEST · LOT 4.7.2</p>
+    <p data-rise>It's early, there's no main menu, no tutorial and no build yet, and nobody has played a full day by hand.</p>
+  </div>
+
+  <!-- 7. price tag -->
+  <div class="y-get">
+    <div class="y-tag" role="img" aria-label="Coming soon"><span class="y-tag-hole" aria-hidden="true"></span><span>Coming soon</span></div>
+    <p data-rise>Free · no build yet · playtest build when there is one</p>
+  </div>
+
+  <div class="feedback-slot" data-game="Give Me Your Yoghurt"></div>
+</section>
+
+<!-- ======================================================================
+     OUROBOROS: OCULUS
+     ====================================================================== -->
+<section class="tab" data-tab="ouro" hidden>
+  <div class="crt" aria-hidden="true"></div>
+  <div class="crt-roll" aria-hidden="true"></div>
+  <div class="o-hud" aria-hidden="true">
+    <div class="o-hud-top"><span><span class="o-rec">●</span> REC · SUBJECT 0451 · OBSERVED</span><span class="o-clock">00:00:00:00</span></div>
+    <span class="o-pos">LOC 0000 · 0000</span>
+    <span class="o-sees">THE EYE SEES ALL</span>
+    <div class="o-hud-frame"></div>
+  </div>
+  <div class="o-corner" aria-hidden="true">
+    <div class="eye" data-eye="corner">
+      <div class="lid t"></div>
+      <div class="sclera"><div class="iris-dot"><i></i><b></b></div></div>
+      <div class="lid b"></div>
+    </div>
+  </div>
+
+  <!-- 1. the eye opens -->
+  <div class="scene o-hero">
+    <div class="eye" data-eye="hero" aria-hidden="true">
+      <div class="lid t"></div>
+      <div class="sclera"><div class="iris-dot"><i></i><b></b></div></div>
+      <div class="lid b"></div>
+    </div>
+    <div class="o-name">
+      <h1 class="o-title-type" aria-label="Ouroboros: Oculus"><span class="o-t1"></span><span class="o-t2"></span></h1>
+    </div>
+    <p class="o-says whisper">you are here.</p>
+  </div>
+
+  <!-- 2. directives -->
+  <div class="o-directives">
+    <div data-rise><span class="o-dir">DIRECTIVE 01</span><p class="o-big">Sudoku.</p></div>
+    <div data-rise><span class="o-dir">DIRECTIVE 02</span><p>Every cell has ONE correct digit.</p></div>
+    <div data-rise><span class="o-dir">DIRECTIVE 03</span><p>Anything else costs a <span class="red">Flicker</span>.</p></div>
+    <div data-rise><span class="o-dir">DIRECTIVE 04</span><p>Precision.</p><p class="whisper">obey.</p></div>
+  </div>
+
+  <div class="o-ticker-wrap" aria-hidden="true">
+    <div class="o-ticker">PRECISION IS FREEDOM · ERRORS ARE RECORDED · THE EYE SEES ALL · OBEY · DO NOT GUESS · EVERY CELL IS WATCHED · PRECISION IS FREEDOM · ERRORS ARE RECORDED · THE EYE SEES ALL · OBEY · DO NOT GUESS · EVERY CELL IS WATCHED · </div>
+  </div>
+
+  <!-- 3. score cascade -->
+  <div class="scene o-score">
+    <p class="o-score-head">C H I P S &nbsp;× &nbsp;M U L T</p>
+    <div class="o-rowgrid" aria-hidden="true">
+      <div class="o-cell"><span>5</span></div>
+      <div class="o-cell"><span class="o-dig">9</span></div>
+      <div class="o-cell"><span>2</span></div>
+      <div class="o-cell"><span class="o-dig">7</span></div>
+      <div class="o-cell"><span>6</span></div>
+      <div class="o-cell"><span class="o-dig">8</span></div>
+      <div class="o-cell"><span class="o-dig">4</span></div>
+      <div class="o-cell"><span>3</span></div>
+      <div class="o-cell"><span class="o-dig">1</span></div>
+    </div>
+    <div class="chips">
+      <span class="chip" style="--c:#FFCC00">ROW</span><span class="chip" style="--c:#00CCFF">COLUMN</span><span class="chip" style="--c:#CC66FF">BOX</span><span class="chip" style="--c:#FFFFFF">TRIPLE SIGHT</span><span class="chip chip-red" style="--c:#FF0000">OUROBOROS</span>
+    </div>
+    <p class="o-sum">+<span class="o-total">0</span></p>
+    <div class="o-murmur">
+      <p class="o-m1 whisper" data-static>chain them.</p>
+      <p class="o-m2 whisper" data-static>....good.</p>
+    </div>
+  </div>
+
+  <!-- 4. the weeping eye -->
+  <div class="scene o-weep">
+    <div class="o-weep-eye">
+      <div class="eye" data-eye="weep" aria-hidden="true">
+        <div class="lid t"></div>
+        <div class="sclera"><div class="iris-dot"><i></i><b></b></div></div>
+        <div class="lid b"></div>
+      </div>
+      <div class="o-tears" aria-hidden="true"></div>
+    </div>
+    <div class="o-weep-lines">
+      <p data-static>i'm sorry.</p>
+      <p data-static>forgive me.</p>
+      <p data-static>you don't deserve this.</p>
+      <p data-static>...take this, please.</p>
+    </div>
+  </div>
+
+  <!-- 5. merchant -->
+  <div class="hs o-shop">
+    <div class="track">
+      <div class="panel o-shop-head"><span class="hs-title" data-skew>MERCHANT</span><span class="whisper">spend wisely.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>BLOOD PACT</span><span class="price">6 ◆</span></div><span class="item-fx">Lose 1 Flicker. Gain ×2 mult for this floor.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>THIRD EYE</span><span class="price">16 ◆</span></div><span class="item-fx">Every 7th placement scores ×3.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>HOLLOW CROWN</span><span class="price">22 ◆</span></div><span class="item-fx">Empty cells at floor end each give +50 chips.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>THE PATIENT</span><span class="price">24 ◆</span></div><span class="item-fx">+1 mult for each empty row remaining at floor end.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>THE UNBLINKING</span><span class="price">25 ◆</span></div><span class="item-fx">First placement each floor scores ×5.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>VOID PACT</span><span class="price">30 ◆</span></div><span class="item-fx">All mult ×3. But lose 25% score on floor start.</span></div>
+      <div class="panel item"><div class="item-head" data-skew><span>OUROBOROS</span><span class="price">32 ◆</span></div><span class="item-fx">When you complete a row, its mult bonus also applies to the matching column.</span></div>
+    </div>
+  </div>
+
+  <!-- 6. play it -->
+  <div class="o-play">
+    <p class="whisper" data-rise>we meet.</p>
+    <div class="o-frame" data-rise>
+      <iframe loading="lazy" src="play/ouroboros-oculus.html" title="Ouroboros: Oculus, playable"></iframe>
+    </div>
+    <p class="o-play-note" data-rise>Old prototype · plays in your browser · progress saves on this device</p>
+    <a class="o-full" data-rise href="play/ouroboros-oculus.html" target="_blank" rel="noopener"><span class="wide-only">OPEN FULL SCREEN</span><span class="narrow-only">PLAY FULL SCREEN</span></a>
+  </div>
+
+  <div class="o-old">
+    <p class="whisper" data-rise>an old prototype. definitely not finished.</p>
+  </div>
+
+  <div class="feedback-slot" data-game="Ouroboros: Oculus"></div>
+</section>
+
+<!-- ======================================================================
+     ABOUT
+     ====================================================================== -->
+<section class="tab" data-tab="about" hidden>
+
+  <!-- 1. the portrait paints itself -->
+  <div class="scene a-hero">
+    <canvas class="pfp-cv" data-src="assets/about/pfp.webp" role="img" aria-label="ZEAR's hand-drawn self-portrait: a bald figure in thick dry-brush strokes"></canvas>
+    <div class="a-name">
+      <h1 class="a-word">ZEAR</h1>
+      <p class="a-sub">It's my initials.</p>
+    </div>
+    <div class="cue">scroll<div class="cue-line"></div></div>
+  </div>
+
+  <div class="a-lines">
+    <p data-rise>I love games.</p>
+    <p data-rise>So I make them, roughly many at a time.</p>
+    <p data-rise>I also write music, and draw.</p>
+    <p data-rise>The portrait up there? I painted that.</p>
+  </div>
+
+  <!-- 2. projects bounce, then settle into a list -->
+  <div class="scene b-stage">
+    <div class="b-head">
+      <span data-brush="#7A3329" aria-hidden="true"></span>
+      <p>Too many projects.</p>
+    </div>
+    <a class="b-item" href="#hadal" data-goto="hadal"><span class="b-hadal">HADAL</span><span class="b-status">Hadal · playtest build, by request</span></a>
+    <a class="b-item" href="#ohafh" data-goto="ohafh"><span class="b-ohafh">One House Away From Home</span><span class="b-status">One House · early playtest</span></a>
+    <a class="b-item" href="#gmyy" data-goto="gmyy"><span class="b-gmyy">GIVE ME YOUR YOGHURT</span><span class="b-status">Give Me Your Yoghurt · not done yet</span></a>
+    <p class="b-count">3 projects active.</p>
+  </div>
+
+  <div class="a-compose">
+    <h2 data-rise>I compose.</h2>
+    <span class="a-wave" data-brush="#B8612F" data-wave aria-hidden="true"></span>
+    <p data-rise>Tracks coming soon.</p>
+  </div>
+
+  <!-- 3. art -->
+  <div class="hs a-art">
+    <div class="track">
+      <div class="panel"><h2 class="hs-title" data-skew>I draw.</h2></div>
+      <div class="panel"><img data-skew loading="lazy" src="assets/about/art-01.webp" width="1600" height="1600" alt="Painting by ZEAR"></div>
+      <div class="panel"><img data-skew loading="lazy" src="assets/about/pfp.webp" width="768" height="1020" alt="ZEAR's self-portrait"></div>
+    </div>
+  </div>
+
+  <div class="a-else">
+    <h2 data-rise>Elsewhere</h2>
+    <a data-rise href="https://github.com/VoidR34ver" rel="noopener">GitHub<span data-brush="#D7A948" aria-hidden="true"></span></a>
+  </div>
+
+  <div class="feedback-slot" data-game="About me"></div>
+</section>
+
+</main>
+
+<footer class="foot">ZEAR Studios.</footer>
+
+<!-- ================= FEEDBACK FORM (copied into every tab) ================= -->
+<template id="feedback-tpl">
+  <div class="feedback">
+    <div data-rise>
+      <h2>Recommen&shy;dations?</h2>
+      <p>I won't know you, your name or your email.</p>
+    </div>
+    <form novalidate>
+      <label data-rise>
+        <span class="f-label">Which game</span>
+        <select name="game">
+          <option value="">Choose</option>
+          <option>Hadal</option>
+          <option>One House Away From Home</option>
+          <option>Give Me Your Yoghurt</option>
+          <option>Ouroboros: Oculus</option>
+          <option>About me</option>
+          <option>Just the website</option>
+        </select>
+      </label>
+      <label data-rise>
+        <span class="f-label">Which build, if you know</span>
+        <input type="text" name="build" placeholder="latest" maxlength="60" autocomplete="off">
+      </label>
+      <div class="f-rating" data-rise>
+        <span class="f-label" id="rating-label">How was it</span>
+        <div class="f-stars" role="radiogroup" aria-label="Rating from 1 to 5">
+          <button type="button" role="radio" aria-checked="false">1</button><button type="button" role="radio" aria-checked="false">2</button><button type="button" role="radio" aria-checked="false">3</button><button type="button" role="radio" aria-checked="false">4</button><button type="button" role="radio" aria-checked="false">5</button>
+        </div>
+        <span class="f-label">1 is bad, 5 is great</span>
+      </div>
+      <label data-rise>
+        <span class="f-label">What happened</span>
+        <textarea name="text" maxlength="4000"></textarea>
+      </label>
+      <input class="f-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="f-turnstile"></div>
+      <div class="f-send" data-rise>
+        <button type="submit">Send</button>
+        <span class="f-status" role="status"></span>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
