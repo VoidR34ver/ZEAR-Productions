@@ -24,12 +24,14 @@ const GAMES = {
   "One House Away From Home": "ohafh",
   "Give Me Your Yoghurt": "gmyy",
   "Ouroboros: Oculus": "ouro",
+  "Once Upon a Moon": "moon",
   "About me": "about",
   "Just the website": "website"
 };
 
 const PLATFORMS = [
-  { id: "windows", label: "Windows", match: /-(win|windows)(?![a-z])/i },
+  { id: "windows", label: "Windows", match: /-(win|windows)(?!-lowspec)(?![a-z])/i },
+  { id: "windowslow", label: "Windows (low-spec)", match: /-(win|windows)-lowspec(?![a-z])/i },
   { id: "macos", label: "macOS", match: /-(mac|macos)(?![a-z])/i },
   { id: "linux", label: "Linux", match: /-linux(?![a-z])/i }
 ];
