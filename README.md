@@ -18,8 +18,11 @@ irm https://raw.githubusercontent.com/VoidR34ver/ZEAR-Productions/odin/install.p
 
 Then open a new terminal and type `odin`.
 
-The first `/mimir` message downloads Mimir's model, about 7 GB; `odin --setup` fetches it ahead of time.
-On Windows and Linux this build runs the model on the processor alone, so replies are slow.
+The first `/mimir` message downloads Mimir's model, about 7 to 8 GB; `odin --setup` fetches it ahead of time.
+
+On Windows and Linux the installer first tries the build that runs the model on the graphics card
+(through Vulkan: NVIDIA, AMD or Intel, with current drivers). If that build can't start, it installs
+the processor-only one instead, where replies are slow. The last line it prints says which you got.
 Everything Odin keeps (the model, saved files, the browser profile) lives in `~/Odin`.
 
 The builds themselves are the `odin-latest` release of this repository.
