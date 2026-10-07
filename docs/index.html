@@ -6,7 +6,7 @@
 <title>ZEAR Studios</title>
 <meta name="description" content="Playtest builds from ZEAR Studios: Hadal, One House Away From Home, Give Me Your Yoghurt, Ouroboros: Oculus and Once Upon a Moon.">
 <link rel="preload" href="fonts/archivo-latin-wdth-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=11">
+<link rel="stylesheet" href="css/site.css?v=12">
 </head>
 <body data-tab="zear">
 
@@ -306,7 +306,7 @@
   <div class="scene o-ammo">
     <div class="rounds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <div class="ammo-lines">
-      <p class="a1" data-static>Shoot him?</p>
+      <p class="a1" data-static>Shoot it?</p>
       <p class="a2" data-static>Or the lock?</p>
     </div>
   </div>
@@ -980,24 +980,74 @@
       </ol>
     </div>
 
-    <!-- 5. stack and status -->
-    <div class="od-two od-under">
-      <div class="od-stack">
-        <h2 class="od-h" data-scr>Under the hood</h2>
-        <ul class="od-list">
-          <li><span class="od-dot" aria-hidden="true">•</span><span>Python, in one file of about 3,800 lines</span></li>
-          <li><span class="od-dot" aria-hidden="true">•</span><span>Textual and Rich for the interface</span></li>
-          <li><span class="od-dot" aria-hidden="true">•</span><span>Requests and BeautifulSoup for the reader</span></li>
-          <li><span class="od-dot" aria-hidden="true">•</span><span>Playwright driving headless Chromium for the live engine</span></li>
-          <li><span class="od-dot" aria-hidden="true">•</span><span>MLX on Apple silicon for the model</span></li>
-          <li><span class="od-dot" aria-hidden="true">•</span><span>Mimir2: a 12B parameter 4-bit model</span></li>
+    <!-- 5. requirements -->
+    <div class="od-needs">
+      <h2 class="od-h" data-scr>What it needs</h2>
+      <p class="od-wide">Mimir runs on your own machine, so the machine has to be able to hold it. Odin on its own asks for very little.</p>
+      <div class="od-pane od-req">
+        <span class="od-tag" aria-hidden="true">Requirements</span>
+        <div class="od-sys-grid">
+          <div class="od-pane od-sys">
+            <span class="od-tag" aria-hidden="true">Mac</span>
+            <dl aria-label="Mac">
+              <div><dt>Processor</dt><dd>Apple silicon (M1 or later)</dd></div>
+              <div><dt>Memory</dt><dd>16 GB</dd></div>
+              <div><dt>Graphics card</dt><dd>Built in</dd></div>
+              <div><dt>Free disk</dt><dd>About 10 GB</dd></div>
+              <div><dt>System</dt><dd>macOS 14 or later</dd></div>
+            </dl>
+          </div>
+          <div class="od-pane od-sys">
+            <span class="od-tag" aria-hidden="true">Windows</span>
+            <dl aria-label="Windows">
+              <div><dt>Processor</dt><dd>64-bit Intel or AMD, six or more modern cores</dd></div>
+              <div><dt>Memory</dt><dd>16 GB</dd></div>
+              <div><dt>Graphics card</dt><dd>Optional. About 10 to 12 GB of video memory to help</dd></div>
+              <div><dt>Free disk</dt><dd>About 12 GB</dd></div>
+              <div><dt>System</dt><dd>Windows 10 or 11, 64-bit</dd></div>
+            </dl>
+          </div>
+          <div class="od-pane od-sys">
+            <span class="od-tag" aria-hidden="true">Linux</span>
+            <dl aria-label="Linux">
+              <div><dt>Processor</dt><dd>64-bit Intel or AMD, six or more modern cores</dd></div>
+              <div><dt>Memory</dt><dd>16 GB</dd></div>
+              <div><dt>Graphics card</dt><dd>Optional. About 10 to 12 GB of video memory to help</dd></div>
+              <div><dt>Free disk</dt><dd>About 12 GB</dd></div>
+              <div><dt>System</dt><dd>A recent distribution (Ubuntu 24.04 or newer, or the like)</dd></div>
+            </dl>
+          </div>
+        </div>
+        <ul class="od-fine">
+          <li>Most of the disk and memory is Mimir: a 12-billion-parameter model, about 6 to 8 GB on disk.</li>
+          <li>A machine with 8 GB of memory is not expected to run Mimir.</li>
+          <li>Without a graphics card, Mimir still runs on the processor, slowly: a few words a second.</li>
+          <li>On a Mac the model runs through Apple's MLX and uses the whole chip.</li>
+          <li>Intel Macs, and Windows or Linux on ARM, are not supported.</li>
         </ul>
       </div>
-      <div class="od-pane od-status">
-        <span class="od-tag" aria-hidden="true">Status</span>
-        <span class="od-ring" aria-hidden="true"></span>
-        <p>A personal project by ZEAR Studios, in active development. Not released; there is nothing to download yet. A Windows version is in the works.</p>
+      <p class="od-wide od-aside">Odin alone, as a browser, runs on anything that can run Chromium: about 4 GB of memory and 1 GB of disk.</p>
+    </div>
+
+    <!-- 6. download: one build per system, straight from the odin-latest release -->
+    <div class="od-get">
+      <h2 class="od-h" data-scr>Get it</h2>
+      <button type="button" class="od-dl" aria-expanded="false" aria-controls="od-pick">Download</button>
+      <div class="od-pick" id="od-pick" hidden>
+        <p class="od-pick-note">pick your system</p>
+        <div class="od-pick-row">
+          <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/download/odin-latest/odin-windows-x64.zip" rel="noopener"><span>[1]</span>Windows</a>
+          <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/download/odin-latest/odin-macos-arm64.tar.gz" rel="noopener"><span>[2]</span>macOS</a>
+          <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/download/odin-latest/odin-linux-x64.tar.gz" rel="noopener"><span>[3]</span>Linux</a>
+        </div>
+        <p class="od-pick-note">with a graphics card: <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/download/odin-latest/odin-windows-x64-vulkan.zip" rel="noopener">Windows (Vulkan)</a> · <a href="https://github.com/VoidR34ver/ZEAR-Productions/releases/download/odin-latest/odin-linux-x64-vulkan.tar.gz" rel="noopener">Linux (Vulkan)</a></p>
       </div>
+    </div>
+
+    <div class="od-pane od-status">
+      <span class="od-tag" aria-hidden="true">Status</span>
+      <span class="od-ring" aria-hidden="true"></span>
+      <p>A personal project by me, in active development.</p>
     </div>
 
   </div>
@@ -1114,6 +1164,6 @@
 
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
-<script src="js/app.js?v=11"></script>
+<script src="js/app.js?v=12"></script>
 </body>
 </html>

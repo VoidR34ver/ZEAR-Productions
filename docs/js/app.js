@@ -1060,6 +1060,14 @@
   /* ------------------------------------------------------------------ clicks, history, boot */
   document.addEventListener("click", e => {
     if (!drops.some(d => d.contains(e.target))) closeMenus();
+    const dl = e.target.closest(".od-dl");
+    if (dl) {
+      // Odin's Download button opens the choice of system
+      const pick = $("#od-pick"), open = pick.hidden;
+      pick.hidden = !open;
+      dl.setAttribute("aria-expanded", open ? "true" : "false");
+      return;
+    }
     const q = e.target.closest("[data-request]");
     if (q) {
       // "Request access" takes you to this tab's feedback form
