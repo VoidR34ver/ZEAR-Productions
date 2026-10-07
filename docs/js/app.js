@@ -9,11 +9,11 @@
   // Cloudflare Turnstile site key. Empty = no Turnstile, and nothing is loaded from Cloudflare.
   const TURNSTILE_SITEKEY = "";
 
-  const TABS = ["zear", "hadal", "ohafh", "gmyy", "ouro", "moon", "about"];
+  const TABS = ["zear", "hadal", "ohafh", "gmyy", "ouro", "moon", "odin", "about"];
   // Colour of the wipe when switching to a tab. Foil for Yoghurt, ochre for About.
   // Moon has its own dither dissolve instead (ditherWipe).
   const WIPE = {
-    zear: "#f7f7f5", hadal: "#000000", ohafh: "#1e100a", ouro: "#000000", about: "#D7A948",
+    zear: "#f7f7f5", hadal: "#000000", ohafh: "#1e100a", ouro: "#000000", odin: "#000000", about: "#D7A948",
     gmyy: "repeating-linear-gradient(0deg,rgba(255,255,255,.35) 0 1px,rgba(0,0,0,0) 1px 3px),linear-gradient(135deg,#d9dbdf,#f4f5f7 35%,#bfc3c9 60%,#e8e9ec)"
   };
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -866,17 +866,129 @@
     return () => { cleanup(); bodies.forEach(b => b.el.style.transform = ""); stats.forEach(e => e.style.opacity = ""); count.style.opacity = ""; };
   };
 
+  /* ------------------------------------------------------------------ odin */
+  // Mimir's face. face-frames.json holds every frame as plain text; each glyph is tinted by its
+  // place in the ramp. live = it blinks, glances, follows the pointer and reads what you type.
+  function odinFace(sec, live) {
+    const pre = $(".od-face", sec), said = $(".od-said", sec), form = $(".od-ask", sec), box = $(".od-line", sec);
+    let alive = true, raf = 0, F = null, tone = {};
+    const cache = new Map(), esc = g => g === "<" ? "&lt;" : g === ">" ? "&gt;" : g === "&" ? "&amp;" : g;
+    const paint = fr => {
+      if (!fr || pre._shown === fr) return;
+      if (!cache.has(fr)) cache.set(fr, [...fr].map(g => g === "\n" || g === " " ? g : '<span style="color:' + tone[g] + '">' + esc(g) + "</span>").join(""));
+      pre.innerHTML = cache.get(fr); pre._shown = fr;
+    };
+    let look = 0, glance = [0, 0], follow = [0, -1], lidAt = -1, nextBlink = 2, mouth = [0, 0], speech = "", at = 0;
+    const tick = now => {
+      const t = now / 1000, speaking = at < speech.length;
+      if (t > glance[1]) { const away = Math.random() < 0.3; glance = [away ? Math.random() * 12 - 6 : 0, t + (away ? 0.3 + Math.random() * 0.6 : 1.5 + Math.random() * 3.5)]; }
+      const aim = speaking ? 0 : t < follow[1] ? follow[0] : glance[0];
+      look += (aim - look) * 0.5;
+      if (t > nextBlink) { lidAt = t; nextBlink = t + F.blinkEverySeconds[0] + Math.random() * (F.blinkEverySeconds[1] - F.blinkEverySeconds[0]); }
+      const blink = Math.floor((t - lidAt) / F.blinkFrameSeconds);
+      let shape = [0, 0];
+      if (speaking) {
+        const ch = speech[Math.floor(at)].toLowerCase();
+        shape = F.visemes[ch] || (/[a-z0-9]/.test(ch) ? [0.25, 0.2] : [0.06, 0]);
+        at += F.speechCharsPerSecond / F.fps;
+        said.textContent = speech.slice(0, Math.floor(at));
+      }
+      mouth = [mouth[0] + (shape[0] - mouth[0]) * 0.55, mouth[1] + (shape[1] - mouth[1]) * 0.45];
+      const open = Math.round(mouth[0] * 8), wide = Math.round(mouth[1] * 4);
+      if (speaking || open > 0) paint(F.mouth[open + "," + wide]);
+      else if (lidAt >= 0 && blink < F.eye.blink.length) paint(F.eye.blink[blink]);
+      else paint(F.eye.look[String(Math.max(-7, Math.min(7, Math.round(look))))]);
+    };
+    fetch("assets/odin/face/face-frames.json").then(r => r.json()).then(J => {
+      if (!alive) return;
+      F = J; tone = Object.fromEntries([...F.ramp].map((g, i) => [g, F.tones[i]]));
+      paint(F.eye.look["0"]);
+      if (!live) return;
+      let last = 0;
+      const loop = now => { if (!alive) return; if (now - last >= 1000 / F.fps) { last = now; tick(now); } raf = requestAnimationFrame(loop); };
+      raf = requestAnimationFrame(loop);
+    }).catch(err => console.warn("[zear] odin face:", err));
+    const onSub = e => {
+      e.preventDefault();
+      const v = box.value.trim(); if (!v) return;
+      box.value = "";
+      if (live && F) { speech = v; at = 0; said.textContent = ""; } else said.textContent = v;
+    };
+    const onMove = e => { follow = [((e.clientX / innerWidth) * 2 - 1) * 7, performance.now() / 1000 + 1.5]; };
+    // The command bar types example lines by itself until you click into it.
+    const LINES = ["what's the time?", "how old is egypt?", "open en.wikipedia.org/wiki/Yggdrasil", "what is at the bottom of the well?", "who are you, and what is this place?", "tell me what the ravens are for"];
+    let demoT = 0, demoOn = false, li = 0;
+    const later = (fn, ms) => { clearTimeout(demoT); demoT = setTimeout(() => { if (alive && demoOn) fn(); }, ms); };
+    const typeLine = () => {
+      const line = LINES[li++ % LINES.length]; let i = 0;
+      const step = () => {
+        box.value = line.slice(0, ++i);
+        if (i < line.length) later(step, 55 + Math.random() * 90);
+        else later(erase, 2200);
+      };
+      const erase = () => {
+        box.value = box.value.slice(0, -1);
+        if (box.value) later(erase, 28);
+        else later(typeLine, 450);
+      };
+      later(step, 300);
+    };
+    const startDemo = () => { if (demoOn || !live) return; demoOn = true; later(typeLine, 1400); };
+    const stopDemo = () => { if (!demoOn) return; demoOn = false; clearTimeout(demoT); box.value = ""; };
+    const onFocus = () => stopDemo();
+    const onBlur = () => { if (!box.value) { clearTimeout(demoT); demoT = setTimeout(() => { if (alive && document.activeElement !== box && !box.value) startDemo(); }, 4000); } };
+    box.addEventListener("focus", onFocus); box.addEventListener("blur", onBlur);
+    startDemo();
+    form.addEventListener("submit", onSub);
+    if (live) window.addEventListener("pointermove", onMove);
+    return () => { alive = false; demoOn = false; clearTimeout(demoT); box.value = ""; box.removeEventListener("focus", onFocus); box.removeEventListener("blur", onBlur); cancelAnimationFrame(raf); form.removeEventListener("submit", onSub); window.removeEventListener("pointermove", onMove); };
+  }
+
+  init.odin = (sec, still) => {
+    const vids = $$("video", sec);
+    if (still) {
+      // reduced motion: a still eye, nothing plays by itself
+      vids.forEach(v => { v.controls = true; v.preload = "metadata"; });
+      return odinFace(sec, false);
+    }
+    const offFace = odinFace(sec, true);
+    // the recordings only load and play while they're on screen
+    const vio = new IntersectionObserver(es => es.forEach(e => {
+      const v = e.target;
+      if (e.isIntersecting) { v.preload = "auto"; const p = v.play(); if (p && p.catch) p.catch(() => {}); } else v.pause();
+    }), { threshold: 0.25 });
+    vids.forEach(v => { v.muted = true; v.playsInline = true; vio.observe(v); });
+    // headings resolve out of random characters, once, the first time they're seen
+    const GL = "!<>-_/[]{}=+*^?#~:;$ZO8DNM", RUNES = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ", timers = [];
+    const scr = el => {
+      const txt = el.dataset.txt || (el.dataset.txt = el.textContent), n = txt.length, t0 = performance.now(), dur = 500 + Math.min(n, 60) * 12;
+      const G = el.dataset.glyphs === "runes" ? RUNES : GL;
+      if (!el.hasAttribute("aria-hidden")) el.setAttribute("aria-label", txt);
+      const step = () => {
+        const p = (performance.now() - t0) / dur;
+        if (p >= 1) { el.textContent = txt; return; }
+        el.textContent = [...txt].map((c, i) => c === " " || i / n < p ? c : G[Math.floor(Math.random() * G.length)]).join("");
+        timers.push(setTimeout(step, 40));
+      };
+      step();
+    };
+    const sio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { sio.unobserve(e.target); scr(e.target); } }), { threshold: 0.6 });
+    $$("[data-scr]", sec).forEach(el => sio.observe(el));
+    return () => { offFace(); vio.disconnect(); sio.disconnect(); timers.forEach(clearTimeout); vids.forEach(v => v.pause()); $$("[data-scr]", sec).forEach(el => { if (el.dataset.txt) el.textContent = el.dataset.txt; }); };
+  };
+
   /* ------------------------------------------------------------------ tabs */
-  const wipe = $(".wipe"), ind = $(".ind"), games = $(".games"), gamesBtn = $("button", games);
+  const wipe = $(".wipe"), ind = $(".ind"), drops = $$(".drop");
   let current = null, ctx = null, cleanup = null, busy = false, queued = null;
 
   function moveInd(name) {
     if (!name) return;
-    const a = $(`[data-link="${name === "zear" || name === "about" ? name : "games"}"]`);
+    const a = $(`[data-link="${name === "zear" || name === "about" ? name : name === "odin" ? "programs" : "games"}"]`);
     $$("[data-link]").forEach(x => { const on = x === a; x.classList.toggle("on", on); if (x.tagName === "A") on ? x.setAttribute("aria-current", "page") : x.removeAttribute("aria-current"); });
     $$("[data-item]").forEach(x => { const on = x.dataset.item === name; x.classList.toggle("on", on); on ? x.setAttribute("aria-current", "page") : x.removeAttribute("aria-current"); });
     ind.style.width = a.offsetWidth + "px";
-    ind.style.transform = `translateX(${a.offsetLeft}px)`;
+    // measured against the nav: the drop-down buttons sit inside their own positioned wrapper
+    ind.style.transform = `translateX(${a.getBoundingClientRect().left - ind.parentElement.getBoundingClientRect().left}px)`;
   }
 
   function teardown() {
@@ -893,7 +1005,8 @@
     document.body.dataset.tab = name;
     window.scrollTo(0, 0);
     // this tab's pictures were waiting; fetch them all now so the sideways galleries don't pop in
-    $$("img[loading=lazy]", sec).forEach(i => { i.loading = "eager"; if (!i.complete) i.addEventListener("load", softRefresh, { once: true }); });
+    // (Odin's screenshots stay lazy: they sit far down a long page)
+    if (name !== "odin") $$("img[loading=lazy]", sec).forEach(i => { i.loading = "eager"; if (!i.complete) i.addEventListener("load", softRefresh, { once: true }); });
     try {
       if (REDUCED) cleanup = init[name](sec, true) || null;
       else ctx = gsap.context(() => { cleanup = init[name](sec, false) || null; }, sec);
@@ -924,22 +1037,29 @@
     }, 520);
   }
 
-  /* ------------------------------------------------------------------ games menu */
+  /* ------------------------------------------------------------------ nav drop-downs (Games, Programs) */
   const canHover = window.matchMedia("(hover: hover)").matches;
-  let menuT = 0;
-  const setMenu = open => { clearTimeout(menuT); games.classList.toggle("open", open); gamesBtn.setAttribute("aria-expanded", open ? "true" : "false"); };
-  if (canHover) {
-    games.addEventListener("mouseenter", () => setMenu(true));
-    games.addEventListener("mouseleave", () => { clearTimeout(menuT); menuT = setTimeout(() => setMenu(false), 120); });
-  }
-  // A mouse click on a hover device keeps it open (hover already opened it); keyboard and touch toggle.
-  gamesBtn.addEventListener("click", e => setMenu(canHover && e.detail > 0 ? true : !games.classList.contains("open")));
-  games.addEventListener("focusout", e => { if (!games.contains(e.relatedTarget)) setMenu(false); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && games.classList.contains("open")) { setMenu(false); gamesBtn.focus(); } });
+  const isOpen = d => d.classList.contains("open");
+  // Opening one closes the other.
+  const setMenu = (d, open) => {
+    drops.forEach(x => { const on = open && x === d; clearTimeout(x._t); x.classList.toggle("open", on); $("button", x).setAttribute("aria-expanded", on ? "true" : "false"); });
+  };
+  const closeMenus = () => setMenu(null, false);
+  drops.forEach(d => {
+    const btn = $("button", d);
+    if (canHover) {
+      d.addEventListener("mouseenter", () => setMenu(d, true));
+      d.addEventListener("mouseleave", () => { clearTimeout(d._t); d._t = setTimeout(() => { if (isOpen(d)) setMenu(d, false); }, 120); });
+    }
+    // A mouse click on a hover device keeps it open (hover already opened it); keyboard and touch toggle.
+    btn.addEventListener("click", e => setMenu(d, canHover && e.detail > 0 ? true : !isOpen(d)));
+    d.addEventListener("focusout", e => { if (isOpen(d) && !d.contains(e.relatedTarget)) setMenu(d, false); });
+  });
+  document.addEventListener("keydown", e => { const d = drops.find(isOpen); if (e.key === "Escape" && d) { setMenu(d, false); $("button", d).focus(); } });
 
   /* ------------------------------------------------------------------ clicks, history, boot */
   document.addEventListener("click", e => {
-    if (!games.contains(e.target)) setMenu(false);
+    if (!drops.some(d => d.contains(e.target))) closeMenus();
     const q = e.target.closest("[data-request]");
     if (q) {
       // "Request access" takes you to this tab's feedback form
@@ -954,7 +1074,7 @@
     const a = e.target.closest("[data-goto]");
     if (!a) return;
     e.preventDefault();
-    setMenu(false);
+    closeMenus();
     const name = a.dataset.goto;
     if (name !== current) { try { history.pushState(null, "", "#" + name); } catch (_) {} }
     go(name);

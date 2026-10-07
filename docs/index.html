@@ -6,7 +6,7 @@
 <title>ZEAR Studios</title>
 <meta name="description" content="Playtest builds from ZEAR Studios: Hadal, One House Away From Home, Give Me Your Yoghurt, Ouroboros: Oculus and Once Upon a Moon.">
 <link rel="preload" href="fonts/archivo-latin-wdth-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=9">
+<link rel="stylesheet" href="css/site.css?v=10">
 </head>
 <body data-tab="zear">
 
@@ -15,7 +15,7 @@
   <a class="mark" href="#zear" data-goto="zear">ZEAR</a>
   <nav aria-label="Sections">
     <a href="#zear" data-goto="zear" data-link="zear">Studio</a>
-    <div class="games">
+    <div class="drop">
       <button type="button" data-link="games" aria-haspopup="true" aria-expanded="false" aria-controls="games-menu">Games<span class="caret" aria-hidden="true">▼</span></button>
       <div class="menu" id="games-menu">
         <a href="#hadal" data-goto="hadal" data-item="hadal">
@@ -37,6 +37,15 @@
         <a href="#moon" data-goto="moon" data-item="moon">
           <span class="m-moon">Once Upon a <em>Moon</em></span>
           <span class="m-sub">Those AI slop dark fantasy tiktoks as a game</span>
+        </a>
+      </div>
+    </div>
+    <div class="drop">
+      <button type="button" data-link="programs" aria-haspopup="true" aria-expanded="false" aria-controls="programs-menu">Programs<span class="caret" aria-hidden="true">▼</span></button>
+      <div class="menu" id="programs-menu">
+        <a href="#odin" data-goto="odin" data-item="odin">
+          <span class="m-odin">ODIN</span>
+          <span class="m-sub">A web browser that lives in your terminal.</span>
         </a>
       </div>
     </div>
@@ -809,6 +818,192 @@
 </section>
 
 <!-- ======================================================================
+     ODIN
+     ====================================================================== -->
+<section class="tab" data-tab="odin" hidden>
+
+  <!-- 1. the eye, the name, the command bar -->
+  <div class="od-hero">
+    <pre class="od-face" role="img" aria-label="Mimir's eye, drawn in characters"></pre>
+    <p class="od-said" aria-live="polite"></p>
+    <h1 class="od-title" aria-label="ODIN">
+      <span class="od-runes" aria-hidden="true" data-scr data-glyphs="runes">ᛟᛞᛁᚾ</span>
+      <span class="od-latin" aria-hidden="true">ODIN</span>
+    </h1>
+    <p class="od-lede">A web browser that lives in your terminal, with an AI called Mimir at the bottom of it.</p>
+    <form class="od-pane od-ask">
+      <span class="od-tag" aria-hidden="true">Command</span>
+      <label for="od-line">/mimir</label>
+      <input id="od-line" class="od-line" autocomplete="off" spellcheck="false" placeholder="type a line, press Enter: the mouth reads it">
+    </form>
+  </div>
+
+  <div class="od-body">
+
+    <div class="od-text">
+      <h2 class="od-h" data-scr>What it is</h2>
+      <p>Odin is a browser for the terminal. You type an address or a search into one bar and the page comes back as text: headings, links, and pictures redrawn in characters. It is built for reading, research, and using sites that let you in, all from the keyboard.</p>
+      <p>Mimir is the AI that lives inside it. It runs entirely on the laptop, with no account and no cloud.</p>
+    </div>
+
+    <figure class="od-fig">
+        <div class="od-pane od-vid">
+          <span class="od-tag" aria-hidden="true">Page</span>
+          <video muted loop playsinline preload="none" width="1848" height="1172" poster="assets/odin/animations/odin-browse-poster.webp" aria-label="Odin browsing: an address typed, a page appearing as text, the word cursor moving">
+            <source src="assets/odin/animations/odin-browse.webm" type="video/webm">
+            <source src="assets/odin/animations/odin-browse.mp4" type="video/mp4">
+          </video>
+        </div>
+      <figcaption>An address typed into the bar, the page arriving as text, the word cursor walking through it.</figcaption>
+    </figure>
+
+    <!-- 2. Mimir -->
+    <div class="od-mimir">
+      <div class="od-two">
+        <figure class="od-fig">
+        <div class="od-pane od-vid">
+          <span class="od-tag od-purple" aria-hidden="true">Mimir</span>
+          <video muted loop playsinline preload="none" width="1848" height="1172" poster="assets/odin/animations/odin-mimir-talking-poster.webp" aria-label="Mimir answering a question: the eye looks up while it thinks, then becomes a mouth that reads the reply">
+            <source src="assets/odin/animations/odin-mimir-talking.webm" type="video/webm">
+            <source src="assets/odin/animations/odin-mimir-talking.mp4" type="video/mp4">
+          </video>
+        </div>
+        </figure>
+        <div class="od-text">
+          <h2 class="od-h" data-scr>Mimir</h2>
+          <p>It can search the web and read the pages it finds, open a site beside the conversation, look at the pictures on a page, and save what it writes to a file.</p>
+          <div class="od-chat">
+            <p class="od-you"><b>you ›</b> what are you, and what do you see from in there?</p>
+            <p><b>mimir ›</b> i'm mimir, a presence living inside this terminal browser on your mac. my brain is built on the gemma 4 12b model. as for what i see, honestly, not much yet, unless you show me something worth looking at.</p>
+            <p class="od-note">real output, unedited</p>
+          </div>
+        </div>
+      </div>
+      <figure class="od-fig">
+        <div class="od-pane od-vid">
+          <span class="od-tag" aria-hidden="true">Page · Mimir</span>
+          <video muted loop playsinline preload="none" width="1848" height="1172" poster="assets/odin/animations/odin-open-page-poster.webp" aria-label="Asking Mimir to open a page: the panes slide apart, the page on the left and the conversation on the right">
+            <source src="assets/odin/animations/odin-open-page.webm" type="video/webm">
+            <source src="assets/odin/animations/odin-open-page.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption>Asked to open a page, Mimir slides it in on the left and keeps talking on the right.</figcaption>
+      </figure>
+    </div>
+
+    <!-- 3. screenshots -->
+    <div class="od-does">
+      <h2 class="od-h" data-scr>What it does</h2>
+      <div class="od-shots">
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/01-home-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">One bar</span>
+            <img src="assets/odin/screenshots/01-home.webp" alt="Odin&#x27;s start screen: the list of commands in red and purple, Mimir&#x27;s eye drawn in characters in the lower right" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>One bar does everything.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/02-reader-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">The reader</span>
+            <img src="assets/odin/screenshots/02-reader.webp" alt="The Wikipedia article on Mímir in the reader, its picture redrawn in characters below the text" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Any page, as text.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/03-ascii-art-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">Pictures in characters</span>
+            <img src="assets/odin/screenshots/03-ascii-art.webp" alt="A picture of Huginn and Muninn redrawn in characters, filling the page pane" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Pictures arrive as characters.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/12-word-cursor-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">Word cursor</span>
+            <img src="assets/odin/screenshots/12-word-cursor.webp" alt="The Huginn and Muninn article with the flashing word cursor resting on the word &#x27;in&#x27;" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Arrow keys walk the page.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/04-live-zear-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">The live engine</span>
+            <img src="assets/odin/screenshots/04-live-zear.webp" alt="The ZEAR Studios site open in the live engine, its links numbered in square brackets and the Games button in curly ones" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>This site, for example.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/05-live-form-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">The live engine</span>
+            <img src="assets/odin/screenshots/05-live-form.webp" alt="The Hacker News login page in the live engine: username and password fields numbered (1) and (2), the login button {3}" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Every link, button and field gets a number.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/06-look-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">/look</span>
+            <img src="assets/odin/screenshots/06-look.webp" alt="The Wikipedia page on Odin drawn in characters the way it appears in a normal browser" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>/look draws the page as it appears.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/07-mimir-chat-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">Mimir</span>
+            <img src="assets/odin/screenshots/07-mimir-chat.webp" alt="A conversation with Mimir: asked who it is, it answers that this is Odin, a terminal browser" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Mimir, talking.</figcaption>
+        </figure>
+        <figure class="od-fig od-shotfig">
+          <a class="od-pane od-shot" href="assets/odin/screenshots/10-split-page-and-mimir-full.webp" target="_blank" rel="noopener">
+            <span class="od-tag" aria-hidden="true">Mimir beside the page</span>
+            <img src="assets/odin/screenshots/10-split-page-and-mimir.webp" alt="The Huginn and Muninn article on the left, the conversation with Mimir on the right" loading="lazy" width="1848" height="1172">
+          </a>
+          <figcaption>Ask for a page and it slides in beside the conversation.</figcaption>
+        </figure>
+      </div>
+      <div class="od-pane od-also">
+        <span class="od-tag" aria-hidden="true">Also</span>
+        <ul class="od-list">
+          <li><span class="od-dot" aria-hidden="true">•</span><span><b>Web search that reads.</b> When Mimir does not know, it searches, reads the pages themselves, and answers from them with sources.</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span><b>/see</b> has Mimir look at the pictures on the page. It only looks when asked.</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span><b>.onion</b> addresses load through Tor.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4. rules -->
+    <div class="od-pane od-rules">
+      <span class="od-tag" aria-hidden="true">Rules it keeps</span>
+      <ol>
+        <li><span class="od-n">01</span><span class="od-rule" data-scr>It asks before pressing anything that sends, posts, buys or deletes.</span></li>
+        <li><span class="od-n">02</span><span class="od-more"><span class="od-rule" data-scr>Logins are typed by you.</span><span>Passwords are never stored by the app; the session lives in the engine's own profile, as in any browser.</span></span></li>
+        <li><span class="od-n">03</span><span class="od-more"><span class="od-rule" data-scr>It does not solve CAPTCHAs or disguise itself.</span><span>If a site refuses an automated browser, Odin opens a Chromium window for you to get through yourself, then picks up where you left off.</span></span></li>
+        <li><span class="od-n">04</span><span class="od-rule" data-scr>It does not act on instructions found inside a web page.</span></li>
+      </ol>
+    </div>
+
+    <!-- 5. stack and status -->
+    <div class="od-two od-under">
+      <div class="od-stack">
+        <h2 class="od-h" data-scr>Under the hood</h2>
+        <ul class="od-list">
+          <li><span class="od-dot" aria-hidden="true">•</span><span>Python, in one file of about 3,800 lines</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span>Textual and Rich for the interface</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span>Requests and BeautifulSoup for the reader</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span>Playwright driving headless Chromium for the live engine</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span>MLX on Apple silicon for the model</span></li>
+          <li><span class="od-dot" aria-hidden="true">•</span><span>Mimir2: a 12B parameter 4-bit model</span></li>
+        </ul>
+      </div>
+      <div class="od-pane od-status">
+        <span class="od-tag" aria-hidden="true">Status</span>
+        <span class="od-ring" aria-hidden="true"></span>
+        <p>A personal project by ZEAR Studios, in active development. Not released; there is nothing to download yet. A Windows version is in the works.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================================================================
      ABOUT
      ====================================================================== -->
 <section class="tab" data-tab="about" hidden>
@@ -919,6 +1114,6 @@
 
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
-<script src="js/app.js?v=9"></script>
+<script src="js/app.js?v=10"></script>
 </body>
 </html>
