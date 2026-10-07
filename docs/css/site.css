@@ -11,6 +11,9 @@
 @font-face { font-family: "Plex Mono"; src: url(../fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "IM Fell English"; src: url(../fonts/im-fell-english-latin-400-normal.woff2) format("woff2"); font-style: normal; font-display: swap; }
 @font-face { font-family: "IM Fell English"; src: url(../fonts/im-fell-english-latin-400-italic.woff2) format("woff2"); font-style: italic; font-display: swap; }
+@font-face { font-family: "Fira Code"; src: url(../fonts/fira-code-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fira Code"; src: url(../fonts/fira-code-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans Runic"; src: url(../fonts/noto-sans-runic-runic-400-normal.woff2) format("woff2"); font-display: swap; unicode-range: U+16A0-16F8; }
 @font-face { font-family: "Fraktur"; src: url(../fonts/unifrakturmaguntia-latin-400-normal.woff2) format("woff2"); font-display: swap; }
 
 /* ------------------------------------------------------------------ tokens */
@@ -22,6 +25,7 @@
   --bowl: "Bowlby One", "Archivo", sans-serif;
   --doto: "Doto", "Plex Mono", monospace;
   --fell: "IM Fell English", Georgia, serif;
+  --fira: "Fira Code", "JetBrains Mono", Menlo, Consolas, monospace;
   --bar-h: 52px;
   --vh: 100vh;
 }
@@ -34,6 +38,7 @@ body[data-tab=ohafh]  { --bg: #1e100a; --fg: #efe4d0; --line: rgba(239,228,208,.
 body[data-tab=gmyy]   { --bg: #FBFBF8; --fg: #1F3FA8; --line: rgba(31,63,168,.22);   --ind: #E0306A; --accent: #1F3FA8; --on-accent: #FBFBF8; }
 body[data-tab=ouro]   { --bg: #000000; --fg: #ffffff; --line: rgba(255,255,255,.2);  --ind: #FF0000; --accent: #FF0000; --on-accent: #000; }
 body[data-tab=moon]   { --bg: #0A0D1F; --fg: #C9D4F0; --line: rgba(201,212,240,.18); --ind: #6B5EA8; --accent: #C9D4F0; --on-accent: #0A0D1F; }
+body[data-tab=odin]   { --bg: #000000; --fg: #ff2a2a; --line: #8a0303; --ind: #ff2a2a; --accent: #ff2a2a; --on-accent: #000; }
 body[data-tab=about]  { --bg: #0B1013; --fg: #E9DCC0; --line: rgba(215,169,72,.22);  --ind: #D7A948; --accent: #D7A948; --on-accent: #0B1013; }
 
 /* ------------------------------------------------------------------ base */
@@ -55,11 +60,11 @@ em { font-style: normal; }
 .bar nav { position: relative; display: flex; height: 100%; }
 .bar [data-link] { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 100%; border: 0; background: transparent; color: inherit; cursor: pointer; text-decoration: none; font: 13px var(--mono); opacity: .55; transition: opacity .3s; }
 .bar [data-link].on, .bar [data-link]:hover { opacity: 1; }
-.games { position: relative; height: 100%; }
+.drop { position: relative; height: 100%; }
 .caret { display: inline-block; font-size: 9px; transition: transform .25s; }
-.games.open .caret { transform: rotate(180deg); }
+.drop.open .caret { transform: rotate(180deg); }
 .menu { position: absolute; top: 100%; right: 0; min-width: 300px; display: none; flex-direction: column; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-top: 0; transition: background-color .6s, color .6s; }
-.games.open .menu { display: flex; }
+.drop.open .menu { display: flex; }
 .menu a { display: grid; gap: 4px; padding: 16px 18px; text-decoration: none; border-top: 1px solid rgba(127,127,127,.25); transition: background-color .2s; }
 .menu a:first-child { border-top: 0; }
 .menu a:hover, .menu a:focus-visible { background: rgba(127,127,127,.12); }
@@ -70,6 +75,7 @@ em { font-style: normal; }
 .m-ouro { font: 700 20px var(--mono); letter-spacing: .3em; }
 .m-moon { font: 400 27px/1 var(--fell); }
 .m-moon em, .door-m em, .tab[data-tab=moon] em { font-style: italic; }
+.m-odin { font: 700 22px var(--fira); letter-spacing: .3em; color: #ff2a2a; }
 .m-sub { font: 12px var(--mono); opacity: .7; }
 .ind { position: absolute; bottom: -1px; left: 0; height: 3px; width: 0; background: var(--ind); transition: transform .45s cubic-bezier(.7,0,.2,1), width .45s cubic-bezier(.7,0,.2,1); }
 
@@ -649,10 +655,74 @@ em { font-style: normal; }
 .f-status { min-height: 1.6em; font-size: 14px; opacity: .8; }
 
 /* ======================================================================
+   ODIN: a terminal page. Red on black, purple headings, double-ruled panes.
+   ====================================================================== */
+.tab[data-tab=odin] { position: relative; background: #000; color: #ff2a2a; font: 16px/1.65 var(--fira); --red: #ff2a2a; --blood: #8a0303; --purple: #a855f7; }
+.tab[data-tab=odin] p { margin: 0; text-wrap: pretty; }
+.tab[data-tab=odin] a:hover { color: var(--red); }
+.tab[data-tab=odin] input::placeholder { color: #8a0303; opacity: 1; }
+.od-hero { min-height: 100vh; min-height: 100dvh; display: grid; align-content: center; justify-items: center; gap: 22px; padding: 92px clamp(16px,4vw,48px) 56px; text-align: center; }
+.od-face { margin: 0; font: 700 clamp(9px,2.9vw,26px)/1.2 var(--fira); letter-spacing: 0; white-space: pre; height: 14.4em; width: 19.2em; max-width: 100%; overflow: hidden; text-align: left; }
+.od-said { min-height: 1.65em; max-width: 60ch; }
+.od-title { margin: 0; display: grid; justify-items: center; gap: 12px; font-weight: 400; }
+.od-runes { padding-left: .16em; color: var(--purple); font: 400 clamp(64px,13vw,168px)/1 "Noto Sans Runic", serif; letter-spacing: .16em; }
+.od-latin { padding-left: .6em; font-size: clamp(14px,1.6vw,20px); font-weight: 700; letter-spacing: .6em; }
+.od-lede { max-width: 44ch; font-size: clamp(16px,1.6vw,19px); }
+/* a pane: double rule with its name sitting on the top edge, lit while hovered or focused */
+.od-pane { position: relative; border: 3px double var(--blood); transition: border-color .2s; }
+.od-pane:hover, .od-pane:focus-within { border-color: var(--red); }
+.od-tag { position: absolute; top: -0.75em; left: 1.25rem; padding: 0 .6em; background: #000; color: var(--red); text-transform: uppercase; line-height: 1.2; font-size: 14px; }
+.od-purple { color: var(--purple); }
+.od-ask { width: min(100%,760px); margin-top: 18px; padding: 20px 16px 12px; display: flex; gap: 12px; align-items: baseline; text-align: left; }
+.od-ask label { flex: none; color: var(--purple); }
+.od-line { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: #fff; font: inherit; caret-color: var(--red); padding: 0; }
+.od-body { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px,4vw,48px) 120px; display: grid; gap: clamp(88px,12vw,150px); }
+.od-text { display: grid; gap: 20px; }
+.od-body > .od-text { max-width: 68ch; }
+.od-h { margin: 0 0 8px; color: var(--purple); font-size: clamp(26px,3.6vw,44px); line-height: 1.1; font-weight: 700; text-decoration: underline; text-underline-offset: .18em; text-decoration-thickness: 2px; }
+.od-does .od-h, .od-stack .od-h { margin: 0; }
+.od-fig { margin: 0; display: grid; gap: 14px; }
+.od-fig figcaption { font-size: 15px; text-wrap: pretty; }
+.od-vid { padding: 22px clamp(8px,1.6vw,18px) clamp(8px,1.6vw,18px); }
+.od-vid video { display: block; width: 100%; height: auto; aspect-ratio: 1848/1172; background: #000; }
+.od-mimir { display: grid; gap: clamp(56px,8vw,96px); }
+.od-two { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,380px),1fr)); gap: clamp(32px,5vw,64px); align-items: center; }
+.od-chat { display: grid; gap: 12px; margin-top: 12px; padding-top: 20px; border-top: 1px solid var(--blood); font-size: 15px; }
+.od-you { color: var(--purple); }
+.od-chat .od-note { color: var(--blood); font-size: 13px; }
+.od-does { display: grid; gap: clamp(36px,5vw,56px); }
+.od-shots { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,440px),1fr)); gap: clamp(40px,4vw,56px) clamp(24px,3vw,40px); }
+.od-shotfig { gap: 12px; align-content: start; }
+.od-shot { display: block; padding: 22px 10px 10px; outline: none; }
+.od-shot img { display: block; width: 100%; height: auto; }
+.od-also { padding: 28px clamp(16px,2.4vw,28px) 22px; }
+.od-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.od-list li { display: grid; grid-template-columns: auto 1fr; gap: 12px; }
+.od-list li > span:last-child { text-wrap: pretty; }
+.od-list b { color: var(--purple); }
+.od-dot { color: var(--blood); }
+.od-stack .od-list { gap: 10px; }
+.od-rules { padding: clamp(40px,5vw,64px) clamp(18px,4vw,56px) clamp(32px,4vw,52px); }
+.od-rules ol { margin: 0; padding: 0; list-style: none; display: grid; gap: clamp(24px,3vw,36px); }
+.od-rules li { display: grid; grid-template-columns: auto 1fr; gap: clamp(14px,2.4vw,32px); align-items: baseline; }
+.od-n { color: var(--purple); font-size: clamp(16px,1.6vw,20px); }
+.od-rule { font-size: clamp(20px,2.7vw,34px); line-height: 1.3; font-weight: 700; text-wrap: pretty; }
+.od-more { display: grid; gap: 8px; }
+.od-more > span:last-child { text-wrap: pretty; }
+.od-under { gap: clamp(40px,6vw,80px); align-items: start; }
+.od-stack { display: grid; gap: 24px; }
+.od-status { padding: 28px clamp(16px,2.4vw,24px) 22px; display: flex; gap: 14px; align-items: baseline; }
+.od-ring { flex: none; width: .8em; height: .8em; border: 2px solid var(--blood); border-radius: 50%; transform: translateY(.05em); }
+
+/* ======================================================================
    PHONES
    ====================================================================== */
 @media (max-width: 640px) {
   .menu { min-width: min(300px, calc(100vw - 24px)); }
+  /* four nav items have to fit, and both menus hang from the right edge of the nav */
+  .bar { gap: 8px; }
+  .bar [data-link] { padding: 0 7px; gap: 5px; }
+  .drop { position: static; }
   .dt { grid-template-columns: minmax(0,1fr); }
   .dt-sub { white-space: normal; }
   .door-u .dt-name { letter-spacing: .25em; }
