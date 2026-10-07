@@ -75,7 +75,7 @@ em { font-style: normal; }
 .m-ouro { font: 700 20px var(--mono); letter-spacing: .3em; }
 .m-moon { font: 400 27px/1 var(--fell); }
 .m-moon em, .door-m em, .tab[data-tab=moon] em { font-style: italic; }
-.m-odin { font: 700 22px var(--fira); letter-spacing: .3em; color: #ff2a2a; }
+.m-odin { font: 400 30px/1 "Noto Sans Runic", serif; letter-spacing: .16em; color: #a855f7; }
 .m-sub { font: 12px var(--mono); opacity: .7; }
 .ind { position: absolute; bottom: -1px; left: 0; height: 3px; width: 0; background: var(--ind); transition: transform .45s cubic-bezier(.7,0,.2,1), width .45s cubic-bezier(.7,0,.2,1); }
 
