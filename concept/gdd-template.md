@@ -1,7 +1,7 @@
 # [TITLE] — Game Design Document
 
 **Version:** 0.1 · **Engine:** Godot 4 / GDScript · **Last updated:** [date]
-**Author / Creative Director:** Zephie · **Lead Programmer:** Claude
+**Author / Creative Director:** Zephie
 
 > **How to use this doc**
 > - Every bullet is a question for you to answer. Replace it with your answer; don't leave the question in.
@@ -287,7 +287,7 @@ damage = ( ? )
 ### 10.5 Abilities
 - How are abilities obtained, equipped, and limited (cooldown, cost, slots)?
 
-### 10.6 Enemy AI
+### 10.6 Enemy behaviour
 - How do enemies decide what to do? Describe each behaviour tier.
 
 ### 10.7 Ending a fight
